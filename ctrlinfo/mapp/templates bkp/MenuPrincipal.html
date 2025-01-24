@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Menu principal</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
+  <style>
+   body {
+      background-color: #007bff; /* Azul vivo */
+      color: white;
+      padding: 10px;
+    }
+
+  </style>
+<body>
+  <h1>Freshstart</h1>
+
+  <nav class="navbar  navbar-expand-lg navbar-light bg-light ">
+    <a class="navbar-brand" href="#">Opciones</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Internos
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
+            <a class="dropdown-item" href="{% url 'listaint' %}">Listado</a>
+            <a class="dropdown-item" href="{% url 'registro' %}">Salidas de internos</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Reporte de internos</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Consejeria
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Psicologia
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Seguimiento
+          </a>
+        </li>
+         <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Configuracion
+          </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
+            <a class="dropdown-item" href="{% url 'datosgrales' %}">Datos generales de la clinica</a>
+            <a class="dropdown-item" href="{% url 'lusuarios' %}">Usuarios</a>
+             <a class="dropdown-item" href="#">Tabla de otros conceptos</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Estados y Paises</a>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Incluimos jQuery y Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+
+</body>
+</html>

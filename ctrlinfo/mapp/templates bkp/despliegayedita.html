@@ -1,0 +1,75 @@
+<!-- datosgrales.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internos</title>
+    <style>
+     body {
+
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      font-size : 12px;
+    }
+
+
+        /* Estilos para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        /* Estilos para los campos del formulario */
+        .campo-label {
+            width: 30%; /* Ancho fijo para las etiquetas */
+            display: inline-block;
+            font-size : 16px;
+        }
+        .campo-input {
+            width: 65%; /* Ancho fijo para los campos de entrada */
+            display: inline-block;
+            font-size : 16px;
+
+        }
+        .panel {
+        background-color: silver;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin: 10px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <h1>Expediente :{{interno.numeroexpediente}} Nobre : {{interno.nombrecompleto}}</h1>
+
+       <a href="{%url 'listaint' %}"  class="btn btn-link" style="font-size:18px">Regresar al listado</a>
+
+    <!-- Formulario dentro de una tabla -->
+    <form method="post"  action="{% url 'grabainterno' id=interno.pk %}">
+        {% csrf_token %}
+        <div class="panel">
+       <section>
+           <label=
+
+       </section>
+
+
+        <button type="submit" style="margin-top:-30px; font-size:15px; height: 35px; width: 100px; background-color: blue; color: white; float: right;" >Grabar</button>
+        </div>
+
+
+    </form>
+</body>
+
+
+
+</html>

@@ -1,0 +1,35 @@
+{% extends "MenuPrincipal.html" %}
+<body>
+{% block content %}
+ <div class="grid-container">
+    <h3>Datos del usuario {{usuario.usuario}}</h3>
+
+    <a href="{%url 'lusuarios' %}"  class="btn btn-link" >Regresar al listado</a>
+
+
+
+    <form method="post"  action="{% url 'grabadatosusuario' id=usuario.usuario %}">
+        {% csrf_token %}
+
+            {% for field in usuariof %}
+             <div class="etiqueta">
+                 <label for="{{ field.id_for_label }}" class="campo-label">{{ field.label }}</label>
+             </div>
+             <div class="grid-item">
+                 {{ field}}
+             </div>
+
+            {% endfor %}
+
+         <button type="submit" style="margin-top:30px;font-size:20px; height: 50px; width: 100px; background-color: blue; color: white; float: right;" >Grabar</button>
+
+    </form>
+ </div>
+{% endblock %}
+</body>
+
+
+
+
+
+

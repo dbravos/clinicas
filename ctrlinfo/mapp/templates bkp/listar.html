@@ -1,0 +1,129 @@
+<!-- datosgrales.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <style>
+
+      body {
+      font-family: Arial, sans-serif;
+      margin : 0;
+      padding:0;
+      background-color: white;
+      font-weight : 800;
+      color:  #154360 ;
+      padding: 10px;
+      font-size : 12px;
+    }
+     .panel {
+
+        background-color : silver;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin: 10px;
+        }
+
+
+h1 {
+    position: fixed; /* Fija la posición del h1 */
+    top: 0; /* Coloca el h1 en la parte superior */
+    left: 100; /* Coloca el h1 en la esquina superior izquierda */
+    width: 100%; /* Ajusta el ancho del h1 al 100% del ancho del navegador */
+    background-color: #007bff; /* Color de fondo del h1 */
+    color: white; /* Color del texto del h1 */
+    padding: 10px; /* Añade relleno al h1 */
+    z-index: 999; /* Asegura que el h1 esté en la capa superior */
+}
+
+        /* Estilos para la tabla */
+        table {
+            width: 80%;
+            border-collapse : collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+    .messages-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: blue;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        }
+    </style>
+</head>
+<body>
+    <h1>Internos</h1>
+   <a href="{%url 'Menu principal' %}"  class="btn btn-link" style="color:white;font-size:18px; margin-left:900px;margin-top:150; ">Regresar </a>
+    <!-- Formulario dentro de una tabla -->
+
+    <form method="post"  action="{% url 'agregainterno' %}">
+     <button type="submit" style="margin-left:10px;margin-bottom:10px;font-size:12px;font-weight:bold; height: 35px; width: 150px; background-color: skyblue; color: white; float: none;" >Agregar interno</button>
+
+        {% csrf_token %}
+
+        </form>
+    <div class="panel">
+     <table>
+    <tr>
+        <th>No. Expediente</th>
+        <th>Nombre</th>
+        <th>Responsable</th>
+        <th>Opcion</th>
+    </tr>
+       {% for interno in internos %}
+        <tr>
+           <div>
+            <td>{{ interno.numeroexpediente }}</td>
+            <td>{{ interno.nombrecompleto }}</td>
+            <td>{{ interno.responsable }}</td>
+            <td>
+
+                <!-- Enlace para editar -->
+                <a href="{% url 'editainterno' id=interno.pk  %}" style="color:white;">Editar</a> |
+                <!-- Enlace para borrar (usando un formulario para confirmar la eliminación) -->
+                <a href="{% url 'borrainterno' id=interno.pk %}" style="color:white;">Borrar</a>
+                    {% csrf_token %}
+
+            </td>
+           </div>
+        </tr>
+       {% endfor %}
+
+    </table>
+    </div>
+       <div class='messages-container'>
+          {% if messages %}
+            <ul class="messages">
+             {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+           {% endif %}
+      </div>
+
+</body>
+<script>
+
+    // Función para ocultar los mensajes después de 2 segundos
+    setTimeout(function() {
+        var messagesContainer = document.querySelector('.messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 2000); // 2000 milisegundos = 2 segundos
+</script>
+
+
+
+</html>
+
+

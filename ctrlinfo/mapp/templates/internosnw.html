@@ -1,0 +1,258 @@
+<!-- datosgrales.html -->
+{% extends "MenuPrincipal.html" %}
+<body>
+{% block content %}
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light"
+     style="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;">
+
+
+    <ul class="nav nav-pills me-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="#datosgenerales">Datos generales</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#responsable">Responsable</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#dependientes">Dependientes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#proviene">Proviene</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#enfermedades">Enfermedades y sustancias</a>
+        </li>
+    </ul>
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="{%url 'listaint' %}" style="color:#0597f9;">Regresar</a>
+        </li>
+    </ul>
+
+
+</nav>
+<div class="grid-container">
+    <form action="{% url 'grabainterno' id=interno.pk %} " method="post">
+        {% csrf_token %}
+
+        <!-- Seccion de los Datos Generales del INterno -->
+        <section id="datosgenerales">
+            <h3>Datos del interno</h3>
+            {%for field in internof%}
+            {% if 'opciones-radio' in field.field.widget.attrs.class %}
+            <div class="opciones-radio">
+                <div class="etiqueta">
+                    <label for="{{field.id_for_label}}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+
+            </div>
+            {%else%}
+            <div class="etiqueta">
+                <label for="{{field.id_for_label}}">{{ field.label }}</label>
+            </div>
+
+            <div class="grid-item">
+                {{field}}
+            </div>
+            {%endif%}
+            {%endfor%}
+
+        </section>
+
+        <!-- Seccion del Responsable -->
+
+        <section id="responsable">
+            <h3>Responsable</h3>
+            {%for field in intresponsablef%}
+            <div class="etiqueta">
+                <label for="{{field.id_for_label}}">{{ field.label }}</label>
+            </div>
+            {% if 'opciones-radio' in field.field.widget.attrs.class %}
+            <div class="opciones-radio">
+                {{ field }}
+            </div>
+
+            {% else %}
+            <div class="grid-item">
+                {{ field }}
+            </div>
+            {% endif %}
+            {%endfor%}
+        </section>
+
+        <!-- Seccion de Los Dependientes -->
+
+        <section id="dependientes">
+            <h3>Dependientes</h3>
+            <div class="form-group">
+                <div class="form-item">
+                    <label for="{{intdependientesf.dpadres.id_for_label}}">{{intdependientesf.dpadres.label}}</label>
+                    {{intdependientesf.dpadres}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intdependientesf.dconyugue.id_for_label}}">{{intdependientesf.dconyugue.label}}</label>
+                    {{intdependientesf.dconyugue}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intdependientesf.dhijos.id_for_label}}">{{intdependientesf.dhijos.label}}</label>
+                    {{intdependientesf.dhijos}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intdependientesf.dotros.id_for_label}}">{{intdependientesf.dotros.label}}</label>
+                    {{intdependientesf.dotros}}
+                </div>
+            </div>
+
+
+            <br>
+            <h5 style="color: #0597f9;margin-left:120px;">Comentarios</h5>
+            <div class="grid-item">
+                {{intdependientesf.comentarios}}
+            </div>
+        </section>
+
+        <!-- Seccion de donde proviene, enfermedades y substancias que ha usado -->
+
+        <section id="proviene">
+            <h3>Proviene</h3>
+            <div class="etiqueta">
+                <label for="{{intproviene.proviene.id_for_label}}">{{ intprovienef.proviene.label }}</label>
+            </div>
+            <div class="grid-item">
+                {{ intprovienef.proviene }}
+            </div>
+            <div class="etiqueta">
+                <label for="{{intproviene.provieneotro.id_for_label}}">{{ intprovienef.provieneotro.label }}</label>
+            </div>
+            <div class="grid-item">
+                {{ intprovienef.provieneotro }}
+            </div>
+            <div class="etiqueta">
+                <label for="{{intproviene.acudecon.id_for_label}}">{{ intprovienef.acudecon.label }}</label>
+            </div>
+            <div class="grid-item">
+                {{ intprovienef.acudecon }}
+            </div>
+            <div class="etiqueta">
+                <label for="{{intproviene.acudeotro.id_for_label}}">{{ intprovienef.acudeotro.label }}</label>
+            </div>
+            <div class="grid-item">
+                {{ intprovienef.acudeotro }}
+            </div>
+            <div class="form-group">
+                <div class="form-item">
+                    <label for="{{intproviene.tomamedicinas.id_for_label}}">{{ intprovienef.tomamedicinas.label
+                        }}</label>
+                    {{ intprovienef.tomamedicinas }}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.especifique.id_for_label}}">{{ intprovienef.especifique.label }}</label>
+                    {{ intprovienef.especifique }}
+                </div>
+            </div>
+        </section>
+        <section id="enfermedades">
+            <h3>Enfermedades</h3>
+            <div class="form-group">
+
+                <div class="form-item">
+                    <label for="{{intproviene.embarazo.id_for_label}}">{{intprovienef.embarazo.label}}</label>
+                    {{intprovienef.embarazo}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.psiquiatricas.id_for_label}}">{{intprovienef.psiquiatricas.label}}</label>
+                    {{intprovienef.psiquiatricas}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.fisicas.id_for_label}}">{{intprovienef.fisicas.label}}</label>
+                    {{intprovienef.fisicas}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.contagiosas.id_for_label}}">{{intprovienef.contagiosas.label}}</label>
+                    {{intprovienef.contagiosas}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.basiloscopia.id_for_label}}">{{intprovienef.basiloscopia.label}}</label>
+                    {{intprovienef.basiloscopia}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.enfermedadesotro.id_for_label}}">{{intprovienef.enfermedadesotro.label}}</label>
+                    {{intprovienef.enfermedadesotro}}
+                </div>
+
+            </div>
+            <h3>Sustancias que consume</h3>
+            <div class="form-group">
+
+                <div class="form-item">
+                    <label for="{{intproviene.alcohol.id_for_label}}">{{intprovienef.alcohol.label}}</label>
+                    {{intprovienef.alcohol}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.anfetaminas.id_for_label}}">{{intprovienef.anfetaminas.label}}</label>
+                    {{intprovienef.anfetaminas}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.secantes.id_for_label}}">{{intprovienef.secantes.label}}</label>
+                    {{intprovienef.secantes}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.marihuana.id_for_label}}">{{intprovienef.marihuana.label}}</label>
+                    {{intprovienef.marihuana}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.rohypnol.id_for_label}}">{{intprovienef.rohypnol.label}}</label>
+                    {{intprovienef.rohypnol}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.analgesicos.id_for_label}}">{{intprovienef.analgesicos.label}}</label>
+                    {{intprovienef.analgesicos}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.disolventes.id_for_label}}">{{intprovienef.disolventes.label}}</label>
+                    {{intprovienef.disolventes}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.cocaina.id_for_label}}">{{intprovienef.cocaina.label}}</label>
+                    {{intprovienef.cocaina}}
+                </div>
+                <div class="form-item">
+                    <label for="{{intproviene.opio.id_for_label}}">{{intprovienef.opio.label}}</label>
+                    {{intprovienef.opio}}
+                </div>
+
+                <div class="form-item">
+                    <label for="{{intproviene.cristal.id_for_label}}">{{intprovienef.cristal.label}}</label>
+                    {{intprovienef.cristal}}
+                </div>
+            </div>
+            <div class="etiqueta">
+                <label for="{{intproviene.porcualingresa.id_for_label}}">{{ intprovienef.porcualingresa.label }}</label>
+            </div>
+            <div class="grid-item">
+                {{ intprovienef.porcualingresa }}
+            </div>
+
+
+            <!-- fields = ['proviene','provieneotro','acudecon','acudeotro','tomamedicinas',
+                 'especifique',
+                 'padecimientos','embarazo','psiquiatricas','fisicas','contagiosas',
+                 'enfermedadesotro','basiloscopia','alcohol','anfetaminas','secantes','marihuana',
+                 'rohypnol','analgesicos','disolventes','cocaina','opio','cristal','porcualingresa','numeroreuniones',
+                 'diversasactividades', 'duracion','aportaciontotal', 'aportacioninicial','quieninformo'] -->
+
+
+        </section>
+
+        <button class="btn btn-primary" style="margin-left:650px;margin-bottom:10px" type="submit"> Graba</button>
+
+    </form>
+</div>
+<button onclick="location.href='{% url 'consentimiento'  %}' " type="button">Imprime Carta consentimiento</button>
+{% endblock %}
+</body>
+
+
+

@@ -1,0 +1,186 @@
+/* General */
+:root {
+    --color-primario: #4CAF50;
+    --color-secundario: #343a40;
+    --color-fondog:  #0597f9;
+    --color-fondo :#f3f8f7;
+    --color-texto:  #0597f9;
+    --color-hover: #45a049;
+    --color-titulo:  #0597f9;
+    --color-mensaje: silver;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-fondog) !important;
+    color: var(--color-texto);
+    font-size: 14px;
+    overflow-x: hidden;
+}
+
+h3 {
+    text-align: center;
+    color: #0597f9;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--color-secundario);
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+    color: white;
+}
+
+.sidebar .accordion-button {
+    color: white;
+    background-color: var(--color-secundario);
+    border: none;
+}
+
+.sidebar .accordion-body {
+    background-color: #495057;
+}
+
+/* Table Container */
+.table-container {
+    position: relative;
+    border : 2px solid white;
+    border-radius: 8px;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.full-width-table {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+.full-width-table th,
+.full-width-table td {
+    border: 1px solid #ddd;
+    padding: 1px;
+    text-align: center;
+}
+
+/* Grid Container */
+.grid-container {
+    display: grid;
+
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+ .etiqueta {
+      /*   width:100%; */
+         margin-left: 110px;
+      /*   gap : 20px; */
+        }
+
+ .grid-item {
+            width : 80%;
+            margin-left : 50px;
+            margin-bottom: 10px;
+            flex-direction: column;
+            text-align : center;
+         }
+ input, select,  textarea {
+            width : 80%;
+            display : inline-block;
+            padding: 8px;
+            margin-top: 1px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+
+           }
+
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    background-color: var(--color-primario);
+    color: var(--color-texto);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: var(--color-hover);
+}
+
+button.secundario {
+    background-color: #f44336;
+}
+
+/* Radio Options */
+.opciones-radio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    padding-bottom: 10px;
+}
+
+/* Messages */
+.messages-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: var(--color-mensaje);
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease-in-out;
+}
+
+.messages-container.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+
+    main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}
+.form-group {
+    margin-left : 120px;
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas si es necesario */
+    gap: 20px; /* Espacio entre los elementos */
+   padding:5px;
+    align-items: center; /* Alinea verticalmente los elementos */
+}
+
+.form-item {
+    display: flex;
+    align-items: center; /* Alinea la etiqueta y el campo en la misma línea */
+    gap: 8px; /* Espacio entre la etiqueta y el campo */
+
+}

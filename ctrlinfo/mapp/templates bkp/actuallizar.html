@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Actualizar  Usuario</title>
+</head>
+<body>
+    <h2>Actualizar Usuario</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ forma }}
+        <input type="submit" value="Actualiza Usuario">
+         <a href="/listar"> Regresar</a>
+    </form>
+</body>
+</html>

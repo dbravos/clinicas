@@ -1,0 +1,80 @@
+{% extends "MenuPrincipal.html" %}
+
+<body>
+
+
+{% block content %}
+
+    <nav class="navbar sticky-top navbar bg-body-tertiary px-3 mb-3" style ="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;" >
+
+                    <ul class="nav nav-pills me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'agregainterno' %}" >Agrega interno</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#responsable"  >Registra salida de internos</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="#responsable" >Reporte de internos</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'Menu principal' %}" style="color:#0597f9;"  >Cerrar</a>
+                        </li>
+                    </ul>
+
+
+        </nav>
+
+
+             {% csrf_token %}
+           <div class="table-container" >
+                    <table class="full-width-table">
+                        <tr>
+                            <th>No. Expediente</th>
+                            <th>Nombre</th>
+                            <th>Responsable</th>
+                            <th>Opciones</th>
+                        </tr>
+                        {% for interno in internos %}
+                        <tr>
+                            <td>{{ interno.numeroexpediente }}</td>
+                            <td>{{ interno.nombrecompleto }}</td>
+                            <td>{{ interno.responsable }}</td>
+                            <td>
+                                <a href="{% url 'editainterno' id=interno.pk %}" >Selecciona </a>
+                                <a href="{% url 'editainterno' id=interno.pk %}" >Editar</a>
+                                <a href="{% url 'borrainterno' id=interno.pk %}" style="color:red">Borrar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </table>
+           </div>
+    <br>
+
+
+
+            <div class="messages-container">
+                    {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+{% endblock %}
+</body>
+
+
+    <script>
+        // Ocultar los mensajes después de 2 segundos
+        setTimeout(function() {
+            var messagesContainer = document.querySelector('.messages-container');
+            if (messagesContainer) {
+                messagesContainer.style.display = 'none';
+            }
+        }, 2000); // 2000 ms = 2 segundos
+    </script>

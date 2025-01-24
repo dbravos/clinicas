@@ -1,0 +1,66 @@
+{% extends "MenuPrincipal.html" %}
+{% block content %}
+<body>
+
+
+    <!-- Formulario dentro de una tabla -->
+    <form method="post"  action="{% url 'agregausuario' %}">
+     <button type="submit" style="margin-left:10px;margin-bottom:10px;font-size:12px;font-weight:bold; height: 35px; width: 150px; background-color: blue; color: white; float: none;" >Agregar usuario</button>
+        {% csrf_token %}
+      <div class="table-container" >
+     <table class="full-width-table">
+
+    <tr>
+        <th>Usuario</th>
+        <th>Nombre</th>
+        <th>Cargo</th>
+        <th>Opcion</th>
+    </tr>
+       {% for usuario in usuarios %}
+        <tr>
+           <div>
+            <td>{{ usuario.usuario }}</td>
+            <td>{{ usuario.nombre }}</td>
+            <td>{{ usuario.cargo }}</td>
+            <td>
+
+                <!-- Enlace para editar -->
+                <a href="{% url 'editausuario' id=usuario.pk  %}" >Editar</a> |
+                <!-- Enlace para borrar (usando un formulario para confirmar la eliminación) -->
+                <a href="{% url 'borrausuario' id=usuario.pk %}" style="color:red">Borrar</a>
+                    {% csrf_token %}
+
+            </td>
+           </div>
+        </tr>
+       {% endfor %}
+
+    </table>
+ </div>
+ </div>
+       <div class='messages-container'>
+          {% if messages %}
+            <ul class="messages">
+             {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+           {% endif %}
+      </div>
+    </form>
+{% endblock %}
+</body>
+<script>
+
+    // Función para ocultar los mensajes después de 2 segundos
+    setTimeout(function() {
+        var messagesContainer = document.querySelector('.messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 2000); // 2000 milisegundos = 2 segundos
+</script>
+
+
+
+</html>
