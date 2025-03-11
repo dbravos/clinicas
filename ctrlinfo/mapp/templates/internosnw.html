@@ -58,12 +58,44 @@
             </div>
             {%endif%}
             {%endfor%}
+            <div class="etiqueta">
+               <label for="{{intprovienef.numeroreuniones.id_for_label}}">{{intprovienef.numeroreuniones.label}}</label>
+            </div>
+            <div class="grid-item">
+                  {{intprovienef.numeroreuniones}}
+            </div>
+            <div class="etiqueta">
+               <label for="{{intprovienef.diversasactividades.id_for_label}}">{{intprovienef.diversasactividades.label}}</label>
+            </div>
+            <div class="grid-item">
+                  {{intprovienef.diversasactividades}}
+            </div>
+            <div class="etiqueta">
+               <label for="{{intprovienef.duracion.id_for_label}}">{{intprovienef.duracion.label}}</label>
+            </div>
+            <div class="grid-item">
+                  {{intprovienef.duracion}}
+            </div>
+            <div class="etiqueta">
+               <label for="{{intprovienef.aportaciontotal.id_for_label}}">{{intprovienef.aportaciontotal.label}}</label>
+            </div>
+            <div class="grid-item">
+                  {{intprovienef.aportaciontotal}}
+            </div>
+            <div class="etiqueta">
+               <label for="{{intprovienef.aportacioninicial.id_for_label}}">{{intprovienef.aportacioninicial.label}}</label>
+            </div>
+            <div class="grid-item">
+                  {{intprovienef.aportacioninicial}}
+            </div>
+
+
 
         </section>
 
         <!-- Seccion del Responsable -->
 
-        <section id="responsable">
+        <section id="responsable" style="background-color: #cac3c2; padding: 20px; color: blue;">
             <h3>Responsable</h3>
             {%for field in intresponsablef%}
             <div class="etiqueta">
@@ -84,7 +116,7 @@
 
         <!-- Seccion de Los Dependientes -->
 
-        <section id="dependientes">
+        <section id="dependientes" style="background-color: lightblue; padding: 20px; color: blue;">
             <h3>Dependientes</h3>
             <div class="form-group">
                 <div class="form-item">
@@ -116,7 +148,7 @@
         <!-- Seccion de donde proviene, enfermedades y substancias que ha usado -->
 
         <section id="proviene">
-            <h3>Proviene</h3>
+            <h5>Proviene</h5>
             <div class="etiqueta">
                 <label for="{{intproviene.proviene.id_for_label}}">{{ intprovienef.proviene.label }}</label>
             </div>
@@ -143,8 +175,7 @@
             </div>
             <div class="form-group">
                 <div class="form-item">
-                    <label for="{{intproviene.tomamedicinas.id_for_label}}">{{ intprovienef.tomamedicinas.label
-                        }}</label>
+                    <label for="{{intproviene.tomamedicinas.id_for_label}}">{{ intprovienef.tomamedicinas.label}}</label>
                     {{ intprovienef.tomamedicinas }}
                 </div>
                 <div class="form-item">
@@ -153,10 +184,9 @@
                 </div>
             </div>
         </section>
-        <section id="enfermedades">
-            <h3>Enfermedades</h3>
+        <section id="enfermedades"  >
+            <h5>Enfermedades</h5>
             <div class="form-group">
-
                 <div class="form-item">
                     <label for="{{intproviene.embarazo.id_for_label}}">{{intprovienef.embarazo.label}}</label>
                     {{intprovienef.embarazo}}
@@ -177,13 +207,19 @@
                     <label for="{{intproviene.basiloscopia.id_for_label}}">{{intprovienef.basiloscopia.label}}</label>
                     {{intprovienef.basiloscopia}}
                 </div>
-                <div class="form-item">
-                    <label for="{{intproviene.enfermedadesotro.id_for_label}}">{{intprovienef.enfermedadesotro.label}}</label>
-                    {{intprovienef.enfermedadesotro}}
-                </div>
 
             </div>
-            <h3>Sustancias que consume</h3>
+              <div class="etiqueta">
+                    <label for="{{intproviene.enfermedadesotro.id_for_label}}">{{intprovienef.enfermedadesotro.label}}</label>
+
+                </div>
+                <div class="grid-item">
+                     {{intprovienef.enfermedadesotro}}
+                </div>
+
+            <br>
+
+            <h5>Sustancias que consume</h5>
             <div class="form-group">
 
                 <div class="form-item">
@@ -246,11 +282,11 @@
 
         </section>
 
-        <button class="btn btn-primary" style="margin-left:650px;margin-bottom:10px" type="submit"> Graba</button>
+        <button class="btn btn-primary btn-lg" style="margin-left:600px;margin-top:30px" type="submit"> Graba</button>
 
     </form>
 </div>
-<button onclick="location.href='{% url 'consentimiento'  %}' " type="button">Imprime Carta consentimiento</button>
+<button onclick="location.href='{% url 'consentimiento' id=interno.pk %}' " type="button">Imprime Carta consentimiento</button>
 {% endblock %}
 </body>
 

@@ -24,7 +24,10 @@ h3 {
     text-align: center;
     color: #0597f9;
 }
-
+h5 {
+    text-align: left;
+    color: blue;
+}
 /* Sidebar */
 .sidebar {
     width: 250px;
@@ -174,7 +177,7 @@ button.secundario {
     display: flex;
     flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas si es necesario */
     gap: 20px; /* Espacio entre los elementos */
-   padding:5px;
+    padding:5px;
     align-items: center; /* Alinea verticalmente los elementos */
 }
 
@@ -184,3 +187,10 @@ button.secundario {
     gap: 8px; /* Espacio entre la etiqueta y el campo */
 
 }
+#enfermedades {
+    background: linear-gradient(180deg, #1e90ff, #87cefa);
+    padding: 20px;
+    color: blue;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }

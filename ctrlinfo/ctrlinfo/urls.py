@@ -22,7 +22,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgrales,lusuarios,\
-                        agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,editainterno,\
+                        agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,seleccionainterno,\
                         grabainterno,probar,consentimiento
 
 urlpatterns = [
@@ -31,7 +31,7 @@ urlpatterns = [
     path('menuprincipal/', primermenu, name='Menu principal'),
     path('listaint/',listaint,name='listaint'),
     path('agregaint/',agregainterno,name='agregainterno'),
-    path('editaint/<int:id>', editainterno, name='editainterno'),
+    path('selecciona/<int:id>', seleccionainterno, name='seleccionainterno'),
     path('borrainterno/<int:id>',borrainterno,name='borrainterno'),
     path('grabainterno/<int:id>', grabainterno, name='grabainterno'),
     path('registro/',registro,name='registro'),
@@ -43,7 +43,7 @@ urlpatterns = [
     path('editausuario/<int:id>',editausuario,name='editausuario'),
     path('borrausuario/<int:id>',borrausuario,name='borrausuario'),
     path('probar/', probar, name='probar'),
-    path('consentimiento/',consentimiento,name='consentimiento')
+    path('consentimiento/<int:id>',consentimiento,name='consentimiento')
 
 ]
 if settings.DEBUG:

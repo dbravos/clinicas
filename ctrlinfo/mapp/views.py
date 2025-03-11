@@ -8,8 +8,10 @@ from django.http import request, Http404, HttpResponse
 from django.contrib import messages
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-
-
+from datetime import datetime
+import win32print
+import win32api
+import os
 
 # Create your views here.
 
@@ -36,16 +38,17 @@ def agregainterno(request):
 
     return render(request, 'internos.html', {'interno':interno,'internof':internof, 'intresponsablef':intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef})
 
-def editainterno(request,id):
+def seleccionainterno(request,id):
     interno = get_object_or_404(Internos, pk=id)
+    opcion = request.GET.get('opcion', None)
     internof = Internosf(instance=interno)
     intresponsablef=IntResponsablef(instance=interno)
     intdependientesf=IntDependientesf(instance=interno)
     intprovienef=IntProvienef(instance=interno)
-    if request.method == "POST":
-        return consentimiento(interno)
-
-    return render(request, 'internosnw.html', {'interno':interno,'internof':internof, 'intresponsablef':intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef })
+    if opcion=="editar":
+       return render(request, 'internosnw.html', {'interno':interno,'internof':internof, 'intresponsablef':intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef })
+    else:
+       return render(request, 'dgenerales.html', {'interno':interno})
 
 def borrainterno(request,id):
     interno = get_object_or_404(Internos, pk=id)
@@ -161,28 +164,74 @@ def borrausuario(request,id):
     usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
     return render(request, 'lusuarios.html', {'usuarios': usuarios})
 
-def consentimiento(request):
+def consentimiento(request,id):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="consentimiento.pdf"'
-    interno=Internos.objects
+    interno = get_object_or_404(Internos, pk=id)
+    datosgrales = DatosGrales.objects.first()
+    archivo_pdf="consentimiento.pdf"
     # Crear un canvas de ReportLab
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
+    p.setFont("Helvetica", 10)
 
+    mSuperior=760
+    mizquierdo =50
+    avance=15
     # Agregar un título al reporte
-    p.drawString(100, height - 100, "Consentimiento Informado")
-    # Obtener la lista de internos
-    # internos=Internos.objects.all()
+
+
     logo="c:/viveprg/logo.jpg"
-    # Agregar los datos de los internos al reporte
+
     p.drawImage(logo,10,680,width=120,height=100)
-    y = height - 150
-   # for interno in internos:
-    p.drawString(100, y, f"{interno.numeroexpediente} - {interno.nombrecompleto}")
-    y -= 20
+    p.drawString(140,mSuperior,datosgrales.nombre)
+    p.drawString(140,mSuperior-avance,'RFC : '+datosgrales.rfc)
+    p.drawString(140,mSuperior-2*avance,datosgrales.calleynumero+','+datosgrales.colonia)
+    p.drawString(140,mSuperior-3*avance,datosgrales.ciudad+' '+datosgrales.estado+','+datosgrales.cp)
+    p.drawString(140,mSuperior-4*avance,'WEB: '+datosgrales.sitioweb+'   Email :'+datosgrales.correoelectronico)
+    p.drawString(140,mSuperior-5*avance,'Telefono: '+datosgrales.telefono)
+    p.drawString(420,mSuperior-6*avance,'Expediente : '+interno.numeroexpediente)
+    fecha_y_hora=datetime.now()
+    p.drawString(420,mSuperior-7*avance,'Fecha y Hora :'+fecha_y_hora.strftime("%d/%m/%Y  %I:%M %p"))
+
+    p.setFont("Helvetica", 14)
+    p.drawString(220,mSuperior-10*avance, "Consentimiento Informado")
+    p.setFont("Helvetica", 8)
+    p.drawString(10, mSuperior - 12 * avance, 'C. DIRECTOR O RESPONSABLE DEL ESTABLECIMIENTO')
+    p.drawString(10, mSuperior - 13 * avance, 'PRESENTE')
+    p.drawString(10, mSuperior - 15 * avance, 'EL(LA) QUE SUSCRIBE C. '+interno.nombrecompleto)
+    p.drawString(10, mSuperior - 16 * avance, 'OTORGADO MI CONSENTIMIENTO PARA RECIBIR EL TRATAMIENTO EL CUAL CONSISTE EN: REUNIONES Y SESIONES DE LOS 12 PASOS DE')
+    p.drawString(10, mSuperior - 17 * avance, 'N.A. TERAPIA OCUPACIONAL,TRATAMIENTO PSICOLOGICO Y DIVERSAS ACTIVIDADES')
+    p.drawString(10, mSuperior - 18 * avance, 'CON  UNA DURACION DE '+ str(interno.duracion))
+    p.drawString(10, mSuperior - 19 * avance, 'HACIENDO CONSTAR QUE FUI INFORMADO DE TO0OS Y CADA UNO DE LOS PROCEDIMIENTOS, IMPLICACIONES Y RIESGOS QUE ESTE')
+    p.drawString(10, mSuperior - 20 * avance, 'IMPLICA, ASI COMO LOS ESTATUTOS, REGLAMENTO INTERNO Y DE LAS CONDICIONES DE INGRESO, ESTANCIA Y EGRESO DEL')
+    p.drawString(10, mSuperior - 21 * avance, 'ESTABLECIMIENTO, INFORMACION QUE ME FUE PROPORCIONADA DETALLADAMENTE POR EL O LA C. RESPONSABLE DEL CENTRO')
+    p.drawString(10, mSuperior - 22 * avance, 'DE TRATAMIENTO '+datosgrales.nombre)
+    p.drawString(30, mSuperior - 24 * avance, 'LO ANTERIOR APEGADO A LO DISPUESTO EN EL APARTADO 10.3.1 DE LA NORMA OFICIAL MEXICANA NOM-028-2009, PARA LA ')
+    p.drawString(10, mSuperior - 25 * avance, 'PREVENCION , TRATAMIENTO Y CONTROL DE ADICCIONES')
+    p.drawString(85, mSuperior - 28 * avance, 'USUARIO(A)')
+    p.drawString(305, mSuperior - 28 * avance, 'FAMILIAR O RESPONSABLE')
+    p.drawString(60, mSuperior - 31 * avance, '________________  _____________')
+    p.drawString(300, mSuperior - 31 * avance, '_______________  _____________')
+    p.drawString(60, mSuperior - 32 * avance, '       Nombre                    Firma')
+    p.drawString(300, mSuperior - 32 * avance, '      Nombre                    Firma')
+    p.drawString(300, mSuperior - 33 * avance, 'Parentesco o Relacion :___________')
+    p.drawString(220, mSuperior - 36 * avance, 'ENCARGADO DEL ESTABLECIMIENTO')
+    p.drawString(220, (mSuperior-1) - (39 * avance), datosgrales.responsable)
+    p.drawString(220, mSuperior - 39 * avance, '________________        __________________')
+    p.drawString(220, mSuperior - 40 * avance, '     Nombre                               Firma')
 
     # Finalizar el PDF
     p.showPage()
     p.save()
 
+    try:
+        impresora_default = win32print.GetDefaultPrinter()
+        win32api.ShellExecute(0, "print", archivo_pdf, None, ".", 0)
+    except Exception as e:
+        print(f"Error al imprimir: {e}")
+
+    #os.remove(archivo_pdf)
+
     return response
+

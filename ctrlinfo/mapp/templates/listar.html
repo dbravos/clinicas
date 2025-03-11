@@ -1,8 +1,4 @@
 {% extends "MenuPrincipal.html" %}
-
-<body>
-
-
 {% block content %}
 
     <nav class="navbar sticky-top navbar bg-body-tertiary px-3 mb-3" style ="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;" >
@@ -43,9 +39,9 @@
                             <td>{{ interno.nombrecompleto }}</td>
                             <td>{{ interno.responsable }}</td>
                             <td>
-                                <a href="{% url 'editainterno' id=interno.pk %}" >Selecciona </a>
-                                <a href="{% url 'editainterno' id=interno.pk %}" >Editar</a>
-                                <a href="{% url 'borrainterno' id=interno.pk %}" style="color:red">Borrar</a>
+                                <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar" >Selecciona </a>
+                                <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar" >Editar </a>
+                                <a href="{% url 'seleccionainterno' id=interno.pk %}" style="color:red">Borrar</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -66,8 +62,6 @@
                     {% endif %}
                 </div>
 {% endblock %}
-</body>
-
 
     <script>
         // Ocultar los mensajes después de 2 segundos
