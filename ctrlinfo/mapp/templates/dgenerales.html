@@ -1,8 +1,91 @@
 {% extends "MenuPrincipal.html" %}
-<body>
-{% block content %}<!-- datosgrales.html -->
 
-    <h3>Expediente :{{interno.numeroexpediente}} Nombre : {{interno.nombrecompleto}}</h3>
+{% block content %}<!-- datosgrales.html -->
+<h5>Expediente :{{interno.numeroexpediente}} Nombre : {{interno.nombrecompleto}}</h5>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFreshstart">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenido del menú -->
+    <div class="collapse navbar-collapse" id="navbarFreshstart">
+      <ul class="navbar-nav me-auto">
+
+        <li class="nav-item dropdown">
+
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            Consejería
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'einicial' id=interno.pk %}">Entrevista inicial</a></li>
+            <li><a class="dropdown-item" href="{% url 'assist' id=interno.pk %}">Cuestionario ASSIST</a></li>
+            <li><a class="dropdown-item" href="#">Síntomas de psicosis</a></li>
+            <li><a class="dropdown-item" href="#">Satisfaccion de vida</a></li>
+            <li><a class="dropdown-item" href="#">Cuestionario uso de drogas</a></li>
+            <li><a class="dropdown-item" href="#">Sintomas de ansiedad</a></li>
+            <li><a class="dropdown-item" href="#">Sintomas de depresion</a></li>
+            <li><a class="dropdown-item" href="#">Cedula de indicadores para medir dependencia a las drogas</a></li>
+            <li><a class="dropdown-item" href="#">Cuestionario AUDIT</a></li>
+            <li><a class="dropdown-item" href="#">Hoja de identificación de razones de consumo</a></li>
+            <li><a class="dropdown-item" href="#">Reporte individual de valorización</a></li>
+            <li><a class="dropdown-item" href="#">Notas de evolución de consejería individual</a></li>
+            <li><a class="dropdown-item" href="#">Notas de evolución de consejería familiar</a></li>
+            <li><a class="dropdown-item" href="#">Notas de evolución de consejería grupal</a></li>
+            <li><a class="dropdown-item" href="#">Plan de consejería individual</a></li>
+            <li><a class="dropdown-item" href="#">Digitalizacion de tareas</a></li>
+            <li><a class="dropdown-item" href="#">Despliegue de tareas</a></li>
+            <li><a class="dropdown-item" href="#">Impresion de tareas</a></li>
+
+          </ul>
+        </li>
+
+        <!-- Dropdown de Psicología -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            Psicología
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Hoja de atencion</a></li>
+            <li><a class="dropdown-item" href="#">Hoja de evolucion</a></li>
+            <li><a class="dropdown-item" href="#">Expediente</a></li>
+
+          </ul>
+        </li>
+          <!-- Dropdown de Medico -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            Medico
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Hoja de atencion</a></li>
+            <li><a class="dropdown-item" href="#">Hoja de evolucion</a></li>
+            <li><a class="dropdown-item" href="#">Expediente</a></li>
+
+          </ul>
+        </li>
+
+  <!-- Dropdown de Psiquiatria -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            Psiquiatrico
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Hoja de atencion</a></li>
+            <li><a class="dropdown-item" href="#">Hoja de evolucion</a></li>
+            <li><a class="dropdown-item" href="#">Expediente</a></li>
+
+          </ul>
+        </li>
+
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
 {%endblock%}
-</body>
+
 

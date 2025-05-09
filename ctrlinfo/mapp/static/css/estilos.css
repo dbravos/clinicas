@@ -194,3 +194,55 @@ button.secundario {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+
+/* Personalización del Navbar Bootstrap para Freshstart */
+
+.nav-link,
+.dropdown-toggle {
+  color: grey !important;
+  font-weight: bold;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: black !important; /* Verde más oscuro #45a049 */
+}
+
+.dropdown-menu {
+  background-color: #f3f8f7;
+  border: 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  color: var(--color-texto)  !important;
+  padding: 0.15rem .5rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: #A5D6A7 ;
+  color: white !important;
+}
+
+.dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Ajustes para móviles */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background-color: var(--color-primario);
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.25rem;
+  }
+

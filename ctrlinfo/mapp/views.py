@@ -2,8 +2,8 @@ from django.db.models import Q
 from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from mapp.models import Internos,Usuarios,DatosGrales
-from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependientesf,IntProvienef
+from mapp.models import Internos,Usuarios,DatosGrales,Einicial,Assist
+from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependientesf,IntProvienef,Einicialf,Assistf
 from django.http import request, Http404, HttpResponse
 from django.contrib import messages
 from reportlab.lib.pagesizes import letter
@@ -16,7 +16,9 @@ import os
 # Create your views here.
 
 def primermenu(request):
-    return render(request,'MenuPrincipal.html')
+
+    interno = Internos.objects.first()
+    return render(request,'MenuPrincipal.html', {'interno': interno})
 
 def probar(request):
     return render(request,'agregar.html')
@@ -36,7 +38,7 @@ def agregainterno(request):
     intdependientesf = IntDependientesf(instance=interno)
     intprovienef = IntProvienef(instance=interno)
 
-    return render(request, 'internos.html', {'interno':interno,'internof':internof, 'intresponsablef':intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef})
+    return render(request, 'internosnw.html', {'interno':interno,'internof':internof, 'intresponsablef':intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef})
 
 def seleccionainterno(request,id):
     interno = get_object_or_404(Internos, pk=id)
@@ -235,3 +237,28 @@ def consentimiento(request,id):
 
     return response
 
+def einicial(request,id):
+    interno = Internos.objects.get(pk=id)
+    internof= Internosf(request.POST,instance=interno)
+    try:
+        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente)
+        einicialf = Einicialf(instance=einicial)
+    except Http404:
+        einicial=Einicial(expediente=interno.numeroexpediente)
+        einicial.save()
+        einicialf=Einicialf(instance=einicial)
+
+    return render(request, 'einicial.html', {'einicial': einicial, 'einicialf':einicialf,'interno':interno} )
+
+def assist(request,id):
+    interno = Internos.objects.get(pk=id)
+    internof= Internosf(request.POST,instance=interno)
+    try:
+        assist = get_object_or_404(Assist, expediente=interno.numeroexpediente)
+        assistf = Assistf(instance=assist)
+    except Http404:
+        assist=Assist(expediente=interno.numeroexpediente)
+        assist.save()
+        assistf=Assistf(instance=assist)
+
+    return render(request, 'assist.html', {'assist': assist, 'assistf':assistf,'interno':interno} )

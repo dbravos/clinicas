@@ -1,5 +1,5 @@
 from django import forms
-from mapp.models import Internos,DatosGrales,Usuarios
+from mapp.models import Internos,DatosGrales,Usuarios,Einicial,Assist
 from django.utils import timezone
 from django.forms import widgets
 
@@ -105,5 +105,30 @@ class Usuariosf(forms.ModelForm):
             if cleaned_data.get(field) is None:
                 cleaned_data[field] = ''
         return cleaned_data
+
+class Einicialf(forms.ModelForm):
+    class Meta:
+        model=Einicial
+        fields='__all__'
+        widgets={'consumo1':forms.CheckboxInput(),
+            'consumo2':forms.CheckboxInput(),
+            'consumo3':forms.CheckboxInput(),
+            'consumo4':forms.CheckboxInput(),
+            'consumo5': forms.CheckboxInput(),
+            'consumo6': forms.CheckboxInput(),
+            'consumo7': forms.CheckboxInput(),
+            'consumo8': forms.CheckboxInput(),
+            'consumo9': forms.CheckboxInput(),
+            'conusmo10': forms.CheckboxInput()
+            }
+
+class Assistf(forms.ModelForm):
+            class Meta:
+                model = Assist
+                fields = '__all__'
+
+
+
+
 
 

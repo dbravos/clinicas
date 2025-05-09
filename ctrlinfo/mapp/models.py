@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from datetime import date
-
+import calendar
 # Create your models here.
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Usuarios(models.Model):
     objects = models.Manager()
@@ -54,7 +55,7 @@ class Internos(models.Model):
     opcionesPorcual=[('A','Alcohol'),('B','Anfetaminas'),('C','Secantes'),('D','Marihuana'),('E','Rohypnol'),('F','Analgesicos'),
                      ('G','Disolventes'),('H','Cocaina'),('I','Opcio'),('J','Cristal')]
 
-    numeroexpediente = models.CharField(max_length=10, verbose_name='No.Expediente', null=True, blank=True)
+    numeroexpediente = models.CharField(max_length=10, primary_key=True,verbose_name='No.Expediente',unique=True)
     fechaingreso = models.DateField(verbose_name='Fecha de ingreso', null=True, blank=True,default=date.today)
     fsalidareal = models.DateField(verbose_name='Fecha de salida', null=True, blank=True )
     apaterno = models.CharField(max_length=20,verbose_name='Apellido paterno', null=True, blank=True, default='')
@@ -143,3 +144,236 @@ class Internos(models.Model):
 
     def __str__(self):
         return self.nombrecompleto
+
+class Einicial(models.Model):
+
+    objects=models.Manager
+
+    opcionesConsumo = [('0', 'No'), ('1', 'Si')]
+    opcionesForma = [('0','Ingerida'),('1','Inyectada'),('2','Fumada'),('3','Inhalada'),('4','Otras')]
+    opcionesTabaco = [('0', 'Nunca'), ('1', 'Actualmente'), ('2', 'Exfumador mas de un año'), ('3', 'Exfumador menos de un año')]
+    opcionesSustancias = [('0', 'Alcohol'), ('1', 'Tabaco'), ('2', 'Marihuana/Canabis'), ('3', 'Cocaina'), ('4', 'Crack'),
+                       ('5', 'Pastillas'),('6', 'Otras')]
+    opcionesAlcohol = [('0', 'Cerveza'), ('1', 'Vino'), ('2', 'Pulque'), ('3', 'Coolers'), ('4', 'Destilado')]
+    opcionesComo = [('0', 'Solo'), ('1', 'Acompañado'), ('2', 'Publico'), ('3', 'Privado')]
+    opcionesPorque = [('1', ''), ('2', ''), ('3', ''), ('4', ''),('5', ''),('6', ''), ('7', ''),('8','')]
+    opcionesImportante=[('1','Nada'),('2','Poco'),('3','Algo'),('4','Importante'),('5','Muy')]
+    opcionesPiensaque = [('1', 'No es su intencion'), ('2', 'Indeciso'), ('3', 'Decidido'), ('4', 'Ya haciendo algo')]
+    opcionesDispuesto = [('1', 'Nada'), ('2', 'Poco'), ('3', 'Algo'), ('4', 'Dispuesto'), ('5', 'Muy dispuesto')]
+
+    expediente = models.CharField(max_length=10, primary_key=True, verbose_name='No.Expediente', unique=True)
+    opcionesMeses =[('Ene','Ene'),('Feb','Feb'),('Mar','Mar'),('Abr','Abr'),('May','May'),('Jun','Jun'),('Jul','Jul'),('Ago','Ago'),('Sep','Sep'),('Oct','Oct'),('Nov','Nov'),('Dic','Dic')]
+    opcionesYears = [(str(año), str(año)) for año in range(2000, 2051)]
+    consumo1 = models.BooleanField(verbose_name='Alcohol',null=True,blank=True,default=False)
+    forma1 = models.SmallIntegerField(verbose_name='Forma de consumo',choices=opcionesForma,null=True,blank=True)
+    frecuencia1 = models.CharField(verbose_name='Frecuencia de consumo',null=True,blank=True,max_length=10)
+    cantidad1= models.CharField(verbose_name='Cantidad que consume',null=True,blank=True,max_length=10)
+    edad1 = models.SmallIntegerField(verbose_name='Edad inicio de consumo',null=True,blank=True)
+    consumo2 = models.BooleanField(verbose_name='Marihuana', null=True, blank=True, default=False)
+    forma2 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia2 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad2 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad2 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+
+    consumo3 = models.BooleanField(verbose_name='Cocaina', null=True, blank=True, default=False)
+    forma3 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia3 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad3 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad3 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo4 = models.BooleanField(verbose_name='Heroina', null=True, blank=True, default=False)
+    forma4 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia4 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad4 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad4 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo5 = models.BooleanField(verbose_name='Metanfetaminas anfetaminas', null=True, blank=True, default=False)
+    forma5 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia5 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad5 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad5 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo6 = models.BooleanField(verbose_name='Inhalables', null=True, blank=True, default=False)
+    forma6 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia6 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad6 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad6 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo7 = models.BooleanField(verbose_name='Alucinogenos', null=True, blank=True, default=False)
+    forma7 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia7 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad7 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad7 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo8 = models.BooleanField(verbose_name='Drogas de diseño', null=True, blank=True, default=False)
+    forma8 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia8 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad8 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad8 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo9 = models.BooleanField(verbose_name='Medicamentos estimulantes', null=True, blank=True, default=False)
+    forma9 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia9 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad9 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad9 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo10 = models.BooleanField(verbose_name='Medicamentos depresores', null=True, blank=True, default=False)
+    forma10 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, null=True, blank=True)
+    frecuencia10 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad10 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad10 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    consumo11 = models.SmallIntegerField(verbose_name='Tabaco', null=True, blank=True, choices=opcionesTabaco)
+    frecuencia11 = models.CharField(verbose_name='Frecuencia de consumo', null=True, blank=True, max_length=10)
+    cantidad11 = models.CharField(verbose_name='Cantidad que consume', null=True, blank=True, max_length=10)
+    edad11 = models.SmallIntegerField(verbose_name='Edad inicio de consumo', null=True, blank=True)
+    otrassustancias=models.CharField(verbose_name='Otras sustancias',max_length=50,null=True,blank=True)
+    principalsustancia=models.SmallIntegerField(verbose_name='Principal sustancia',choices=opcionesSustancias,null=True,blank=True)
+    otrasustanciap=models.CharField(verbose_name='Tipo',max_length=30,null=True,blank=True)
+    cantidadpromedio = models.CharField(verbose_name='Cantidad de consumo',max_length=10,null=True,blank=True)
+    hacecuanto=models.CharField(verbose_name='Hace cuanto consume',max_length=15,null=True,blank=True)
+    cualalcohol =models.SmallIntegerField(verbose_name='Bebida Alcoholica',choices=opcionesAlcohol,null=True,blank=True)
+    cualdestilado =models.CharField(verbose_name='Tipo de destilado',max_length=15,null=True,blank=True)
+    normalmentecomo=models.SmallIntegerField(verbose_name='Normalmente como consume',choices=opcionesComo,null=True,blank=True)
+    enquelugares=models.CharField(verbose_name='En que lugares consume',max_length=15,null=True,blank=True)
+    detenervoluntariamente=models.BooleanField(verbose_name='Puede detenerse voluntariamente',default=False)
+    gastomalcohol=models.DecimalField(verbose_name='Gasto mensual Alcohol',max_digits=10,decimal_places=2,null=True,blank=True)
+    gastomtabaco=models.DecimalField(verbose_name='Gasto mensual Tabaco',max_digits=10,decimal_places=2,null=True,blank=True)
+    gastomdrogas=models.DecimalField(verbose_name='Gasto mensual Drogas',max_digits=10,decimal_places=2,null=True,blank=True)
+    edesagradables=models.SmallIntegerField(verbose_name='Emociones desagradables',choices=opcionesPorque,null=True,blank=True)
+    eagradables=models.SmallIntegerField(verbose_name='Emociones agradables',choices=opcionesPorque,null=True,blank=True)
+    enfermedad=models.SmallIntegerField(verbose_name='Enfermedad',choices=opcionesPorque,null=True,blank=True)
+    necesidadfisica=models.SmallIntegerField(verbose_name='Necesidad fisica',choices=opcionesPorque,null=True,blank=True)
+    probando=models.SmallIntegerField(verbose_name='Probando',choices=opcionesPorque,null=True,blank=True)
+    conflictos=models.SmallIntegerField(verbose_name='Conflictos',choices=opcionesPorque,null=True,blank=True)
+    agradablesotros=models.SmallIntegerField(verbose_name='Momentos agradables',choices=opcionesPorque,null=True,blank=True)
+    presion=models.SmallIntegerField(verbose_name='Presion social',choices=opcionesPorque,null=True,blank=True)
+    tamanoproblema=models.CharField(verbose_name='Tamaño del problema Alcohol',max_length=10,null=True,blank=True)
+    tamanoproblemad=models.CharField(verbose_name='Tamaño del problema Drogas',max_length=10,null=True,blank=True)
+    tipoproblema=models.CharField(verbose_name='Tipo de problema',max_length=15,null=True,blank=True)
+    maximotiempo=models.CharField(verbose_name='Maximo tiempo',max_length=15,null=True,blank=True)
+    cuandoocurriom=models.CharField(verbose_name='Mes',choices=opcionesMeses,max_length=3,null=True,blank=True)
+    cuandoocurrioa=models.CharField(verbose_name='Año',max_length=4,choices=opcionesYears,null=True,blank=True)
+    motivo=models.CharField(verbose_name='Motivo',max_length=30,null=True,blank=True)
+    cuandoocurriom6 = models.CharField(verbose_name='Mes',choices=opcionesMeses, max_length=3, null=True, blank=True)
+    cuandoocurrioa6 = models.CharField(verbose_name='Año', max_length=4,choices=opcionesYears, null=True, blank=True)
+    motivo6 = models.CharField(verbose_name='Motivo', max_length=30, null=True, blank=True)
+    quetanimportante=models.SmallIntegerField(verbose_name='Que tan importante',choices=opcionesImportante,null=True,blank=True)
+    quetanseguro= models.SmallIntegerField(verbose_name='Que tan seguro',validators=[MinValueValidator(1), MaxValueValidator(10)],null=True,blank=True)
+    piensaque=models.SmallIntegerField(verbose_name='Actualmente piensa que ',choices=opcionesPiensaque,null=True,blank=True)
+    dispuesto=models.SmallIntegerField(verbose_name='Que tan dispuesto esta ',choices=opcionesDispuesto,null=True,blank=True)
+    razon1=models.CharField(verbose_name='Razon 1',max_length=50,null=True,blank=True)
+    razon2=models.CharField(verbose_name='Razon 2',max_length=50,null=True,blank=True)
+    razon3=models.CharField(verbose_name='Razon 3',max_length=50,null=True,blank=True)
+
+class Assist(models.Model):
+
+    objects=models.Manager
+    opcionesSioNo = [('0', 'No'), ('1', 'Si')]
+    opcionesCinco =[('0','Nunca'),('3','Una o Dos veces'),('4','Mensualmente'),('5','Semanalmente'),('6','Diario o casi diario')]
+    opcionesTres =[('0','Nunca'),('6','Si en los ultimos tres meses'),('3','Si pero NO en los ultimos tres meses')]
+    opcionesRiesgo=[('0','Bajo'),('1','Moderado'),('2','Alto')]
+    expediente=models.CharField(max_length=10, primary_key=True, verbose_name='No.Expediente', unique=True)
+    p1s1=models.SmallIntegerField(verbose_name='a.) Tabaco (cigarrilllos, tabaco de mascar, puros, etc)',choices=opcionesSioNo,null=True,blank=True)
+    p1s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (cereveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    p1s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    asistotras1=models.CharField(max_length=20,verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',null=True,blank=True)
+    p2s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p2s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    asistotras2=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    p3s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p3s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    asistotras3=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    p4s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p4s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    asistotras4=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    p5s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    p5s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesCinco,null=True,blank=True)
+    asistotras5=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    p7s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p7s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    asistotras7=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    p8s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    p6s10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    asistotras6=models.CharField(max_length=20,verbose_name='',null=True,blank=True)
+    habitosinyectarse=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesSioNo,null=True,blank=True)
+    puntos1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',null=True,blank=True)
+    puntos2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    puntos10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    consejeroassist=models.SmallIntegerField(verbose_name='Consejero',null=True,blank=True)
+    riesgo1=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo2=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo3=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo4=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo5=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo6=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo7=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo8=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo9=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+    riesgo10=models.SmallIntegerField(verbose_name='b.) Bebidas alcoholicas (creveza, vinos, licores, etc.)',choices=opcionesTres,null=True,blank=True)
+
+
+
+
+
+
+
+
+
+
+
+

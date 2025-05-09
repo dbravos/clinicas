@@ -3,9 +3,7 @@
 <body>
 {% block content %}
 
-<nav class="navbar sticky-top navbar-expand-lg navbar-light"
-     style="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;">
-
+<nav class="navbar sticky-top navbar-expand-lg navbar-light" style="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;">
 
     <ul class="nav nav-pills me-auto">
         <li class="nav-item">
@@ -33,6 +31,7 @@
 
 </nav>
 <div class="grid-container">
+    {% if interno and interno.pk %}
     <form action="{% url 'grabainterno' id=interno.pk %} " method="post">
         {% csrf_token %}
 
@@ -285,6 +284,7 @@
         <button class="btn btn-primary btn-lg" style="margin-left:600px;margin-top:30px" type="submit"> Graba</button>
 
     </form>
+      {% endif%}
 </div>
 <button onclick="location.href='{% url 'consentimiento' id=interno.pk %}' " type="button">Imprime Carta consentimiento</button>
 {% endblock %}
