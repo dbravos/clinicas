@@ -2,26 +2,34 @@ from django.db.models import Q
 from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import models
-import os
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
-import pythoncom
-import win32com.client
-
 from django.views.decorators.csrf import csrf_exempt
-
 from django.http import request, Http404, HttpResponse
 from django.contrib import messages
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from datetime import datetime,date
 from django.core.exceptions import ValidationError
 from django.db import transaction,DatabaseError
 import logging
 import json
-import win32print
-import win32api
+import os
+
+# IMPORTS COMPATIBLES CON WINDOWS/LINUX
+try:
+    import pythoncom
+    import win32com.client
+    import win32print
+    import win32api
+    WINDOWS_SYSTEM = True
+except ImportError:
+    WINDOWS_SYSTEM = False
+    # Alternativas para Linux (Railway)
+    pythoncom = None
+    win32com = None
+    win32print = None
+    win32api = None
+
 
 
 
@@ -36,18 +44,7 @@ from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependie
                     CIndividualf,CFamiliarf,CGrupalf,PConsejeriaf,TareaConsejeriaf,HojaAtencionPsf,NotasEvolucionPSf,\
                     Medicof,Recetasf,HistoriaClinicaf
 
-from django.http import request, Http404, HttpResponse
-from django.contrib import messages
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from datetime import datetime,date
-from django.core.exceptions import ValidationError
-from django.db import transaction,DatabaseError
-import logging
-import json
-import win32print
-import win32api
-import os
+
 
 
 logger = logging.getLogger(__name__)
