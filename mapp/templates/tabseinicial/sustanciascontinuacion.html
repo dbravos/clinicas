@@ -1,0 +1,245 @@
+
+  <div class="tab-pane" id="sustanciascontinuacion">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                 <div class="row align-items-center">
+                 <div class="col-2 d-flex flex-wrap p-2">
+                 <div class="d-inline-block " style="color:black;">Principal sustancia</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap p-2">
+                  {% for choice in einicialf.principalsustancia %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+                  <div class="col-5 p-2">
+                         <div class="d-inline-block " style="width:10%;color:black;margin-top:30px;">{{einicialf.otrasustanciap.label}}</div>
+                         <div class="d-inline-block " style="width:80%;color:black;">{{einicialf.otrasustanciap}}</div>
+                  </div>
+                 </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                   <div class="row p-2">
+                        <div class="col-2">
+                        <div class="d-inline-block" style="color:black;">{{einicialf.cantidadpromedio.label}}</div>
+                        </div>
+                        <div class="col-4">
+                        <div class="d-inline-block"  style="color:black;width:100%">{{einicialf.cantidadpromedio}}</div>
+                        </div>
+                        <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.hacecuanto.label}}</div>
+                        </div>
+                       <div class="col-4">
+                        <div class="d-inline-block mb-3" style="width:100%" >{{einicialf.hacecuanto}}</div>
+                       </div>
+                   </div>
+                </div>
+
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                <div class="row align-items-center p-2">
+                <div class="col-2 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">En caso de consumo de alcohol</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap ">
+                  {% for choice in einicialf.cualalcohol %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+
+                  <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.cualdestilado.label}}</div>
+                   </div>
+                   <div class="col-4">
+                        <div class="d-inline-block " style="width:100%" >{{einicialf.cualdestilado}}</div>
+                   </div>
+                </div>
+              </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                <div class="row align-items-center p-2">
+                <div class="col-2 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">Normalmente consume</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap ">
+                  {% for choice in einicialf.normalmentecomo %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+
+                  <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.enquelugares.label}}</div>
+                   </div>
+                   <div class="col-4">
+                        <div class="d-inline-block " style="width:100%" >{{einicialf.enquelugares}}</div>
+                   </div>
+                </div>
+                <div class="row align-items-center">
+                <div class="col-8 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">Una vez que comienza a consumir puede detenerse voluntariamente?</div>
+                 </div>
+                  <div class="col-4 d-flex flex-wrap p-2">
+                  {% for choice in einicialf.detenervoluntariamente %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                  </div>
+               </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+
+                  <div class="row align-items-center p-2" style="color:black;">
+                 <div class="col-6 d-flex flex-wrap d-inline-block p-2 " style="color:black;margin-top:1rem;">Importe mensual asignado de su sueldo para compra de :</div>
+
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Alcohol
+                  {{einicialf.gastomalcohol}}</div>
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Tabaco
+                  {{einicialf.gastomtabaco}}</div>
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Drogas
+                  {{einicialf.gastomdrogas}}</div>
+                  </div>
+                  </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                    <div class="row align-items-center ">
+                    <h6 style="color:black;background-color:silver;"> De las siguientes situaciones de la vida diaria, cuales lo llevan a consumir (1 el mas frecuente, 8 el menos frecuente)</h6>
+                </div>
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap ">Emociones desagradables (triste ansioso etc.) </div>
+                    {% for choice in einicialf.edesagradables %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" style="background-color:silver;">
+                        <div class="col-4 d-flex flex-wrap p-2">Por alguna enfermedad </div>
+                    {% for choice in einicialf.enfermedad %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap">Emociones agradables (feliz,contento,satisfecho,etc) </div>
+                        {% for choice in einicialf.eagradables %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+
+                    <div class="row align-items-center" style="background-color:silver;">
+                    <div class="col-4 d-flex flex-wrap">Necesidad fisica (sindrome de abstinencia, que su cuerpo necesite la sustancia)</div>
+                    {% for choice in einicialf.necesidadfisica %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" >
+                        <div class="col-4 d-flex flex-wrap">Probando autocontrol (ponerse a prueba sentir que puede controlar y parar su consumo)</div>
+                    {% for choice in einicialf.probando %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" style="background-color:silver;">
+                      <div class="col-4 d-flex flex-wrap">Conflictos con otros (pleitos y problemas con alguna persona)</div>
+                    {% for choice in einicialf.conflictos %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" >
+                        <div class="col-4 d-flex flex-wrap">Momentos agradables con otros (disfrutar la compañia de otras personas)</div>
+                    {% for choice in einicialf.agradablesotros %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center p-2" style="background-color:silver;">
+                        <div class="col-4 d-flex flex-wrap">Presion social</div>
+                        {% for choice in einicialf.presion %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center ">
+                    <h6 style="color:black;background-color:silver;"> De acuerdo con lo siguiente escala señale lo que mejor describa su consumo de alcohol/drogas durante los ultimos 12 meses</h6>
+                </div>
+                <div class="row">
+
+                <div class="col-md-6">
+                <h6>{{ einicialf.tamanoproblema.label }}</h6>
+                   <div class="d-flex flex-wrap gap-2">
+                   {% for choice in einicialf.tamanoproblema %}
+                   <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                           name="{{ choice.data.name }}"
+                           id="{{ choice.id_for_label }}"
+                           value="{{ choice.data.value }}"
+                           {% if choice.data.selected %}checked{% endif %}>
+                      <label class="form-check-label" for="{{ choice.id_for_label }}">
+                        {{ choice.choice_label }}
+                        </label>
+                    </div>
+                   {% endfor %}
+                   </div>
+                </div>
+                <div class="col-md-6">
+                <h6>{{ einicialf.tamanoproblemad.label }}</h6>
+                <div class="d-flex flex-wrap gap-2">
+                     {% for choice in einicialf.tamanoproblemad %}
+                     <div class="form-check">
+                     <input class="form-check-input" type="radio"
+                          name="{{ choice.data.name }}"
+                          id="{{ choice.id_for_label }}"
+                          value="{{ choice.data.value }}"
+                          {% if choice.data.selected %}checked{% endif %}>
+                     <label class="form-check-label" for="{{ choice.id_for_label }}">
+                          {{ choice.choice_label }}
+                     </label>
+                     </div>
+                     {% endfor %}
+                    </div>
+                </div>
+                </div>
+
+                    <div class="d-inline-block p-3" style="width: 20%;color:black;">{{einicialf.tipoproblema.label}}</div>
+                    <div class="d-inline-block p-3" style="width: 55%;color:black;">{{einicialf.tipoproblema}}</div>
+
+             </div>
+             </div>

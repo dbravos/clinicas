@@ -1,0 +1,116 @@
+{% extends "MenuPrincipal.html" %}
+
+<body>
+
+{% block content %}
+<!-- datosgrales.html -->
+
+  <!-- Cabecera del Paciente -->
+  <div class="patient-header bg-light p-3 mb-4 rounded shadow-sm">
+    <h5 class="mb-0">
+      <i class="bi bi-file-earmark-text-fill me-2"></i>
+      Expediente: <span class="text-primary">{{interno.numeroexpediente}}</span> |
+      Nombre: <span class="text-primary">{{interno.nombrecompleto}}</span>
+    </h5>
+  </div>
+
+  <!-- Menú de Navegación -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4">
+    <div class="container-fluid px-0" style="color:black">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFreshstart">
+        <span class="navbar-toggler-icon"></span>
+        <span class="ms-2">Menú</span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarFreshstart">
+        <ul class="navbar-nav w-100 justify-content-between">
+
+          <!-- Sección Consejería -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-primary mx-1 my-1" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-chat-square-text-fill me-2"></i>Consejería
+            </a>
+            <ul class="dropdown-menu dropdown-menu-start p-2" style="max-height: 70vh; overflow-y: auto;">
+              <h6 class="dropdown-header text-primary">Evaluaciones</h6>
+              <li><a class="dropdown-item py-2" href="{% url 'einicial' id=interno.pk %}"><i class="bi bi-clipboard-plus me-2"></i>Entrevista inicial</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'assist' id=interno.pk %}"><i class="bi bi-clipboard-data me-2"></i>Cuestionario ASSIST</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'psicosis' id=interno.pk %}"><i class="bi bi-activity me-2"></i>Síntomas de psicosis</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'sdevida' id=interno.pk %}"><i class="bi bi-emoji-smile me-2"></i>Satisfacción de vida</a></li>
+
+              <h6 class="dropdown-header text-primary mt-3">Cuestionarios</h6>
+              <li><a class="dropdown-item py-2" href="{% url 'usodrogas' id=interno.pk %}"><i class="bi bi-capsule me-2"></i>Uso de drogas</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'ansiedad' id=interno.pk %}"><i class="bi bi-heart-pulse me-2"></i>Síntomas de ansiedad</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'depresion' id=interno.pk %}"><i class="bi bi-emoji-frown me-2"></i>Síntomas de depresión</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'marcadores' id=interno.pk %}"><i class="bi bi-graph-up me-2"></i>Indicadores de dependencia</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'riesgos' id=interno.pk %}"><i class="bi bi-clipboard-pulse me-2"></i>Cuestionario AUDIT</a></li>
+
+              <h6 class="dropdown-header text-primary mt-3">Seguimiento</h6>
+              <li><a class="dropdown-item py-2" href="{% url 'razones' id=interno.pk %}"><i class="bi bi-search me-2"></i>Razones de consumo</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'valorizacion' id=interno.pk %}"><i class="bi bi-file-bar-graph me-2"></i>Reporte de valorización</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesiones' tipo_sesion='individual' id=interno.numeroexpediente %}"><i class="bi bi-journal-text me-2"></i>Notas de evolución individual</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesiones' tipo_sesion='familiar' id=interno.numeroexpediente %}"><i class="bi bi-people me-2"></i>Notas de evolución familiar</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesionesGrupales'  %}"><i class="bi bi-collection me-2"></i>Notas de evolución grupal</a></li>
+
+              <h6 class="dropdown-header text-primary mt-3">Planificación</h6>
+              <li><a class="dropdown-item py-2" href="{% url 'planConsejeria' id=interno.numeroexpediente  %}"><i class="bi bi-calendar-check me-2"></i>Plan de consejería</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'escanear_tarea' %}"><i class="bi bi-upload me-2"></i>Digitalización de tareas</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'lista_tareas_escaneadas' %}"><i class="bi bi-list-task me-2"></i>Despliegue de tareas</a></li>
+            </ul>
+          </li>
+
+          <!-- Sección Psicología -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-success mx-1 my-1" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-mental-health me-2"></i>Psicología
+            </a>
+            <ul class="dropdown-menu p-2">
+              <li><a class="dropdown-item py-2" href="{% url 'hojaAtencionPs' id=interno.numeroexpediente %}"><i class="bi bi-file-earmark-medical me-2"></i>Hoja de atención psicologica</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesionesPS' id=interno.pk %}"><i class="bi bi-journal-medical me-2"></i>Notas de evolución psicologica</a></li>
+
+            </ul>
+          </li>
+
+          <!-- Sección Médico -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-info mx-1 my-1" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-heart-pulse me-2"></i>Médico
+            </a>
+            <ul class="dropdown-menu p-2">
+              <li><a class="dropdown-item py-2" href="{% url 'medicoInicial' id=interno.pk %}"><i class="bi bi-file-earmark-medical me-2"></i>Diagnostico inicial</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'emisionDerecetas' id=interno.pk %}"><i class="bi bi-journal-medical me-2"></i>Emision de recetas</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'historiaClinica' id=interno.pk %}"><i class="bi bi-folder me-2"></i>Historia clinica</a></li>
+            </ul>
+          </li>
+
+          <!-- Sección Psiquiatría -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-warning mx-1 my-1" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-brain me-2"></i>Seguimiento
+            </a>
+            <ul class="dropdown-menu p-2">
+              <li><a class="dropdown-item py-2" href="#"><i class="bi bi-file-earmark-medical me-2"></i>Entrevista </a></li>
+              <li><a class="dropdown-item py-2" href="#"><i class="bi bi-journal-medical me-2"></i>Reporte de seguimiento</a></li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+</body>
+
+<style>
+  .patient-header {
+    border-left: 5px solid #0d6efd;
+  }
+  .dropdown-menu {
+
+    min-width: 280px;
+  }
+  .nav-link {
+    font-weight: 500;
+    min-width: 120px;
+    text-align: center;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,3175 @@
+{% extends "dgenerales.html" %}
+<body>
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+
+
+<div class="interview-container">
+  <!-- Header Sticky -->
+  <div class="sticky-top interview-header">
+    <div class="header-content">
+      <div class="header-title">
+        <p class="interview-title">Entrevista Inicial</p>
+        <div class="patient-info">
+          <div class="patient-id">
+            <label>Expediente:</label>
+            <span>{{ interno.numeroexpediente }}</span>
+          </div>
+          <div class="patient-name">
+            <label>Nombre:</label>
+            <span>{{ interno.nombrecompleto }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="interview-tabs">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" data-bs-toggle="tab" href="#sustanciasqueconsume" role="tab">
+             Consumo de sustancias
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#sustanciascontinuacion" role="tab">
+            Consumo (cont.)
+          </a>
+        </li>
+         <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#disposicionalcambio" role="tab">
+            Disposicion al cambio
+          </a>
+        </li>
+         <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#situacionsocialfamiliar" role="tab">
+             Situacion social familiar
+          </a>
+        </li>
+         <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#situacionsociofamiliar" role="tab">
+             Situacion social familiar (cont.)
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#laboralfisicaymental" role="tab">
+            Laboral fisica y mental
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas1" role="tab">
+             Consecuencias adversas #1
+          </a>
+        </li><!-- Resto de pestañas... -->
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas2" role="tab">
+            Consecuencias adversas #2
+          </a>
+        </li><!-- Resto de pestañas... -->
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas3" role="tab">
+            Consecuencias adversas #3
+          </a>
+        </li><!-- Resto de pestañas... -->
+          <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas4" role="tab">
+            Consecuencias adversas #4
+          </a>
+        </li><!-- Resto de pestañas... -->
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas5" role="tab">
+            Consecuencias adversas #5
+          </a>
+        </li><!-- Resto de pestañas... -->
+          <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#consecuenciasadversas6" role="tab">
+            Consecuencias adversas #6
+          </a>
+        </li><!-- Resto de pestañas... -->
+          <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#tratamientos" role="tab">
+            Tratamientos 
+          </a>
+        </li><!-- Resto de pestañas... -->
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#metasycomentarios" role="tab">
+            Metas y comentarios
+          </a>
+        </li><!-- Resto de pestañas... -->
+         <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#menordeedad" role="tab">
+            Menor de edad
+          </a>
+        </li><!-- Resto de pestañas... -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- Contenido del formulario -->
+  <form action="{% url 'grabaeinicial' id=interno.pk %}" method="POST" >
+    {% csrf_token %}
+
+    {% if messages %}
+    <div class="alert-messages">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="tab-content">
+      <!-- Pestaña Consumo de sustancias -->
+      <div class="tab-pane fade show active" id="sustanciasqueconsume" role="tabpanel">
+        <div class="consumo-table">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Sustancia</th>
+                <th>Consume</th>
+                <th>{{ einicialf.forma1.label }}</th>
+                <th>{{ einicialf.frecuencia1.label }}</th>
+                <th>{{ einicialf.cantidad1.label }}</th>
+                <th>{{ einicialf.edad1.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+
+
+
+     {% for i in "1,2,3,4,5,6,7,8,9,10"|split:"," %}
+     {% get_form_field einicialf "consumo"|add:i  as campo %}
+     {% get_form_field einicialf "forma"|add:i as campoa %}
+     {% get_form_field einicialf "frecuencia"|add:i as campob %}
+     {% get_form_field einicialf "cantidad"|add:i as campoc %}
+     {% get_form_field einicialf "edad"|add:i as campod %}
+
+
+
+  <tr>
+    <td>{{ campo.label }} </td>
+    <td>
+      <div class="form-check form-switch ">{{ campo }}</div>
+    </td>
+    <td>
+     {{ campoa|attr:"class:form-select w-auto" }}
+    </td>
+
+    <td>{{campob|attr:"class:form-control"}}</td>
+    <td>{{campoc|attr:"class:form-control"}}</td>
+    <td>{{campod|attr:"class:form-control"}}</td>
+  </tr>
+{% endfor %}
+
+
+
+
+            </tbody>
+          </table>
+
+          <div class="additional-fields">
+            <div class="additional-row">
+              <div class="field-label">{{ einicialf.consumo11.label }}</div>
+              <div class="field-value switch-field">{{ einicialf.consumo11 }}</div>
+              <div class="field-value">{{ einicialf.frecuencia11 }}</div>
+              <div class="field-value">{{ einicialf.cantidad11 }}</div>
+              <div class="field-value">{{ einicialf.edad11 }}</div>
+            </div>
+
+            <div class="other-substances">
+              <div class="field-label">{{ einicialf.otrassustancias.label }}</div>
+              <div class="field-value">{{ einicialf.otrassustancias }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" role="tabpanel" id="sustanciascontinuacion">
+  <!-- Sección 1: Sustancia principal -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-2">
+          <h6 class="card-title mb-0">Principal sustancia</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="row">
+            {% for choice in einicialf.principalsustancia %}
+            <div class="col-6 mb-2">
+              <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{ einicialf.otrasustanciap.id_for_label }}" class="form-label">
+              {{ einicialf.otrasustanciap.label }}
+            </label>
+            {{ einicialf.otrasustanciap|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 2: Cantidad y tiempo -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-group">
+            <label for="{{ einicialf.cantidadpromedio.id_for_label }}" class="form-label">
+              {{ einicialf.cantidadpromedio.label }}
+            </label>
+            {{ einicialf.cantidadpromedio|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{ einicialf.hacecuanto.id_for_label }}" class="form-label">
+              {{ einicialf.hacecuanto.label }}
+            </label>
+            {{ einicialf.hacecuanto|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 3: Consumo de alcohol -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-2">
+          <h6 class="card-title mb-0">En caso de consumo de alcohol</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="row">
+            {% for choice in einicialf.cualalcohol %}
+            <div class="col-6 mb-2">
+              <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{ einicialf.cualdestilado.id_for_label }}" class="form-label">
+              {{ einicialf.cualdestilado.label }}
+            </label>
+            {{ einicialf.cualdestilado|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 4: Patrones de consumo -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-2">
+          <h6 class="card-title mb-0">Normalmente consume</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="row">
+            {% for choice in einicialf.normalmentecomo %}
+            <div class="col-6 mb-2">
+              <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{ einicialf.enquelugares.id_for_label }}" class="form-label">
+              {{ einicialf.enquelugares.label }}
+            </label>
+            {{ einicialf.enquelugares|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-8">
+          <h6 class="card-title">Una vez que comienza a consumir puede detenerse voluntariamente?</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="btn-group" role="group">
+            {% for choice in einicialf.detenervoluntariamente %}
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 5: Gastos mensuales -->
+  <div class="card mb-4 shadow-sm">
+       <div class="card-header bg-primary">
+    <h6 class="mb-0 card-title p-2 rounded text-white">Importe mensual asignado de su sueldo para compra de:</h6>
+      </div>
+
+    <div class="card-body">
+      <h5 class="card-title"></h5>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="{{ einicialf.gastomalcohol.id_for_label }}" class="form-label">Alcohol</label>
+            {{ einicialf.gastomalcohol|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="{{ einicialf.gastomtabaco.id_for_label }}" class="form-label">Tabaco</label>
+            {{ einicialf.gastomtabaco|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="{{ einicialf.gastomdrogas.id_for_label }}" class="form-label">Drogas</label>
+            {{ einicialf.gastomdrogas|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sección 6: Situaciones de consumo -->
+  <div class="card mb-4 shadow-sm border-0">
+      <div class="card-header bg-primary">
+    <h6 class="mb-0 card-title p-2 rounded text-white">De las siguientes situaciones de la vida diaria, cuales lo llevan a consumir (1 el mas frecuente, 8 el menos frecuente)</h6>
+      </div>
+    <div class="card-body">
+
+      {% for field_name, label in situaciones %}
+      <div class="row align-items-center py-2 {% cycle '' 'bg-light' %}">
+        <div class="col-md-4">
+          <label class="mb-0">{{ label }}</label>
+        </div>
+        <div class="col-md-8">
+          <div class="btn-group btn-group-sm" role="group">
+            {% with field=einicialf|get_field:field_name %}
+            {% for choice in field %}
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="btn btn-outline-secondary" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+
+
+  <!-- Sección 7: Escalas de problemas - Versión mejorada -->
+<div class="card mb-4 shadow-sm border-0">
+  <div class="card-header bg-primary">
+    <h6 class="mb-0 card-title p-2 rounded text-white">Señale lo que mejor describa su consumo de alcohol/drogas en los últimos 12 meses</h6>
+  </div>
+
+  <div class="card-body">
+    <div class="row">
+     <div class="col-md-6 mb-4">
+    <h6 class="mb-3">{{ einicialf.tamanoproblema.label }}</h6>
+    <div class="row row-cols-2 g-3">
+        {% for choice in einicialf.tamanoproblema %}
+        <div class="col">
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %} autocomplete="off">
+            <label class="card h-100 border-2 cursor-pointer" for="{{ choice.id_for_label }}">
+                <div class="card-body text-center d-flex align-items-center justify-content-center p-2">
+                    <span>{{ choice.choice_label }}</span>
+                </div>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="col-md-6 mb-4">
+    <h6 class="mb-3">{{ einicialf.tamanoproblemad.label }}</h6>
+    <div class="row row-cols-2 g-3">
+        {% for choice in einicialf.tamanoproblemad %}
+        <div class="col">
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %} autocomplete="off">
+            <label class="card h-100 border-2 cursor-pointer" for="{{ choice.id_for_label }}">
+                <div class="card-body text-center d-flex align-items-center justify-content-center p-2">
+                    <span>{{ choice.choice_label }}</span>
+                </div>
+            </label>
+        </div>
+        {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campo de Tipo de Problema -->
+    <div class="problem-type-card p-4 mt-3">
+      <div class="form-group mb-0">
+        <label for="{{ einicialf.tipoproblema.id_for_label }}"
+               class="font-weight-bold text-muted mb-3">
+          <i class="fas fa-comment-medical mr-2"></i>
+          {{ einicialf.tipoproblema.label }}
+        </label>
+        {{ einicialf.tipoproblema|attr:"class:form-control form-control-lg" }}
+         </div>
+         </div>
+  </div>
+</div>
+        </div>
+      <div class="tab-pane fade" role="tabpanel" id="disposicionalcambio">
+  <!-- Sección 1: Mayor periodo de abstinencia -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <!-- Fila 1: Pregunta principal -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <h6 class="mb-2">¿Cuál fue el mayor tiempo que se propuso y logró no consumir alcohol/drogas? (Si no se lo ha propuesto, marque '0')</h6>
+        </div>
+      </div>
+
+      <!-- Fila 2: Campos de respuesta -->
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.maximotiempo.label_tag }}
+            {{ einicialf.maximotiempo|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.cuandoocurriom.label_tag }}
+            {{ einicialf.cuandoocurriom|add_class:"form-select" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.cuandoocurrioa.label_tag }}
+            {{ einicialf.cuandoocurrioa|add_class:"form-select" }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 3: Pregunta secundaria -->
+
+      <!-- Fila 1: Pregunta principal -->
+       <div class="row mt-3">
+        <div class="col-md-6">
+          <h6 class="mb-0">¿Por qué se abstuvo en esa ocasión y qué hizo para mantenerse sin consumir?</h6>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            {{ einicialf.motivo|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+
+  </div>
+
+
+</div>
+
+  <!-- Sección 2: Abstinencia reciente -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <h6 class="mb-0">En los últimos 6 meses, ¿cuánto tiempo ha sido el mayor periodo que ha tenido sin consumir?</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.mayortiempo.label_tag }}
+            {{ einicialf.mayortiempo|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.cuandoocurriom6.label_tag }}
+            {{ einicialf.cuandoocurriom6|add_class:"form-select" }}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.cuandoocurrioa6.label_tag }}
+            {{ einicialf.cuandoocurrioa6|add_class:"form-select" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <h6 class="mb-0">¿Por qué se abstuvo en esa ocasión y qué hizo para mantenerse sin consumir?</h6>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            {{ einicialf.motivo6|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 3: Motivación actual -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h6 class="mb-0">Actualmente, ¿qué tan importante es para usted el dejar de consumir alcohol/drogas?</h6>
+        </div>
+        <div class="col-md-6">
+          <div class="btn-group" role="group">
+            {% for choice in einicialf.quetanimportante %}
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-8">
+          <h6 class="mb-0">En una escala del 1 al 10 (donde 1 es nada y 10 es mucho), ¿qué tan seguro se siente de no consumir alcohol/drogas?</h6>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            {{ einicialf.quetanseguro|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <h6 class="mb-0">En estos momentos usted piensa que:</h6>
+        </div>
+        <div class="col-md-8">
+          <div class="btn-group" role="group">
+            {% for choice in einicialf.piensaque %}
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 4: Disposición al internamiento -->
+  <div class="card mb-4 shadow-sm bg-light">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-4">
+          <h6 class="mb-0">¿Qué tan dispuesto está para recibir los servicios de internamiento?</h6>
+        </div>
+        <div class="col-md-8">
+          <div class="btn-group" role="group">
+            {% for choice in einicialf.dispuesto %}
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 5: Razones para dejar de consumir -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Mencione tres principales razones por las cuales es importante dejar de consumir:</h5>
+
+      <div class="row mt-3">
+        <div class="col-md-2">
+          <h6 class="mb-0">Razón uno:</h6>
+        </div>
+        <div class="col-md-10">
+          <div class="form-group">
+            {{ einicialf.razon1|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-2">
+          <h6 class="mb-0">Razón dos:</h6>
+        </div>
+        <div class="col-md-10">
+          <div class="form-group">
+            {{ einicialf.razon2|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-2">
+          <h6 class="mb-0">Razón tres:</h6>
+        </div>
+        <div class="col-md-10">
+          <div class="form-group">
+            {{ einicialf.razon3|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="tab-pane fade" role="tabpanel" id="situacionsocialfamiliar">
+
+       <div class="card mb-4 shadow-sm border-primary">
+        <div class="card-header bg-primary text-white ">
+        <h6 class="mb-0"><i class="fas fa-users me-2"></i>Composición Familiar</h6>
+      </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label for="{{ situacionfamiliarf.quienesintegran.id_for_label }}" class="form-label">
+          <h6 class="mb-3">
+            <span class="badge bg-info text-dark me-2">1</span>
+            ¿Quiénes integran su grupo familiar? (mencione las personas con quienes tiene más contacto frecuente)
+          </h6>
+          <small class="text-muted">Ejemplo: "Mi esposa María, mis hijos Juan (25) y Lucía (22), mi madre Rosa"</small>
+        </label>
+        {{ situacionfamiliarf.quienesintegran|add_class:"form-control form-control-lg"}}
+        <div class="form-text mt-2">
+          <i class="fas fa-info-circle text-primary me-1"></i>
+          Incluya relación parental y edades si considera relevante
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Sección 2: Escala de valoración familiar -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">A continuación le voy a mencionar una serie de oraciones que se refieren a aspectos relacionados con su familia, indique qué tan de acuerdo está con cada una</h6>
+    </div>
+
+    <div class="card-body p-0">
+      <!-- Encabezado de escala -->
+      <div class="row bg-light align-items-center py-2 mx-0">
+        <div class="col-md-4 font-weight-bold">Afirmación</div>
+        <div class="col-md-8">
+          <div class="d-flex text-center">
+            <div class="flex-fill px-2">Totalmente de acuerdo</div>
+            <div class="flex-fill px-2">De acuerdo</div>
+            <div class="flex-fill px-2">Neutral</div>
+            <div class="flex-fill px-2">En desacuerdo</div>
+            <div class="flex-fill px-2">Totalmente en desacuerdo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items de la escala -->
+      <div> <!-- class="scale-items"-->
+        <!-- Item 1 -->
+        <div class="row align-items-center py-3 mx-0 border-bottom">
+          <div class="col-md-4">Los miembros de la familia acostumbramos a hacer cosas juntos</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.hacercosasjuntos %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="row align-items-center py-3 mx-0 bg-light border-bottom">
+          <div class="col-md-4">En mi familia nadie se preocupa por los sentimientos de los demás</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.nadiesepreocupa %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="row align-items-center py-3 mx-0 border-bottom">
+          <div class="col-md-4">Mi familia es cálida y me brinda apoyo</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.soncalidos %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="row align-items-center py-3 mx-0 bg-light border-bottom">
+          <div class="col-md-4">En mi familia es importante expresar nuestras opiniones</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.expresaropiniones %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="row align-items-center py-3 mx-0 border-bottom">
+          <div class="col-md-4">El ambiente en mi familia usualmente es desagradable</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.esdesagradable %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="row align-items-center py-3 mx-0 bg-light border-bottom">
+          <div class="col-md-4">Mi familia acostumbra a hacer actividades en conjunto</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.enconjunto %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 7 -->
+        <div class="row align-items-center py-3 mx-0 border-bottom">
+          <div class="col-md-4">Mi familia me escucha</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.meescucha %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 8 -->
+        <div class="row align-items-center py-3 mx-0 bg-light border-bottom">
+          <div class="col-md-4">Cuando tengo un problema NO se lo platico a mi familia</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.platicoproblemas %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 9 -->
+        <div class="row align-items-center py-3 mx-0 border-bottom">
+          <div class="col-md-4">En mi familia expresamos abiertamente nuestro cariño</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.expresamoscarino %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 10 -->
+        <div class="row align-items-center py-3 mx-0 bg-light">
+          <div class="col-md-4">Los conflictos en mi familia nunca se resuelven</div>
+          <div class="col-md-8">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+              {% for choice in situacionfamiliarf.nuncaseresuelven %}
+              <label class="btn btn-outline-primary flex-fill mx-1">
+                {{ choice.tag }}
+                {{ choice.choice_label }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="tab-pane fade" role="tabpanel" id="situacionsociofamiliar">
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <!-- Sección de conflicto familiar -->
+      <div class="row align-items-center mb-4">
+        <div class="col-md-5">
+          <h6 class="mb-0">¿En los últimos 12 meses ha tenido un conflicto familiar grave?</h6>
+        </div>
+        <div class="col-md-3">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.conflictograve %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-4 mt-2 mt-md-0">
+          <div class="input-group">
+            <span class="input-group-text">¿Cuál?</span>
+            {{ situacionfamiliarf.cual|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+
+
+
+<!-- Tabla de familiares - Versión optimizada -->
+<div class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th class="text-center">Familiar</th>
+        <th class="text-center">Consume</th>
+        <th class="text-center">Tipo de sustancia</th>
+        <th class="text-center">Problemas causados</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tipo in "papa,mama,hermano,amigo,pareja,familiar"|split:"," %}
+      <tr class="{% cycle '' 'bg-light' %}">
+        <!-- Columna Familiar -->
+        <td class="text-center font-weight-bold">
+          {% if tipo == 'papa' %}Papá
+          {% elif tipo == 'mama' %}Mamá
+          {% elif tipo == 'hermano' %}Hermano
+          {% elif tipo == 'amigo' %}Amigo
+          {% elif tipo == 'pareja' %}Pareja
+          {% else %}Familiar{% endif %}
+        </td>
+
+        <!-- Columna Radio Buttons (Consume) -->
+        <td>
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% get_form_field situacionfamiliarf tipo as campo_radio %}
+            {% for choice in campo_radio %}
+              <label class="btn btn-sm btn-outline-primary">
+                <input type="radio"
+                       name="{{ campo_radio.name }}"
+                       value="{{ choice.data.value }}"
+                       {% if choice.data.selected %}checked{% endif %}>
+                {{ choice.choice_label }}
+              </label>
+            {% endfor %}
+          </div>
+        </td>
+
+        <!-- Columna Sustancia -->
+        <td>
+          {% get_form_field situacionfamiliarf "cosumio"|add:tipo as campo_sustancia %}
+          <input type="text"
+                 name="{{ campo_sustancia.name }}"
+                 value="{{ campo_sustancia.value|default:'' }}"
+                 class="form-control form-control-sm">
+        </td>
+
+        <!-- Columna Problemas -->
+        <td>
+          {% get_form_field situacionfamiliarf "problema"|add:tipo as campo_problema %}
+          <input type="text"
+                 name="{{ campo_problema.name }}"
+                 value="{{ campo_problema.value|default:'' }}"
+                 class="form-control form-control-sm">
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+    </div>
+  </div>
+  <!-- Sección 3: Presión social -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Cuando está con amigos/familiares, ¿estos lo presionan a consumir alcohol/drogas?</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        {% for choice in situacionfamiliarf.cuandoesta %}
+        <div class="col-md-3 mb-2">
+          <div class="form-check">
+            {{ choice.tag }}
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 4: Apoyo social -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">¿Quiénes le ayudarían a cambiar el consumo de alcohol/drogas?</h6>
+    </div>
+    <div class="card-body">
+      {{ situacionfamiliarf.ayudarian|add_class:"form-control" }}
+    </div>
+  </div>
+
+  <!-- Sección 5: Tiempo libre -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Administración de tiempo libre</h5>
+    </div>
+    <div class="card-body">
+      <!-- Pregunta 1 -->
+      <div class="mb-4">
+        <h6 class="font-weight-bold">¿Cuánto tiempo dedica a consumir sustancias y qué actividades ha dejado de hacer?</h6>
+        {{ situacionfamiliarf.dejadodehacer|add_class:"form-control" }}
+      </div>
+
+      <!-- Pregunta 2 -->
+      <div>
+        <h6 class="font-weight-bold">¿Qué actividades de diversión/entretenimiento están relacionadas con el consumo?</h6>
+        {{ situacionfamiliarf.relacionadas|add_class:"form-control" }}
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="tab-pane fade" role="tabpanel" id="laboralfisicaymental">
+
+
+      <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+        <h6 class="card-header bg-primary text-white">Impacto Laboral</h6>
+        </div>
+      <div class="form-group row">
+        <label class="col-md-10 col-form-label">
+          En los últimos 12 meses, ¿cuántos días no trabajó como resultado del consumo de alcohol/drogas? (0-365)
+        </label>
+        <div class="col-md-2">
+          {{ situacionfamiliarf.diasnotrabajados|add_class:"form-control" }}
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-md-10 col-form-label">
+          En los últimos 12 meses, ¿cuántas veces perdió el empleo como resultado del consumo de alcohol/drogas?
+        </label>
+        <div class="col-md-2">
+          {{ situacionfamiliarf.vecesperdioempleo|add_class:"form-control" }}
+        </div>
+      </div>
+
+
+  <!-- Sección Salud Física y Mental -->
+      <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Salud Física y Mental</h6>
+    </div>
+
+    <div class="card-body">
+      <!-- Pregunta 1 -->
+      <div class="form-group row">
+        <label class="col-md-8 col-form-label">
+          Durante el último mes, ¿ha pensado que estaría mejor muerto o ha deseado estar muerto?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.mejormuerto %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Pregunta 2 -->
+      <div class="form-group row">
+        <label class="col-md-8 col-form-label">
+          En caso afirmativo, ¿durante el último mes ha intentado suicidarse?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.ultimomesintentado %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Pregunta 3 -->
+      <div class="form-group row bg-light">
+        <label class="col-md-8 col-form-label">
+          ¿Alguna vez en la vida ha intentado suicidarse?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.haintentado %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Pregunta 4 -->
+      <div class="form-group row">
+        <label class="col-md-8 col-form-label">
+          ¿Presenta alguna enfermedad o padecimiento físico y/o mental?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.presentaenfermedad %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo adicional -->
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label">¿Cuál?</label>
+        <div class="col-md-10">
+          {{ situacionfamiliarf.cualenfermedad|add_class:"form-control" }}
+        </div>
+      </div>
+
+      <!-- Pregunta 5 -->
+      <div class="form-group row bg-light">
+        <label class="col-md-8 col-form-label">
+          ¿Esta enfermedad o padecimiento fue derivada por el uso de sustancias?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.derivadaporuso %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Pregunta 6 -->
+      <div class="form-group row">
+        <label class="col-md-8 col-form-label" style="font-size: 0.9rem;">
+          ¿Está siendo atendido por algún padecimiento físico y/o mental actualmente (incluyendo psiquiátrico)?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.siendoatendido %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo adicional -->
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label">¿Cuál?</label>
+        <div class="col-md-10">
+          {{ situacionfamiliarf.cualpadecimiento|add_class:"form-control" }}
+        </div>
+      </div>
+
+      <!-- Pregunta 7 -->
+      <div class="form-group row bg-light">
+        <label class="col-md-8 col-form-label">
+          ¿Está tomando algún medicamento por prescripción médica o se está automedicando?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.medicado %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo adicional -->
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label">¿Cuál?</label>
+        <div class="col-md-10">
+          {{ situacionfamiliarf.cualmedicina|add_class:"form-control" }}
+        </div>
+      </div>
+
+      <!-- Pregunta 8 -->
+      <div class="form-group row">
+        <label class="col-md-8 col-form-label">
+          ¿En los últimos 12 meses ha estado internado en algún hospital?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.estadointernado %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo adicional -->
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label">¿Por qué?</label>
+        <div class="col-md-10">
+          {{ situacionfamiliarf.porque|add_class:"form-control" }}
+        </div>
+      </div>
+
+      <!-- Pregunta 9 -->
+      <div class="form-group row bg-light">
+        <label class="col-md-8 col-form-label">
+          En caso afirmativo, ¿ha sido por problemas con el consumo de alcohol y/o drogas?
+        </label>
+        <div class="col-md-4">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for choice in situacionfamiliarf.porconsumo %}
+            <label class="btn btn-outline-primary">
+              {{ choice.tag }}
+              {{ choice.choice_label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+         </div>
+      </div>
+      <div class="tab-pane fade" id="consecuenciasadversas1" role="tabpanel">
+        <div class="consequences-container">
+         <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Consecuencias Físicas</h4>
+            <div class="instructions text-white">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+          <!-- Problemas Cardiovasculares -->
+          <div class="consequence-section">
+            <div class="section-title bg-light">
+              <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas Cardiovasculares</h5>
+            </div>
+
+
+            {% for i in "1,2,3,4,5"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cfisicasf.fotro }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cfisicasf.fp6 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cfisicasf.fp6a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <div class="consequence-section">
+            <div class="section-title bg-light">
+
+              <h5>Problemas Digestivos</h5>
+            </div>
+
+
+            {% for i in " 6,7,8,9,10,11,12,13,14,15,16"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cfisicasf.fotro1 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cfisicasf.fp17 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cfisicasf.fp17a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Otras secciones (digestivos, etc.) seguirían el mismo patrón -->
+        </div>
+      </div> <!-- se cierra consecuencias 1-->
+      <div class="tab-pane fade" id="consecuenciasadversas2" role="tabpanel">
+        <div class="consequences-container">
+
+           <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Problemas Mentales</h4>
+            <div class="instructions text-white">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+
+            {% for i in "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"|split:"," %}
+            {% get_form_field cmentalesf "p"|add:i as campo %}
+            {% get_form_field cmentalesf "p"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cmentalesf.otro }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cmentalesf.p17 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cmentalesf.p17a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Otras secciones (digestivos, etc.) seguirían el mismo patrón -->
+        <!-- Resto de pestañas... -->
+    </div> <!-- se cierra tab consecuencias 2 -->
+      <div class="tab-pane fade" id="consecuenciasadversas3" role="tabpanel">
+        <div class="consequences-container">
+
+         <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Problemas en los huesos</h4>
+            <div class="instructions text-white">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+
+
+            {% for i in "18,19,20"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cfisicasf.fotro2 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cfisicasf.fp21 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cfisicasf.fp21a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div class="consequence-section">
+            <div class="section-title bg-light">
+               <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas respiratorios</h5>
+            </div>
+            {% for i in "22,23,24,25"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cfisicasf.fotro3 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cfisicasf.fp26 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cfisicasf.fp26a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div> <!--consecuences section -->
+
+            <div class="consequence-section">
+            <div class="section-title bg-light">
+               <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas en el pensamiento, memoria y toma de decisiones</h5>
+            </div>
+            {% for i in "17,18,19,20"|split:"," %}
+            {% get_form_field cmentalesf "p"|add:i as campo %}
+            {% get_form_field cmentalesf "p"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cmentalesf.otro2 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cmentalesf.p21 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cmentalesf.p21a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div> <!--consecuences section -->
+     </div>  <!-- se cierra tab consecuencias 3-->
+      <div class="tab-pane fade" id="consecuenciasadversas4" role="tabpanel">
+        <div class="consequences-container">
+
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Problemas para controlar los estados de animo</h4>
+            <div class="instructions text-white">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+
+
+            {% for i in "22,23,24,25,26,27,28,29,30,31,32,33"|split:"," %}
+            {% get_form_field cmentalesf "p"|add:i as campo %}
+            {% get_form_field cmentalesf "p"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ cmentalesf.otro3 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in cmentalesf.p34 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cmentalesf.p34a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div class="consequence-section">
+            <div class="section-title bg-light">
+               <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas en sus relaciones con otras personas</h5>
+            </div>
+            {% for i in "1,2,3,4,5,6,7,8,9,10"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp11 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp11a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div> <!--consecuences section -->
+
+    </div>  <!-- se cierra tab consecuencias 4 -->
+      <div class="tab-pane fade" id="consecuenciasadversas5" role="tabpanel">
+        <div class="consequences-container">
+
+          <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Problemas de conducta</h4>
+            <div class="instructions text-white">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+
+            {% for i in "12,13,14,15,16,17,18"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro1 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp19 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in cmentalesf.rp19a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div class="consequence-section">
+            <div class="section-title">
+               <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas con la ley</h5>
+            </div>
+            {% for i in "20,21,22,23,24"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Fecha duracion y causas: {{ crelacionesf.fechaduracionycausa }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp25 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp25a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% for i in "26,27,28"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro2 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp29 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp29a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+
+          </div> <!--consecuences section -->
+          <div class="consequence-section">
+            <div class="section-title">
+               <i class="bi bi-heart-pulse"></i>
+              <h5>Problemas economicos</h5>
+            </div>
+            {% for i in "30,31,32,33"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro3}}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp34 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp34a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+
+       </div> <!--consecuences container -->
+   </div> <!--cierra consecuencias adversas #5 -->
+      <div class="tab-pane fade" id="consecuenciasadversas6" role="tabpanel">
+        <div class="consequences-container">
+
+         <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4>Problemas en el trabajo</h4>
+            <div class="instructions text-white ">
+              <i class="bi bi-info-circle "></i>
+              <span>Marque "Sí" si ha presentado el síntoma en el último año y seleccione el grado de afectación</span>
+            </div>
+          </div>
+         </div>
+
+            {% for i in "35,36,37,38,39,40,41,42,43,44"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Campo "Otro" -->
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro4 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp45 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp45a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+           <div class="consequence-section">
+            <div class="section-title bg-primary text-white !important ">
+               <i class="bi bi-heart-pulse"></i>
+              <h6>Problemas escolares</h6>
+            </div>
+            {% for i in "46,47,48,49,50"|split:"," %}
+            {% get_form_field crelacionesf "rp"|add:i as campo %}
+            {% get_form_field crelacionesf "rp"|add:i|add:"a" as campoa %}
+            <div class="consequence-item">
+              <div class="consequence-question">
+                {{ campo.label }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in campo %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in campoa %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+
+
+            <div class="consequence-item other-item">
+              <div class="consequence-question">
+                Otro: {{ crelacionesf.rotro5 }}
+              </div>
+
+              <div class="consequence-options">
+                <div class="yes-no-options">
+                  {% for choice in crelacionesf.rp51 %}
+                  <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="severity-options">
+                  {% for choice in crelacionesf.rp51a %}
+                  <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                      {{ choice.choice_label }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+       </div> <!--consecuences container -->
+    </div>  <!-- se cierra tab consecuencias 6 -->
+      <div class="tab-pane fade" role="tabpanel" id="tratamientos">
+      <div class="card shadow-sm mb-4">
+      <div class="card-body">
+      <!-- Sección de conflicto familiar -->
+        <div class="row mb-3">
+         <div class="col-md-6">
+        <h6 class="mb-0">¿Ha recibido algún tratamiento o ayuda para resolver sus problemas de alcohol/drogas?</h6>
+        </div>
+
+       <div class="col-md-4">
+        <div class="btn-group" role="group">
+            {% for choice in tratamientosf.recibio %}
+             <label class="btn btn-sm btn-outline-primary">
+                <input type="radio"
+                       name="{{ choice.data.name }}"
+                       value="{{ choice.data.value }}"
+                       {% if choice.data.selected %}checked{% endif %}>
+                {{ choice.choice_label }}
+              </label>
+            {% endfor %}
+        </div>
+        </div>
+        </div>
+        <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary">
+      <h5 class="mb-0">Cuales y cuantos tratamientos ha recibido?</h5>
+    </div>
+
+
+<!-- Tabla de familiares - Versión optimizada -->
+<div class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th class="text-center" style="width:15%">Tipo de tratamiento</th>
+        <th class="text-center" style="width:8%">Alcohol</th>
+        <th class="text-center" style="width:8%">Drogas</th>
+        <th class="text-center" style="width:30%">Hace cuanto tiempo</th>
+        <th class="text-center" style="width:8%">Lo concluiste?</th>
+        <th class="text-center" style="width:30%">En caso negativo, cuales fueron las razones?</th>
+      </tr>
+    </thead>
+ <tbody>
+        {% for i in "1,2,3,4,5,6,7,8"|split:"," %}
+        {% with a_field="a"|add:i d_field="d"|add:i c_field="c"|add:i h_field="h"|add:i r_field="r"|add:i %}
+            {% get_form_field tratamientosf a_field as campoa %}
+            {% get_form_field tratamientosf d_field as campod %}
+            {% get_form_field tratamientosf c_field as campoc %}
+            {% get_form_field tratamientosf h_field as campoh %}
+            {% get_form_field tratamientosf r_field as campor %}
+
+            {% if campoa and campod and campoc and campoh and campor %}
+            <tr class="{% cycle '' 'bg-light' %}">
+                <!-- Columna Radio Buttons (Consume) -->
+              <td>
+               {{campoa.label}}
+              </td>
+                <td>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        {% for choice in campoa.field.choices %}
+                            <label class="btn btn-sm btn-outline-primary">
+                                <input type="radio"
+                                       name="{{ campoa.html_name }}"
+                                       value="{{ choice.0 }}"
+                                       {% if campoa.value|stringformat:"s" == choice.0|stringformat:"s" %}checked{% endif %}>
+                                {{ choice.1 }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </td>
+
+                <!-- Columna Sustancia -->
+                <td>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        {% for choice in campod.field.choices %}
+                            <label class="btn btn-sm btn-outline-primary">
+                                <input type="radio"
+                                       name="{{ campod.html_name }}"
+                                       value="{{ choice.0 }}"
+                                       {% if campod.value|stringformat:"s" == choice.0|stringformat:"s" %}checked{% endif %}>
+                                {{ choice.1 }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </td>
+
+                <!-- Otras columnas -->
+                <td>
+                     {{campoh|attr:"class:form-control"}}
+
+                </td>
+
+                <td>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        {% for choice in campoc.field.choices %}
+                            <label class="btn btn-sm btn-outline-primary">
+                                <input type="radio"
+                                       name="{{ campoc.html_name }}"
+                                       value="{{ choice.0 }}"
+                                       {% if campoc.value|stringformat:"s" == choice.0|stringformat:"s" %}checked{% endif %}>
+                                {{ choice.1 }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </td>
+
+                <td>
+                   {{campor|attr:"class:form-control"}}
+                </td>
+            </tr>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+           </tbody>
+               </table>
+              </div>
+           </div> <!-- se cierra el card body-->
+          </div>
+        </div>
+      </div> <!-- se cierra tab tratamientos-->
+      <div class="tab-pane fade" role="tabpanel" id="metasycomentarios">
+      <div class="card shadow-sm mb-4">
+      <div class="card-body">
+      <!-- Sección de conflicto familiar -->
+        <div class="row mb-3">
+         <div class="col-md-5">
+        <h6 class="mb-0">¿Que tan satisfecho se encuentra con su estilo de vida?</h6>
+        </div>
+
+       <div class="col-md-4">
+        <div class="btn-group" role="group">
+            {% for choice in tratamientosf.satisfecho %}
+             <label class="btn btn-sm btn-outline-primary">
+                <input type="radio"
+                       name="{{ choice.data.name }}"
+                       value="{{ choice.data.value }}"
+                       {% if choice.data.selected %}checked{% endif %}>
+                {{ choice.choice_label }}
+              </label>
+            {% endfor %}
+        </div>
+        </div>
+        </div>
+        <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary">
+      <h5 class="mb-0">Cuales son sus metas para el futuro?</h5>
+    </div>
+
+
+<!-- Tabla de familiares - Versión optimizada -->
+<table class="table">
+    {% for i in "1,2,3,4,5,6,7,8,9,10"|split:"," %}
+        {% with a_field="meta"|add:i %}
+            {% get_form_field tratamientosf a_field as mmeta %}
+            <tr class="{% cycle 'row-even' 'row-odd' %}">
+                <td>
+                    <div class="mb-2" style="font-weigth:bold;font-size:1.05rem">  <!-- Añade espacio inferior -->
+                        <label for="{{ mmeta.id_for_label }}" class="form-label">
+                            {{ mmeta.label }}
+                        </label>
+                        {{ mmeta|add_class:"form-control bg-hover" }}
+                    </div>
+                </td>
+            </tr>
+        {% endwith %}
+    {% endfor %}
+</table>
+                    <div class="row align-items-end">
+                       <div class="col-md-6">
+                    <div class="mb-2" style="font-weigth:bold;font-size:1.05rem">  <!-- Añade espacio inferior -->
+                        <label for="{{ tratamientosf.problemas.id_for_label }}" class="form-label">
+                            {{ tratamientosf.problemas.label }}
+                        </label>
+                        {{ tratamientosf.problemas|add_class:"form-control bg-hover" }}
+                    </div>
+                       </div>
+                        <div class="col-md-6">
+                    <div class="mb-2" style="font-weigth:bold;font-size:1.05rem">  <!-- Añade espacio inferior -->
+                        <label for="{{ tratamientosf.observaciones.id_for_label }}" class="form-label">
+                            {{ tratamientosf.observaciones.label }}
+                        </label>
+                        {{ tratamientosf.observaciones|add_class:"form-control bg-hover" }}
+                    </div>
+                       </div>
+                    </div>
+            </div> <!-- se cierra el card body-->
+          </div>
+        </div>
+      </div> <!-- se cierra tab metas y comentarios-->
+      <div class="tab-pane fade" role="tabpanel" id="menordeedad">
+
+        <div class="container">
+      <div class="card shadow-sm mb-4">
+   <div class="card-body">
+  <!-- Sección de conflicto familiar -->
+  <h5 class="mb-4 text-primary">Información Familiar</h5> <!-- Título descriptivo -->
+
+  <!-- Tabla de relación familiar (mejor estructura) -->
+  <div class="table-responsive mb-4"> <!-- Usamos tabla para datos estructurados -->
+    <table class="table table-bordered table-hover">
+      <thead class="bg-light">
+        <tr>
+          <th scope="col" class="w-25">Dato</th>
+          <th scope="col" class="text-center">Padre</th>
+          <th scope="col" class="text-center">Madre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Fila: Edad -->
+        <tr>
+          <th scope="row" class="align-middle">Edad</th>
+          <td>{{ cfisicasf.papaedad }}</td>
+          <td>{{ cfisicasf.mamaedad }}</td>
+        </tr>
+
+        <!-- Fila: Escolaridad -->
+        <tr>
+          <th scope="row" class="align-middle">Escolaridad</th>
+          <td>{{ cfisicasf.papaescolaridad }}</td>
+          <td>{{ cfisicasf.mamaescolaridad }}</td>
+        </tr>
+
+        <!-- Fila: Ocupación -->
+        <tr>
+          <th scope="row" class="align-middle">Ocupación</th>
+          <td>{{ cfisicasf.papasededica }}</td>
+          <td>{{ cfisicasf.mamasededica }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sección de "¿Cómo es la relación?" (mejorado) -->
+  <div class="mb-3">
+    <h6 class="mb-3">{{ cfisicasf.comoesrelacion.field.label }}</h6>
+    <div class="d-flex flex-wrap gap-3"> <!-- Mejor disposición de opciones -->
+      {% for choice in cfisicasf.comoesrelacion %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio"
+                 id="{{ choice.id_for_label }}"
+                 name="{{ cfisicasf.comoesrelacion.name }}"
+                 value="{{ choice.data.value }}"
+              {% if choice.data.selected %}checked{% endif %}>
+          <label class="form-check-label" for="{{ choice.id_for_label }}">
+            {{ choice.choice_label }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-group">
+            <label for="{{ cfisicasf.cuantoshermanos.id_for_label }}" class="form-label">
+              {{ cfisicasf.cuantoshermanos.label }}
+            </label>
+            {{ cfisicasf.cuantoshermanos|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{ cfisicasf.quelugarocupas.id_for_label }}" class="form-label">
+              {{ cfisicasf.quelugarocupas.label }}
+            </label>
+            {{ cfisicasf.quelugarocupas|add_class:"form-control" }}
+          </div>
+        </div>
+      </div> <!-- se  cierra row -->
+    </div><!--se cierra card-body -->
+  </div><!-- se cierra card mb-4 -->
+
+
+  <div class="mb-3">
+    <label for="{{ cfisicasf.relacionconhermanos.field.label }}" class="form-label ms-3">
+           {{ cfisicasf.relacionconhermanos.label }}
+    </label>
+    <div class="d-flex flex-wrap gap-3">
+      {% for choice in cfisicasf.relacionconhermanos%}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input mx-3" type="radio"
+                 id="{{ choice.id_for_label }}"
+                 name="{{ cfisicasf.relacionconhermanos.name }}"
+                 value="{{ choice.data.value }}"
+              {% if choice.data.selected %}checked{% endif %}>
+          <label class="form-check-label" for="{{ choice.id_for_label }}">
+            {{ choice.choice_label }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+  </div> <!-- se cierra mb-3 -->
+
+     <div class="card shadow-sm">
+     <div class="card-header bg-primary text-white">
+         <h6>Que opinan las siguientes personas de que consuma alcohol/drogas? (preguntar en relacion a la sustancia principal de consumo)</h6>
+     </div>
+
+    <div class="card-body">  <!-- Agregado para mejor espaciado interno -->
+
+      <div class="row align-items-center">
+      <div class="col-md-5 d-flex flex-wrap">
+    <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+      <label for="{{ cfisicasf.comovemama.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+        {{ cfisicasf.comovemama.label }}
+      </label>
+    </div>
+      </div>
+     <div class="col-md-6 d-flex flex-wrap">
+      <div class="d-flex flex-wrap gap-3 align-items-center">  <!-- Contenedor de radios alineado -->
+        {% for choice in cfisicasf.comovemama %}
+          <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+            <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comovemama.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+         </div>
+        </div>
+        </div>
+      <div class="row align-items-center bg-light">
+      <div class="col-md-5 d-flex flex-wrap">
+     <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+      <label for="{{ cfisicasf.comovepapa.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+        {{ cfisicasf.comovepapa.label }}
+      </label>
+     </div>
+      </div>
+      <div class="col-md-6 d-flex flex-wrap">
+      <div class="d-flex flex-wrap gap-3 align-items-right">  <!-- Contenedor de radios alineado -->
+
+        {% for choice in cfisicasf.comovepapa %}
+          <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+            <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comovepapa.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+     </div>
+      <div class="row align-items-center">
+        <div class="col-md-5 d-flex flex-wrap">
+           <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+             <label for="{{ cfisicasf.comovemaestros.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+             {{ cfisicasf.comovemaestros.label }}
+            </label>
+           </div>
+        </div>
+        <div class="col-md-6 d-flex flex-wrap">
+           <div class="d-flex flex-wrap gap-3 align-items-right">  <!-- Contenedor de radios alineado -->
+           {% for choice in cfisicasf.comovemaestros %}
+             <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+              <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comovemaestros.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+        </div>
+      <div class="row align-items-center bg-light">
+        <div class="col-md-5 d-flex flex-wrap">
+      <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+      <label for="{{ cfisicasf.comoveamigos.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+        {{ cfisicasf.comoveamigos.label }}
+      </label>
+      </div>
+        </div>
+       <div class="col-md-6 d-flex flex-wrap">
+      <div class="d-flex flex-wrap gap-3 align-items-right">  <!-- Contenedor de radios alineado -->
+        {% for choice in cfisicasf.comoveamigos %}
+          <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+            <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comoveamigos.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+      </div>
+      <div class="row align-items-center">
+          <div class="col-md-5 d-flex flex-wrap">
+          <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+          <label for="{{ cfisicasf.comovepareja.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+           {{ cfisicasf.comovepareja.label }}
+          </label>
+          </div>
+          </div>
+          <div class="col-md-6 d-flex flex-wrap">
+           <div class="d-flex flex-wrap gap-3 align-items-right">  <!-- Contenedor de radios alineado -->
+           {% for choice in cfisicasf.comovepareja %}
+             <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+             <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comovepareja.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+        </div>
+      <div class="row align-items-center bg-light">
+       <div class="col-md-5 d-flex flex-wrap">
+       <div class="d-flex align-items-center flex-wrap">  <!-- flex-wrap permite envolver en móviles -->
+       <label for="{{ cfisicasf.comovehermanos.field.label }}" class="form-label mb-0 pe-2 " style="margin-right:6rem;">
+         {{ cfisicasf.comovehermanos.label }}
+       </label>
+       </div>
+       </div>
+       <div class="col-md-6 d-flex flex-wrap">
+      <div class="d-flex flex-wrap gap-3 align-items-right">  <!-- Contenedor de radios alineado -->
+        {% for choice in cfisicasf.comovehermanos %}
+          <div class="form-check">  <!-- Quitamos form-check-inline para mejor control -->
+            <input class="form-check-input" type="radio"
+                   id="{{ choice.id_for_label }}"
+                   name="{{ cfisicasf.comovehermanos.name }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}>
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+              {{ choice.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+     </div>
+<div>
+
+    <div class="card-header bg-primary text-white">
+         <h6>Como es la relacion familiar?</h6>
+     </div>
+    {% for i in "1,2,3,4"|split:"," %}
+        {% with field_name="fpr"|add:i %}
+            {% get_form_field cfisicasf field_name as campo %}
+
+            <div class="row align-items-center {% if forloop.counter|divisibleby:2 %}bg-light{% endif %} py-2">
+              <div class="col-md-8 d-flex flex-wrap">
+                <label for="{{ campo.id_for_label }}" class="form-label ms-3">
+                    {{ campo.label }}
+                </label>
+              </div>
+
+                <div class="col-md-4 d-flex flex-wrap gap-3">
+                    {% for value, label in campo.field.choices %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input mx-3" type="radio"
+                                   id="{{ campo.auto_id }}_{{ forloop.counter }}"
+                                   name="{{ campo.name }}"
+                                   value="{{ value }}"
+                                {% if campo.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ campo.auto_id }}_{{ forloop.counter }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+
+    <div>
+    <div class="card-header bg-primary text-white">
+         <h6>Normas familiares con relacion al consumo de alcohol/drogas (preguntar por la sustancia principal)</h6>
+     </div>
+
+   {% for i in "1,2,3"|split:"," %}
+        {% with field_name="fpn"|add:i %}
+            {% get_form_field cfisicasf field_name as campo %}
+
+            <div class="row align-items-center {% if forloop.counter|divisibleby:2 %}bg-light{% endif %} py-2">
+              <div class="col-md-8 d-flex flex-wrap">
+                <label for="{{ campo.id_for_label }}" class="form-label ms-3">
+                    {{ campo.label }}
+                </label>
+              </div>
+
+                <div class="col-md-4 d-flex flex-wrap gap-3">
+                    {% for value, label in campo.field.choices %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input mx-3" type="radio"
+                                   id="{{ campo.auto_id }}_{{ forloop.counter }}"
+                                   name="{{ campo.name }}"
+                                   value="{{ value }}"
+                                {% if campo.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ campo.auto_id }}_{{ forloop.counter }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+        <div class="border-top border-primary border-3 my-3"></div>
+
+
+
+           <div class="row align-items-center bg-light">
+            <div class="col-md-8 d-flex flex-wrap">
+                <label for="{{ cfisicasf.rsexuales.id_for_label }}" class="form-label ms-3">
+                    {{ cfisicasf.rsexuales.label }}
+                </label>
+              </div>
+
+                <div class="col-md-4 d-flex flex-wrap gap-3">
+                    {% for value, label in cfisicasf.rsexuales.field.choices %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input mx-3" type="radio"
+                                   id="{{ cfisicasf.rsexuales.auto_id }}_{{ forloop.counter }}"
+                                   name="{{ cfisicasf.rsexuales.html_name }}"
+                                   value="{{ value }}"
+                                {% if cfisicasf.rsexuales.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ cfisicasf.rsexuales.auto_id }}_{{ forloop.counter }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+           </div>
+           <div class="row align-items-center ">
+            <div class="col-md-8 d-flex flex-wrap">
+                <label for="{{ cfisicasf.involucrado.id_for_label }}" class="form-label ms-3">
+                    {{ cfisicasf.involucrado.label }}
+                </label>
+              </div>
+
+                <div class="col-md-4 d-flex flex-wrap gap-3">
+                    {% for value, label in cfisicasf.involucrado.field.choices %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input mx-3" type="radio"
+                                   id="{{ cfisicasf.involucrado.auto_id }}_{{ forloop.counter }}"
+                                   name="{{ cfisicasf.involucrado.html_name }}"
+                                   value="{{ value }}"
+                                {% if cfisicasf.involucrado.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ cfisicasf.involucrado.auto_id }}_{{ forloop.counter }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+           </div>
+    </div>
+    </div>
+     </div>
+  </div> <!-- se cierra mb-3 -->
+     </div> <!--se cierra container -->
+
+      </div> <!-- se cierra tab menor de edad-->
+      </div> <!-- se cierra tab content -->
+
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-save">
+        <i class="bi bi-save"></i> Guardar
+      </button>
+
+</div>
+
+   </div> <!-- se cierra el tab-content -->
+
+  </form>
+</div>
+</body>
+<!-- Incluir JavaScript de Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Estilos personalizados -->
+<style>
+.interview-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.interview-header {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1020;
+  padding: 15px 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+}
+
+.interview-title {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: bold;
+  margin: 0;
+  text-align: right;
+}
+
+.patient-info {
+  display: flex;
+  gap: 20px;
+}
+
+.patient-id, .patient-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.patient-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.interview-tabs {
+  margin-top: 15px;
+}
+
+.nav-tabs {
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.nav-link {
+  font-weight: 500;
+}
+
+.consumo-table {
+  margin-top: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.additional-fields {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.additional-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.field-label {
+  width: 15%;
+  font-weight: 500;
+}
+
+.field-value {
+  flex: 1;
+}
+
+.switch-field {
+  display: flex;
+  align-items: center;
+}
+
+.other-substances {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.consequences-container {
+  margin-top: 20px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h4 {
+  color: #333;
+  font-weight: 600;
+}
+
+.instructions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.consequence-section {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.section-title h5 {
+  margin: 0;
+  font-weight: 600;
+  color: #495057;
+}
+
+.consequence-item {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #eee;
+}
+
+.consequence-item:last-child {
+  border-bottom: none;
+}
+
+.consequence-question {
+  width: 100%;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.consequence-options {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.yes-no-options {
+  flex: 1;
+  display: flex;
+  gap: 15px;
+}
+
+.severity-options {
+  flex: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.other-item {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.form-actions {
+  margin-top: 30px;
+  text-align: right;
+}
+
+.btn-save {
+  padding: 10px 25px;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .patient-info {
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .additional-row, .other-substances {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-label {
+    width: 100%;
+  }
+
+  .consequence-item {
+    flex-direction: column;
+  }
+
+  .consequence-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .yes-no-options, .severity-options {
+    width: 100%;
+  }
+}
+
+  /* Estilos personalizados para esta sección */
+  .scale-card {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #4e73df;
+  }
+
+  .problem-type-card {
+    background-color: #f0f7ff;
+    border-radius: 10px;
+    border-left: 4px solid #1cc88a;
+  }
+
+  .radio-indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d3e2;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+
+  .custom-control-input:checked ~ .custom-control-label .radio-indicator {
+    background-color: #4e73df;
+    border-color: #4e73df;
+  }
+
+  .option-text {
+    font-size: 0.95rem;
+  }
+
+    /* Efecto hover y selección para las cards */
+    .btn-check:checked + .card {
+        border-color: #0d6efd !important;
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    .btn-check:focus + .card {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    /* Asegurar que el texto no se desborde */
+    .card-body span {
+        word-break: break-word;
+    }
+.bg-hover:hover {
+    background-color: #e9f5ff;  /* Azul claro */
+    transition: background-color 0.3s;
+}
+
+
+</style>
+
+{% endblock %}

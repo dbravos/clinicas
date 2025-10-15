@@ -1,0 +1,404 @@
+{% extends "dgenerales.html" %}
+
+<body>
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+
+<div class="interview-container">
+  <!-- Header Sticky -->
+  <div class="header-content sticky-top">
+    <div class="header-title">
+      <div class="d-flex justify-content-between align-items-start">
+          <h3>Examen medico inicial</h3>
+        <div>
+          <!-- Botón Regresar -->
+          <a href="{% url 'seleccionainterno' id=interno.pk %}"
+                   class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Regresar
+          </a>
+        </div>
+      </div>
+
+      <!-- Información del paciente -->
+      <div class="medical-badge">
+        <div class="medical-header">
+            <div class="patient-id">
+                <span class="id-label">EXPEDIENTE</span>
+                <span class="id-number">{{ interno.numeroexpediente }}</span>
+            </div>
+            <div class="patient-name">{{ interno.nombrecompleto }}</div>
+        </div>
+
+        <div class="medical-data">
+            <div class="data-row">
+                <div class="data-point">
+                    <span class="data-label">Sexo</span>
+                    <span class="data-value">{{ interno.get_sexo_display }}</span>
+                </div>
+                <div class="data-point">
+                    <span class="data-label">Edad</span>
+                    <span class="data-value">{{ interno.edad }}</span>
+                </div>
+                <div class="data-point">
+                    <span class="data-label">Estado Civil</span>
+                    <span class="data-value">{{ interno.get_estadocivil_display }}</span>
+                </div>
+            </div>
+            <div class="data-point-full d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="data-label">Problema Principal</span>
+                    <span class="data-value alert-value">{{ interno.get_porcualingresa_display }}</span>
+                </div>
+                <div class="text-end">
+                    <span class="data-label">Fecha</span>
+                    <span class="data-value">
+                        {% if medicof.instance.fecha %}
+                            {{ medicof.instance.fecha|date:"d/m/Y" }}
+                        {% else %}
+                            {{ medicof.fecha.value|default:"Nueva evaluación" }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario principal -->
+  <form action="{% url 'medicoInicial' id=interno.numeroexpediente %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
+
+    <!-- MOSTRAR ERRORES DEL FORMULARIO -->
+    {% if medicof.errors %}
+    <div class="alert alert-danger mt-3">
+      <h5><i class="bi bi-exclamation-triangle me-2"></i>Errores en el formulario:</h5>
+      <ul class="mb-0">
+        {% for field in medicof %}
+          {% for error in field.errors %}
+            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in medicof.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+    <div class="alert-messages mt-3">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Sección de captura -->
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Detalle Examen </h5>
+      </div>
+
+      <div class="card-body">
+        <!-- Fecha y Medico -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.fecha.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.fecha.label }} *
+            </label>
+            {{ medicof.fecha }}
+            {% if medicof.fecha.errors %}
+              <div class="text-danger small">{{ medicof.fecha.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.medico.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.medico.label }}
+            </label>
+            {{ medicof.medico }}
+            {% if medicof.medico.errors %}
+              <div class="text-danger small">{{ medicof.medico.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Lateralidad -->
+        <div class="row">
+
+          <!-- NUEVO CAMPO: Motivo agregado aquí -->
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.motivo.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.motivo.label }}
+            </label>
+            {{ medicof.motivo }}
+            {% if medicof.motivo.errors %}
+              <div class="text-danger small">{{ medicof.motivo.errors }}</div>
+            {% endif %}
+          </div>
+
+        <!-- Antecedentes e Instrumentos -->
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.padecimiento.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.padecimiento.label }}
+            </label>
+            {{ medicof.padecimiento }}
+            {% if medicof.padecimiento.errors %}
+              <div class="text-danger small">{{ medicof.padecimiento.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+         <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.sintomas.id_for_label }}">
+                <span class="form-label fw-bold"> {{ medicof.sintomas.label| slice:":18" }}</span>
+                <span class="text-muted small">{{ medicof.sintomas.label| slice:"18:" }}</span>
+
+            </label>
+            {{ medicof.sintomas }}
+            {% if medicof.sintomas.errors %}
+              <div class="text-danger small">{{ medicof.sintomas.errors }}</div>
+            {% endif %}
+          </div>
+
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.tratamientos.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.tratamientos.label }}
+            </label>
+              <div style="margin-top:12px">{{ medicof.tratamientos }}</div>
+            {% if medicof.tratamientos.errors %}
+              <div class="text-danger small">{{ medicof.tratamientos.errors }}</div>
+            {% endif %}
+          </div>
+         </div>
+
+          <div class="row">
+          <div class="col-md-2 mb-3">
+            <label for="{{ medicof.TA.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.TA.label }}
+            </label>
+            {{ medicof.TA}}
+            {% if medicof.TA.errors %}
+              <div class="text-danger small">{{ medicof.TA.errors }}</div>
+            {% endif %}
+          </div>
+
+
+          <div class="col-2 mb-3">
+            <label for="{{ medicof.FC.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.FC.label }}
+            </label>
+            {{ medicof.FC}}
+            {% if medicof.FC.errors %}
+              <div class="text-danger small">{{ medicof.FC.errors }}</div>
+            {% endif %}
+          </div>
+            <div class="col-2 mb-3">
+            <label for="{{ medicof.FR.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.FR.label }}
+            </label>
+            {{ medicof.FR }}
+            {% if medicof.FR.errors %}
+              <div class="text-danger small">{{ medicof.FR.errors }}</div>
+            {% endif %}
+          </div>
+            <div class="col-2 mb-3">
+            <label for="{{ medicof.temperatura.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.temperatura.label }}
+            </label>
+            {{ medicof.temperatura}}
+            {% if medicof.temperatura.errors %}
+              <div class="text-danger small">{{ medicof.temperatura.errors }}</div>
+            {% endif %}
+          </div>
+            <div class="col-2 mb-3">
+            <label for="{{ medicof.peso.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.peso.label }}
+            </label>
+            {{ medicof.peso}}
+            {% if medicof.peso.errors %}
+              <div class="text-danger small">{{ medicof.peso.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-2 mb-3">
+            <label for="{{ medicof.talla.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.talla.label }}
+            </label>
+            {{ medicof.talla }}
+            {% if medicof.talla.errors %}
+              <div class="text-danger small">{{ medicof.talla.errors }}</div>
+            {% endif %}
+          </div>
+
+        </div>
+            <div class="row">
+          <div class="col-md-6 mb-3" style="margin-top:20px">
+            <label for="{{ medicof.exploracion.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.exploracion.label }}
+            </label>
+            {{ medicof.exploracion }}
+            {% if medicof.exploracion.errors %}
+              <div class="text-danger small">{{ medicof.exploracion.errors }}</div>
+            {% endif %}
+          </div>
+
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.examenmental.id_for_label }}" >
+                <span class="form-label fw-bold">{{ medicof.examenmental.label|slice:":15" }}</span>
+                <span class="text-muted small">{{medicof.examenmental.label|slice:"15:"}}</span>
+            </label>
+            {{ medicof.examenmental }}
+            {% if medicof.examenmentaltratamientos.errors %}
+              <div class="text-danger small">{{ medicof.examenmental.errors }}</div>
+            {% endif %}
+          </div>
+         </div>
+         <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.diagnostico.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.diagnostico.label }}
+            </label>
+            {{ medicof.diagnostico }}
+            {% if medicof.diagnostico.errors %}
+              <div class="text-danger small">{{ medicof.diagnostico.errors }}</div>
+            {% endif %}
+          </div>
+
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.pronostico.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.pronostico.label }}
+            </label>
+            {{ medicof.pronostico }}
+            {% if medicof.pronostico.errors %}
+              <div class="text-danger small">{{ medicof.pronostico.errors }}</div>
+            {% endif %}
+          </div>
+         </div>
+
+   <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ medicof.tratamientosugerido.id_for_label }}" class="form-label fw-bold">
+              {{ medicof.tratamientosugerido.label }}
+            </label>
+            {{ medicof.tratamientosugerido }}
+            {% if medicof.tratamientosugerido.errors %}
+              <div class="text-danger small">{{ medicof.tratamientosugerido.errors }}</div>
+            {% endif %}
+          </div>
+
+         </div>
+
+
+
+
+        <!-- Botones de acción -->
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'seleccionainterno' id=interno.numeroexpediente %}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left me-1"></i> Regresar
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i> Guardar Evaluación
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<style>
+.medical-badge {
+    background: white;
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.medical-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f4f8;
+}
+
+.patient-id {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.id-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.id-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1976d2;
+}
+
+.patient-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.medical-data {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.data-row {
+    display: flex;
+    gap: 16px;
+}
+
+.data-point, .data-point-full {
+    flex: 1;
+}
+
+.data-point-full {
+    margin-top: 4px;
+}
+
+.data-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.data-value {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.alert-value {
+    color: #d32f2f;
+    font-weight: 700;
+}
+</style>
+
+</body>
+{% endblock %}

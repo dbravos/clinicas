@@ -1,0 +1,147 @@
+{% extends "dgenerales.html" %}
+<body>
+{% block content %}
+
+
+<div class="container-fluid px-4 py-3">
+    <!-- Encabezado y barra de navegación -->
+
+<!-- <nav class="navbar sticky-top navbar-expand-lg bg-light mb-4 rounded shadow-sm" style="border: 1px solid #d1d7dc;"> -->
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+        <!-- Contenedor para el título, siempre a la izquierda -->
+        <div class="d-flex align-items-center">
+            <h4 class="m-0 text-primary flex-grow-1"> <!-- flex-grow-1 para que el título ocupe espacio -->
+                <i class="bi bi-journal-text me-2"></i>Notas de evolucion Psicologica para Expediente {{ interno.numeroexpediente }} - {{ interno.nombrecompleto }}
+            </h4>
+        </div>
+        </div>
+        <!-- Contenedor para los botones, alineado a la derecha y colapsable -->
+        <div class="card-body">
+
+         <a  class="btn btn-sm btn-primary" href="{% url 'capturaSesionPS'  accion='agregar' id=interno.pk %}">
+             <i class="bi bi-plus-circle me-1"></i>Agregar Nueva Sesión
+         </a>
+         <a class="btn btn-sm btn-secondary float-end" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar">
+                        <i class="bi bi-arrow-left me-1"></i>Volver a Menú
+         </a>
+
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Tabla de sesiones -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3">No. Sesión</th>
+                            <th class="py-3">Fecha</th>
+                            <th class="py-3">Objetivo</th>
+                            <th class="py-3">Psicologo</th>
+                            <th class="py-3">Estatus</th>
+                            {% if tipo_sesion_actual == 'todas' %}
+                                <th class="py-3">Tipo</th>
+                            {% endif %}
+                            <th class="py-3 ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if sesionesPS %}
+                            {% for s in sesionesPS %}
+                            <tr>
+                                <td class="align-middle">{{ s.sesion }}</td>
+                                <td class="align-middle">{{ s.fecha|date:"d M Y" }}</td>
+                                <td class="align-middle">{{ s.objetivo }}</td>
+                                <td class="align-middle">{{ s.psicologo }}</td>
+                                <td class="align-middle">
+                                    {% if s.status == 0 %}
+                                        <span class="badge bg-warning text-dark">Abierta</span>
+                                    {% elif s.status == 1 %}
+                                        <span class="badge bg-success">Cerrada</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Otro</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                             <a href="{% url 'capturaSesionPS_con_id'   accion='editar' id=interno.numeroexpediente no_sesion=s.pk %}"
+                                           class="btn btn-sm btn-primary">
+                                           {% if s.status == 0 %}
+                                            <i class="bi bi-pencil"></i> Editar
+                                           {% else %}
+                                            <i class="bi bi-eye"  title="Consultar"></i> Consultar
+                                           {% endif %}
+                                        </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center py-4 text-muted">No hay sesiones de este tipo para el expediente {{ expediente_actual }}.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes mejorados (sin cambios) -->
+    <div class="messages-container mt-3">
+        {% if messages %}
+
+            {% for message in messages %}
+            <div class="alert alert-dismissible fade show
+                        {% if message.tags == 'error' %}alert-danger
+                        {% elif message.tags == 'success' %}alert-success
+                        {% else %}alert-info{% endif %}"
+                 role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+</body>
+
+<style>
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    .btn-group .btn {
+        margin-right: 5px;
+    }
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+    });
+</script>
+
+
+
+{% endblock %}

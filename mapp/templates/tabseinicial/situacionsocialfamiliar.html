@@ -1,0 +1,138 @@
+
+<div class="tab-pane  " id="situacionsocialfamiliar">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                 <div class="row align-items-center">
+                 <div class="col-12 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:30%;margin-top:20px;">Quienes integran su familia (con quienes tiene mas contacto)</div>
+                     <div class="d-inline-block" style="width:60%;margin-left:1rem">{{situacionfamiliarf.quienesintegran}}</div>
+                 </div>
+                </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center" style="background-color:silver">
+                     <div >A continuacion le voy a mencionar una serie de oraciones que se refieren a aspectos relacionados con su familia, indique que tan de acuerdo esta con lo que cada una de estas indica</div>
+                 </div>
+                <div class="row align-items-center" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap "></div>
+                        <div class="col-8 d-flex flex-wrap " ></div>
+                            <div class="d-line-block" style="width:20%">Totalmente de acuerdo</div>
+                            <div class="d-line-block" style="width:20%">De Acuerdo</div>
+                            <div class="d-line-block" style="width:20%">Neutral (ni de acuerdo ni desacuerdo</div>
+                            <div class="d-line-block" style="width:20%">Desacuerdo</div>
+                            <div class="d-line-block" style="width:20%">Totalmente desacuerdo</div>
+                </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap ">Los miembros de la familia acostumbramos a hacer cosas juntos</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.hacercosasjuntos %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="row align-items-center p-1" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">En mi familia nadie se preocupa por los sentimientos de los demas</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.nadiesepreocupa %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">Mi familia es calida y me brinda apoyo</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.soncalidos %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">En mi familia es importante expresar nuestras opiniones</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.expresaropiniones %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">El ambiente en mi familia usualmente es desagradable</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.esdesagradable %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Mi familia acostubra a hacer actividades en conjunto</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.enconjunto %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">Mi familia me escucha</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.meescucha%}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Cuando tengo un problema NO se lo platico a mi familia</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.platicoproblemas %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  >
+                        <div class="col-4 d-flex flex-wrap ">En mi familia expresamos abiertamente nuestro cariño</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.expresamoscarino%}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Los conflictos en mi familia nunca se resuelven</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.nuncaseresuelven %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+
+             </div>
+             </div> <!-- aqui se cierra el tab de social-familiar -->

@@ -1,0 +1,45 @@
+
+{% extends "dgenerales.html" %}
+
+
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+
+
+<body>
+    <h1>Expediente {{ verbose_name }}: {{ expediente_id }}</h1>
+
+    <h2>Sesiones Existentes:</h2>
+    {% if sesiones_existentes %}
+        <ul>
+            {% for sesion in sesiones_existentes %}
+                <li>Sesión #{{ sesion.sesion }} (Fecha: {{ sesion.fecha|default:"N/A" }})
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="sesion_pk" value="{{ sesion.pk }}">
+                        <button type="submit" name="consultar_sesion">Consultar</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay sesiones {{ verbose_name|lower }} para este expediente. ¿Deseas crear la primera?</p>
+    {% endif %}
+
+    <h2>¿Nueva Sesión {{ verbose_name }}?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="nueva_sesion">Crear Nueva Sesión</button>
+    </form>
+    <br>
+    <a href="{% url 'buscar_expediente_generico' tipo_sesion=tipo_sesion %}">Volver a buscar {{ verbose_name|lower }}</a>
+</body>
+
+
+
+
+
+{% endblock %}
+

@@ -1,0 +1,282 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+                <i class="bi bi-printer me-2"></i>
+                Imprimir Archivos Word - Subcarpetas
+            </h4>
+            <div>
+                <span class="badge bg-light text-dark me-2">
+                    {{ estructura.total_archivos }} archivos
+                </span>
+                <button id="btnActualizar" class="btn btn-light btn-sm me-2">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <a href="{% url 'Menu principal' %}" class="btn btn-light btn-sm">
+                    <i class="bi bi-x-lg"></i> Cerrar
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Controles principales -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="btn-group">
+                        <button id="btnExpandirTodo" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-arrows-expand me-1"></i> Expandir Todo
+                        </button>
+                        <button id="btnContraerTodo" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrows-collapse me-1"></i> Contraer Todo
+                        </button>
+                        <button id="btnSeleccionarTodos" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-check-all me-1"></i> Seleccionar Todos
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button id="btnImprimir" class="btn btn-success" disabled>
+                        <i class="bi bi-printer me-2"></i>
+                        Imprimir Seleccionados
+                        <span id="contador" class="badge bg-light text-dark ms-1">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de carpetas y archivos -->
+            <div id="listaCarpetas">
+                {% if estructura.carpetas %}
+                    {% for carpeta in estructura.carpetas %}
+                    <div class="card mb-3 carpeta-item">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-folder-fill text-warning me-2"></i>
+                                    <strong>{{ carpeta.nombre }}</strong>
+                                    <span class="badge bg-secondary ms-2">{{ carpeta.cantidad_archivos }} archivos</span>
+                                </div>
+                                <div>
+                                    <input type="checkbox" class="form-check-input check-carpeta"
+                                           data-carpeta="{{ carpeta.nombre }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <tbody>
+                                        {% for archivo in carpeta.archivos %}
+                                        <tr>
+                                            <td width="40">
+                                                <input type="checkbox" name="archivos"
+                                                       value="{{ carpeta.nombre }}/{{ archivo.nombre }}"
+                                                       class="form-check-input check-archivo"
+                                                       data-carpeta="{{ carpeta.nombre }}">
+                                            </td>
+                                            <td>
+                                                <i class="bi bi-file-earmark-word text-primary me-2"></i>
+                                                {{ archivo.nombre }}
+                                            </td>
+                                            <td width="100">
+                                                <span class="badge bg-light text-dark">
+                                                    {{ archivo.tamaño|filesizeformat }}
+                                                </span>
+                                            </td>
+                                            <td width="150">
+                                                <small class="text-muted">
+                                                    {{ archivo.fecha_modificacion|date:"d/m/Y H:i" }}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-folder-x display-4 text-muted"></i>
+                        <h5 class="text-muted mt-3">No hay archivos Word</h5>
+                        <p class="text-muted">Coloca los archivos .doc o .docx en subcarpetas dentro de documentos_word</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Resultados de impresión -->
+            <div id="resultadosContainer" style="display: none;">
+                <h5 class="mt-4">Resultados de Impresión:</h5>
+                <div id="resultadosImpresion" class="alert alert-info"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de carga -->
+<div class="modal fade" id="modalCarga" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h6>Imprimiendo archivos...</h6>
+                <p class="small text-muted mb-0" id="estadoImpresion">Preparando impresión</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checksArchivos = document.querySelectorAll('.check-archivo');
+    const checksCarpetas = document.querySelectorAll('.check-carpeta');
+    const btnImprimir = document.getElementById('btnImprimir');
+    const contador = document.getElementById('contador');
+    const btnSeleccionarTodos = document.getElementById('btnSeleccionarTodos');
+    const btnExpandirTodo = document.getElementById('btnExpandirTodo');
+    const btnContraerTodo = document.getElementById('btnContraerTodo');
+
+    // Actualizar contador
+    function actualizarContador() {
+        const seleccionados = document.querySelectorAll('.check-archivo:checked').length;
+        contador.textContent = seleccionados;
+        btnImprimir.disabled = seleccionados === 0;
+    }
+
+    // Seleccionar todos los archivos de una carpeta
+    checksCarpetas.forEach(checkCarpeta => {
+        checkCarpeta.addEventListener('change', function() {
+            const nombreCarpeta = this.getAttribute('data-carpeta');
+            const archivosCarpeta = document.querySelectorAll(`.check-archivo[data-carpeta="${nombreCarpeta}"]`);
+
+            archivosCarpeta.forEach(archivo => {
+                archivo.checked = this.checked;
+            });
+
+            actualizarContador();
+        });
+    });
+
+    // Seleccionar todos los archivos
+    btnSeleccionarTodos.addEventListener('click', function() {
+        checksArchivos.forEach(check => check.checked = true);
+        checksCarpetas.forEach(check => check.checked = true);
+        actualizarContador();
+    });
+
+    // Expandir/Contraer todo
+    btnExpandirTodo.addEventListener('click', function() {
+        document.querySelectorAll('.carpeta-item .card-body').forEach(body => {
+            body.style.display = 'block';
+        });
+    });
+
+    btnContraerTodo.addEventListener('click', function() {
+        document.querySelectorAll('.carpeta-item .card-body').forEach(body => {
+            body.style.display = 'none';
+        });
+    });
+
+    // Event listeners para archivos individuales
+    checksArchivos.forEach(check => {
+        check.addEventListener('change', function() {
+            actualizarContador();
+            actualizarCheckCarpeta(this.getAttribute('data-carpeta'));
+        });
+    });
+
+    // Actualizar check de carpeta basado en sus archivos
+    function actualizarCheckCarpeta(nombreCarpeta) {
+        const checkCarpeta = document.querySelector(`.check-carpeta[data-carpeta="${nombreCarpeta}"]`);
+        const archivosCarpeta = document.querySelectorAll(`.check-archivo[data-carpeta="${nombreCarpeta}"]`);
+        const archivosSeleccionados = Array.from(archivosCarpeta).filter(a => a.checked);
+
+        if (archivosSeleccionados.length === 0) {
+            checkCarpeta.checked = false;
+            checkCarpeta.indeterminate = false;
+        } else if (archivosSeleccionados.length === archivosCarpeta.length) {
+            checkCarpeta.checked = true;
+            checkCarpeta.indeterminate = false;
+        } else {
+            checkCarpeta.checked = false;
+            checkCarpeta.indeterminate = true;
+        }
+    }
+
+    // Imprimir archivos (código igual al anterior)
+    btnImprimir.addEventListener('click', function() {
+        const archivosSeleccionados = Array.from(document.querySelectorAll('.check-archivo:checked'))
+            .map(check => check.value);
+
+        if (archivosSeleccionados.length === 0) {
+            alert('Selecciona al menos un archivo para imprimir');
+            return;
+        }
+
+        const modalCarga = new bootstrap.Modal(document.getElementById('modalCarga'));
+        modalCarga.show();
+
+        fetch('{% url "imprimir_archivos_word" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({
+                'archivos[]': archivosSeleccionados
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            modalCarga.hide();
+            if (data.success) {
+                mostrarResultados(data.resultados);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            modalCarga.hide();
+            alert('Error de conexión: ' + error);
+        });
+    });
+
+    function mostrarResultados(resultados) {
+        const container = document.getElementById('resultadosContainer');
+        const divResultados = document.getElementById('resultadosImpresion');
+
+        let html = '';
+        resultados.forEach(resultado => {
+            html += `<div class="mb-2">
+                <strong>${resultado.archivo}:</strong> ${resultado.estado}
+                ${resultado.error ? `<br><small class="text-danger">${resultado.error}</small>` : ''}
+            </div>`;
+        });
+
+        divResultados.innerHTML = html;
+        container.style.display = 'block';
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Inicializar contador
+    actualizarContador();
+});
+</script>
+
+<style>
+.carpeta-item .card-body {
+    display: block; /* Mostrar todas las carpetas expandidas por defecto */
+}
+
+.check-carpeta:indeterminate {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

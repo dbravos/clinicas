@@ -1,0 +1,31 @@
+
+
+{% extends "dgenerales.html" %}
+
+
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+<body>
+
+    <h1>Ingresar o Buscar Expediente {{ verbose_name }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Continuar</button>
+    </form>
+    {% if form.errors %}
+        <div style="color: red;">
+            <p>Por favor, corrige los siguientes errores:</p>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <p>Nota: Si el expediente {{ verbose_name|lower }} existe, se mostrarán sus sesiones. Si no existe ninguna sesión para él, se creará la primera automáticamente.</p>
+</body>
+{% endblock %}
+

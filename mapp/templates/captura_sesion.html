@@ -1,0 +1,550 @@
+{% extends "dgenerales.html" %}
+
+<body>
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+
+<div class="interview-container">
+  <!-- Header Sticky -->
+  <div class="header-content sticky-top">
+    <div class="header-title">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+
+          <h3>Captura de Sesión: {{verbose_name}}
+          {% if tipo_sesion == 'grupal' %}
+             {% if instancia_sesion %}
+               #{{ instancia_sesion.sesion }}
+             {% else %}
+               #{{ siguiente_numero|default:"Nueva" }}
+             {% endif %}
+          {% else %}
+             {{ instancia_sesion.sesion }}
+          {% endif %}
+
+        </h3>
+        </div>
+        <div>
+          <!-- Botón Regresar -->
+          <a href="{% if tipo_sesion == 'grupal'%}{% url 'listaSesionesGrupales' %}
+                   {% else %}
+                   {% url 'listaSesiones' tipo_sesion=tipo_sesion id=interno.numeroexpediente %}
+                   {% endif %}"
+                   class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Regresar al Listado
+          </a>
+        </div>
+      </div>
+
+      <!-- Información del paciente/grupo -->
+      <div class="patient-info d-flex justify-content-between align-items-center flex-wrap">
+        <!-- Información específica por tipo de sesión -->
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          {% if tipo_sesion == "grupal" %}
+          <!-- Para sesiones grupales -->
+          <div class="group-info">
+            <span class="badge bg-info">Sesión Grupal</span>
+            {% if instancia_sesion %}
+            <span class="fw-bold">Participantes: {{ instancia_sesion.numero_participantes }}</span>
+            {% endif %}
+          </div>
+          {% else %}
+          <!-- Para sesiones individuales y familiares -->
+          <div class="patient-id">
+            <span class="badge bg-secondary">Expediente:</span>
+            <span class="fw-bold">{{ interno.numeroexpediente }}</span>
+          </div>
+          <div class="patient-name">
+            <span class="badge bg-secondary">Nombre:</span>
+            <span class="fw-bold">{{ interno.nombrecompleto }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Elementos de la derecha -->
+        <div class="d-flex align-items-center gap-3">
+          <div class="fecha-sesion">
+            <span class="badge bg-primary">Fecha:</span>
+            <span>{{ instancia_sesion.fecha|default:form.fecha.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario principal -->
+  <form action="{% if tipo_sesion == 'grupal' %}
+                {% if accion == 'editar' and instancia_sesion %}
+                {% url 'capturaSesionGrupal_con_id' tipo_sesion=tipo_sesion accion='editar' no_sesion=instancia_sesion.pk %}
+                {% else %}
+                {% url 'capturaSesionGrupal' tipo_sesion=tipo_sesion accion='agregar' %}
+                {% endif %}
+              {% else %}
+                {% if accion == 'editar' and instancia_sesion %}
+                {% url 'capturaSesion_con_id' tipo_sesion=tipo_sesion id=interno.pk accion='editar' no_sesion=instancia_sesion.pk %}
+                {% else %}
+                {% if accion and tipo_sesion and id %}
+                {% url 'capturaSesion' tipo_sesion=tipo_sesion accion='agregar' id=interno.pk %}
+                {% endif %}
+                {% endif %}
+              {% endif %}"
+        method="POST"
+        class="needs-validation"
+        novalidate
+        id="sesionForm">
+    {% csrf_token %}
+
+    <!-- Campo oculto para el status -->
+    <input type="hidden" name="status" id="statusField" value="0">
+
+    <!-- Lista de participantes SOLO para sesiones grupales -->
+    {% if tipo_sesion == "grupal" %}
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-people me-2"></i>Participantes de la Sesión</h5>
+        <span class="badge bg-light text-dark">
+          <span id="contador-participantes">{{ participantes_seleccionados|length }}</span> seleccionados
+        </span>
+      </div>
+      <div class="card-body">
+
+        <!-- Participantes Seleccionados -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-success mb-3">
+            <i class="bi bi-check-circle me-1"></i> Participantes Actuales
+            <span class="badge bg-success ms-2" id="contador-seleccionados">{{ participantes_seleccionados|length }}</span>
+          </h6>
+          {% if participantes_seleccionados %}
+          <div class="selected-participants border rounded p-3 bg-light">
+            {% for interno in participantes_seleccionados %}
+            <div class="form-check mb-2">
+              <input class="form-check-input participante-checkbox" type="checkbox" name="participantes" value="{{ interno.id }}"
+                     id="participante_{{ interno.id }}" checked
+                     {% if instancia_sesion and instancia_sesion.status == 1 %}disabled{% endif %}>
+              <label class="form-check-label fw-bold text-success" for="participante_{{ interno.id }}">
+                {{ interno.numeroexpediente }} - {{ interno.nombrecompleto }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="alert alert-warning py-2">
+            <small><i class="bi bi-exclamation-triangle me-1"></i> No hay participantes seleccionados</small>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Buscar y Agregar Más Participantes -->
+        <div class="mb-3">
+          <h6 class="fw-bold text-primary mb-3">
+            <i class="bi bi-search me-1"></i> Agregar Más Participantes
+          </h6>
+
+          <!-- Barra de búsqueda -->
+          <div class="mb-3">
+            <input type="text" class="form-control form-control-sm" id="buscarParticipante"
+                   placeholder="Buscar por expediente o nombre...">
+          </div>
+
+          <!-- Lista de todos los internos disponibles (filtrables) -->
+          <div class="all-participants-container border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+            {% for interno in internos_grupo %}
+              {% if interno not in participantes_seleccionados %}
+              <div class="form-check mb-2 participante-item" data-expediente="{{ interno.numeroexpediente|lower }}" data-nombre="{{ interno.nombrecompleto|lower }}">
+                <input class="form-check-input participante-checkbox" type="checkbox" name="participantes" value="{{ interno.id }}"
+                       id="participante_{{ interno.id }}"
+                       {% if instancia_sesion and instancia_sesion.status == 1 %}disabled{% endif %}>
+                <label class="form-check-label" for="participante_{{ interno.id }}">
+                  {{ interno.numeroexpediente }} - {{ interno.nombrecompleto }}
+                </label>
+              </div>
+              {% endif %}
+            {% empty %}
+            <div class="text-muted">No hay internos disponibles</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="alert alert-info">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Total seleccionados: <span id="contador-total">{{ participantes_seleccionados|length }}</span></strong>
+            </div>
+            <div>
+              <small class="text-muted">Los participantes actuales aparecen en verde</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+    <div class="alert-messages mt-3">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Sección de captura -->
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detalles de la Sesión</h5>
+        {% if instancia_sesion and instancia_sesion.status == 1 %}
+        <span class="badge bg-warning text-dark">
+          <i class="bi bi-lock-fill me-1"></i> Sesión Cerrada
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="card-body">
+        <!-- Campos específicos para sesiones grupales -->
+        {% if tipo_sesion == "grupal" %}
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.tema_sesion.id_for_label }}" class="form-label fw-bold">
+              {{ form.tema_sesion.label }} *
+            </label>
+            {{ form.tema_sesion|add_class:"form-control form-control-sm" }}
+            <div class="invalid-feedback">Este campo es obligatorio.</div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.dinamica_utilizada.id_for_label }}" class="form-label fw-bold">
+              {{ form.dinamica_utilizada.label }}
+            </label>
+            {{ form.dinamica_utilizada|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Campos comunes a todos los tipos de sesión -->
+        <div class="row">
+          {% if tipo_sesion == "familiar" %}
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.familiares.id_for_label }}" class="form-label fw-bold">
+              {{ form.familiares.label }}
+            </label>
+            <div class="form-text small">Especifique los familiares presentes</div>
+            {{ form.familiares|add_class:"form-control form-control-sm" }}
+          </div>
+          {% endif %}
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.objetivo.id_for_label }}" class="form-label fw-bold">
+              {{ form.objetivo.label }}
+            </label>
+            <div class="form-text small">Objetivo principal de esta sesión</div>
+            {{ form.objetivo|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.aspectos.id_for_label }}" class="form-label fw-bold">
+              {{ form.aspectos.label }}
+            </label>
+            <div class="form-text small">Aspectos relevantes tratados</div>
+            {{ form.aspectos|add_class:"form-control form-control-sm" }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.resultados.id_for_label }}" class="form-label fw-bold">
+              {{ form.resultados.label }}
+            </label>
+            <div class="form-text small">Resultados obtenidos</div>
+            {{ form.resultados|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.seesperan.id_for_label }}" class="form-label fw-bold">
+              {{ form.seesperan.label }}
+            </label>
+            <div class="form-text small">Expectativas para sesiones futuras</div>
+            {{ form.seesperan|add_class:"form-control form-control-sm" }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.tareas.id_for_label }}" class="form-label fw-bold">
+              {{ form.tareas.label }}
+            </label>
+            <div class="form-text small">Tareas asignadas entre sesiones</div>
+            {{ form.tareas|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.quesetrabajo.id_for_label }}" class="form-label fw-bold">
+              {{ form.quesetrabajo.label }}
+            </label>
+            <div class="form-text small">Temas específicos trabajados</div>
+            {{ form.quesetrabajo|add_class:"form-control form-control-sm" }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="{{ form.observaciones.id_for_label }}" class="form-label fw-bold">
+              {{ form.observaciones.label }}
+            </label>
+            <div class="form-text small">Observaciones adicionales</div>
+            {{ form.observaciones|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="d-flex justify-content-between mt-4">
+          <div>
+            <a href="{% if tipo_sesion == 'grupal' %}{% url 'listaSesionesGrupales' %}
+                     {% else %}
+                     {% url 'listaSesiones' tipo_sesion=tipo_sesion id=interno.numeroexpediente   %}{% endif %}"
+               class="btn btn-outline-secondary me-2">
+              <i class="bi bi-arrow-left me-1"></i> Regresar
+            </a>
+            <!-- Botón para abrir el modal de cerrar sesión -->
+            {% if not instancia_sesion or instancia_sesion.status != 1 %}
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cerrarSesionModal">
+              <i class="bi bi-lock me-2"></i> Cerrar Sesión
+            </button>
+            {% endif %}
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary" {% if instancia_sesion and instancia_sesion.status == 1 %}disabled{% endif %}>
+              <i class="bi bi-save me-2"></i>
+              {% if instancia_sesion and instancia_sesion.status == 1 %}
+                Sesión Cerrada
+              {% else %}
+                {% if accion == 'agregar' %}Guardar Sesión{% else %}Actualizar Sesión{% endif %}
+              {% endif %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Modal para cerrar sesión -->
+<div class="modal fade" id="cerrarSesionModal" tabindex="-1" aria-labelledby="cerrarSesionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cerrarSesionModalLabel">Cerrar Sesión</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-warning mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>¿Está seguro de que desea cerrar esta sesión?</strong>
+        </p>
+        <p class="text-muted small">
+          Al cerrar la sesión, ya no podrá realizar modificaciones a la información capturada.
+          Esta acción es irreversible.
+        </p>
+
+        <form id="cerrarSesionForm">
+          <div class="mb-3">
+            <label for="proximasesion" class="form-label fw-bold">
+              Fecha de la siguiente sesión  <span class="text-danger">*</span>
+            </label>
+            <input type="date" class="form-control" id="proxima_sesion_input" name="proximasesion">
+            <div class="form-text">Debe especificar la fecha para la próxima sesión.</div>
+            <div id="fecha-error" class="alert alert-danger mt-2" style="display: none;"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-2"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-warning" id="confirmarCerrarSesion">
+          <i class="bi bi-check-circle me-2"></i> Sí, Cerrar Sesión y Programar Proxima
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Validación de formularios
+  var forms = document.querySelectorAll('.needs-validation');
+  Array.prototype.slice.call(forms).forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+
+  // Función para actualizar contadores
+  function actualizarContadores() {
+    const checkboxes = document.querySelectorAll('.participante-checkbox');
+    const seleccionados = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+    // Actualizar todos los contadores
+    document.getElementById('contador-participantes').textContent = seleccionados.length;
+    document.getElementById('contador-seleccionados').textContent = seleccionados.length;
+    document.getElementById('contador-total').textContent = seleccionados.length;
+  }
+
+  // Event listeners para checkboxes
+  const checkboxes = document.querySelectorAll('.participante-checkbox');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', actualizarContadores);
+  });
+
+  // Búsqueda de participantes
+  const buscarInput = document.getElementById('buscarParticipante');
+  if (buscarInput) {
+    buscarInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const participantes = document.querySelectorAll('.participante-item');
+
+      participantes.forEach(participante => {
+        const expediente = participante.getAttribute('data-expediente');
+        const nombre = participante.getAttribute('data-nombre');
+
+        if (expediente.includes(searchTerm) || nombre.includes(searchTerm)) {
+          participante.style.display = 'block';
+        } else {
+          participante.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  // 🔥 LÓGICA CORREGIDA PARA CERRAR SESIÓN - SOLO UN EVENT LISTENER
+  document.getElementById('confirmarCerrarSesion').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const fechaSesionInput = '{{ instancia_sesion.fecha|date:"Y-m-d" }}';
+    const fechaSesion = new Date(fechaSesionInput);
+    const proximaSesionInput = document.getElementById('proxima_sesion_input');
+    const proximaSesion = proximaSesionInput.value ? new Date(proximaSesionInput.value) : null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    let error = '';
+
+    // Validar que se ingrese una fecha
+    if (!proximaSesionInput.value) {
+        error = 'Error: Debe especificar una fecha para la próxima sesión al cerrar la sesión actual';
+    }
+    // Validar que sea posterior a la fecha de la sesión actual
+    else if (proximaSesion <= fechaSesion) {
+        error = `Error: La próxima sesión debe ser posterior a la fecha de esta sesión ({{ instancia_sesion.fecha|date:"d/m/Y" }})`;
+    }
+    // Validar que no sea una fecha pasada
+    else if (proximaSesion < hoy) {
+        error = 'Error: La próxima sesión no puede ser una fecha pasada';
+    }
+
+    if (error) {
+        // Mostrar error en el modal
+        const errorDiv = document.getElementById('fecha-error');
+        if (errorDiv) {
+            errorDiv.textContent = error;
+            errorDiv.style.display = 'block';
+        } else {
+            alert(error);
+        }
+        proximaSesionInput.focus();
+        return;
+    }
+
+    // Si pasa validación, proceder con el cierre
+    document.getElementById('statusField').value = '1';
+
+    // Agregar la fecha al formulario principal
+    if (proximaSesionInput.value) {
+        const proximaInput = document.createElement('input');
+        proximaInput.type = 'hidden';
+        proximaInput.name = 'proximasesion';
+        proximaInput.value = proximaSesionInput.value;
+        document.getElementById('sesionForm').appendChild(proximaInput);
+    }
+
+    document.getElementById('sesionForm').submit();
+  });
+
+  // Ocultar mensaje de error cuando el usuario modifique la fecha
+  const fechaInput = document.getElementById('proxima_sesion_input');
+  if (fechaInput) {
+    fechaInput.addEventListener('input', function() {
+      const errorDiv = document.getElementById('fecha-error');
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+      }
+    });
+  }
+
+  document.getElementById('cerrarSesionModal').addEventListener('hidden.bs.modal', function () {
+    const errorDiv = document.getElementById('fecha-error');
+    if (errorDiv) {
+      errorDiv.style.display = 'none';
+    }
+    // NO limpiar el valor aquí para que el usuario no pierda lo que escribió
+  });
+
+  // Deshabilitar campos si la sesión está cerrada
+  {% if instancia_sesion and instancia_sesion.status == 1 %}
+  const formControls = document.querySelectorAll('#sesionForm input, #sesionForm textarea, #sesionForm select');
+  formControls.forEach(function(control) {
+    control.disabled = true;
+  });
+  {% endif %}
+});
+</script>
+
+<style>
+.interview-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px 30px;
+}
+
+.header-content {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 15px 0;
+  margin-bottom: 20px;
+}
+
+.selected-participants {
+  background-color: #f8fff8 !important;
+  border-left: 4px solid #28a745 !important;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+  .interview-container {
+    padding: 0 10px;
+  }
+
+  .patient-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .col-md-6 {
+    width: 100%;
+  }
+}
+</style>
+
+{% endblock %}

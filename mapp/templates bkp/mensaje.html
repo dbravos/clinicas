@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+/* Establece el fondo de la página */
+body {
+    background-color: #33ff4f; /* Cambia el color de fondo según tus preferencias */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Define el estilo del cuadro de mensaje */
+.mensaje {
+    background-color: #fff; /* Cambia el color de fondo según tus preferencias */
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+
+
+    </style>
+    <title>E  R R O R !!!!!!!</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="mensaje">
+        <p>{{mensaje}}</p>
+    </div>
+    <form action="{% url 'buscar' %}">
+        <button type="submit" autofocus> Volver </button>
+    </form>
+    <script>
+        alert("{{mensaje}}");
+    </script>
+</body>
+</html>

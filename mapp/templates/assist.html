@@ -1,0 +1,1194 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+
+{% load forms_tags %}
+{% load riesgos %}
+<style>
+:root {
+    --color-primario: #4CAF50;
+    --color-secundario: #343a40;
+    --color-fondog:  #0597f9;
+    --color-fondo :#1b55f3;
+    --color-texto:  #e0e5ed;
+    --color-hover: #45a049;
+    --color-titulo:  #0597f9;
+    --color-mensaje: silver;
+}
+html {
+  /* Hace que el salto entre secciones sea una animación suave en lugar de un corte brusco */
+  scroll-behavior: smooth;
+
+  /*
+   CRUCIAL: Compensa la altura de tu menú sticky-top.
+   Si tu menú mide 60px de alto, ponle 70px o 80px para dejar un margen.
+   Ajusta este valor según la altura real de tu navbar.
+  */
+  scroll-padding-top: 80px;
+}
+
+/* Mejora opcional: Estiliza la barra de scroll del menú para que sea más delgada y sutil */
+.navbar-nav.overflow-x-auto::-webkit-scrollbar {
+  height: 4px; /* Altura de la barra de scroll */
+}
+
+.navbar-nav.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.5); /* Color del "pulgar" de la barra */
+  border-radius: 10px;
+}
+
+    /* Estilos mejorados */
+    .vertical-tabs {
+        border-right: 1px solid #dee2e6;
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+
+    .nav-link {
+        text-align: left;
+        padding: 12px 15px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        color: #495057;
+        white-space: normal;
+    }
+
+    .nav-link.active {
+        font-weight: bold;
+        background-color: #e9f5ff;
+        color: #0d6efd;
+        border-left: 3px solid #0d6efd;
+    }
+
+    .nav-link:hover:not(.active) {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        font-weight: 500;
+        font-size: 16px;
+        color: #212529;
+    }
+
+    .radio-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 15px;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        min-width: 120px;
+    }
+
+    .form-check-input {
+        width: 1.1em;
+        height: 1.1em;
+        margin-right: 8px;
+    }
+
+    .form-check-label {
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .other-item {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .btn-save {
+        padding: 10px 25px;
+        font-weight: 500;
+        margin-top: 20px;
+    }
+
+    .patient-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .interview-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0d6efd;
+        margin-bottom: 15px;
+    }
+
+    .tab-content-container {
+        height: calc(100vh - 180px);
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    /* Estilos para los niveles de riesgo */
+    .riesgo-bajo {
+        background-color:white;
+        color: green ;
+        font-weight: bold;
+    }
+    .riesgo-medio {
+        background-color : yellow;
+        color: orange ; /* Usamos naranja en lugar de amarillo para mejor legibilidad en fondo blanco */
+        font-weight: bold;
+    }
+    .riesgo-alto {
+        background-color:red;
+        color: white;
+        font-weight: bold;
+    }
+
+    .nav-scroller {
+        position: relative;
+        z-index: 2;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    .nav-scroller .navbar-nav {
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+    }
+    .nav-scroller .nav-link {
+        white-space: nowrap;
+    }
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    .nav-scroller::-webkit-scrollbar {
+        display: none;
+    }
+    /* Pequeño indicador visual de scroll */
+    .nav-scroller {
+        mask-image: linear-gradient(to right, transparent, black 20px, black 90%, transparent);
+    }
+</style>
+
+
+
+
+
+
+
+
+<body>
+
+                   {% if messages %}
+                    <div class="alert-messages mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+
+    <div class="header-content">
+        <div class="header-title">
+            <p class="interview-title">Cuestionario ASSIST</p>
+         <div class="patient-info d-flex justify-content-between align-items-center">
+         <div class="d-flex">
+        <div class="patient-id me-3">
+            <label class="fw-bold">Expediente:</label>
+            <span>{{ interno.numeroexpediente }}</span>
+        </div>
+        <div class="patient-name">
+            <label class="fw-bold">Nombre:</label>
+            <span>{{ interno.nombrecompleto }}</span>
+        </div>
+    </div>
+    <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar" class="btn btn-primary ms-auto"
+            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; ">
+        Regresar
+    </a>
+     </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row g-0">
+            <!-- Columna de menú vertical -->
+            <div class="col-md-4 col-lg-3 bg-light vertical-tabs">
+                <div class="d-flex justify-content-center align-items-center" >
+                <h4 class="p-3 bg-primary text-white ">Preguntas</h4>
+                </div>
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active" id="v-cuales-tab" data-bs-toggle="pill" data-bs-target="#v-cuales" type="button" role="tab">
+                       <span style="font-size:1.5rem">1.- </span> A lo largo de la vida ¿cuáles de estas sustancias ha consumido alguna vez? (solo las que ha consumido sin receta médica)
+                    </button>
+                    <button class="nav-link" id="v-frecuencia-tab" data-bs-toggle="pill" data-bs-target="#v-frecuencia" type="button" role="tab">
+                     <span style="font-size:1.5rem">2.- </span>   En los últimos 3 meses ¿con qué frecuencia ha consumido las sustancias que mencionó?
+                    </button>
+                    <button class="nav-link" id="v-deseo-tab" data-bs-toggle="pill" data-bs-target="#v-deseo" type="button" role="tab">
+                       <span style="font-size:1.5rem">3.- </span> En los últimos 3 meses ¿con qué frecuencia ha sentido un fuerte deseo o ansias de consumir?
+                    </button>
+                    <button class="nav-link" id="v-problemas-tab" data-bs-toggle="pill" data-bs-target="#v-problemas" type="button" role="tab">
+                        <span style="font-size:1.5rem">4.- </span>En los últimos 3 meses ¿el consumo le ha causado problemas de salud, sociales, legales o económicos?
+                    </button>
+                    <button class="nav-link" id="v-dejado-tab" data-bs-toggle="pill" data-bs-target="#v-dejado" type="button" role="tab">
+                       <span style="font-size:1.5rem">5.- </span> En los últimos 3 meses ¿con qué frecuencia dejó de hacer lo que habitualmente se esperaba de usted por el consumo?
+                    </button>
+                    <button class="nav-link" id="v-preocupacion-tab" data-bs-toggle="pill" data-bs-target="#v-preocupacion" type="button" role="tab">
+                       <span style="font-size:1.5rem">6.- </span> ¿Un amigo, familiar o alguien más ha mostrado preocupación por sus hábitos de consumo?
+                    </button>
+                    <button class="nav-link" id="v-reducir-tab" data-bs-toggle="pill" data-bs-target="#v-reducir" type="button" role="tab">
+                        <span style="font-size:1.5rem">7.- </span>¿Ha intentado eliminar o reducir el consumo y no lo ha logrado?
+                    </button>
+                    <button class="nav-link" id="v-inyectada-tab" data-bs-toggle="pill" data-bs-target="#v-inyectada" type="button" role="tab">
+                       <span style="font-size:1.5rem">8.- </span> ¿Alguna vez ha consumido alguna droga por vía inyectada? (solo las que consumió sin receta médica)
+                    </button>
+                     <button class="nav-link" id="v-resultado-tab" data-bs-toggle="pill" data-bs-target="#v-resultado" type="button" role="tab">
+                       <span style="font-size:1.5rem">9.- </span> Resultados y/o Puntaje
+                    </button>
+                     <button class="nav-link" id="v-riesgos-tab" data-bs-toggle="pill" data-bs-target="#v-riesgos" type="button" role="tab">
+                       <span style="font-size:1.5rem">10.- </span> Riesgos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Columna de contenido -->
+            <div class="col-md-8 col-lg-9 p-4">
+                <form action="{% url 'graba-assist' id=interno.pk %}" method="POST">
+                    {% csrf_token %}
+
+
+
+                    <div class="tab-content-container">
+                        <div class="tab-content" id="v-pills-tabContent">
+                            <!-- Panel 1 -->
+                            <div class="tab-pane fade show active" id="v-cuales" role="tabpanel" aria-labelledby="v-cuales-tab">
+                                 <div class="card mb-4 shadow-sm">
+                                  <div class="row align-items-top">
+                                     <div class="col-4 d-flex flex-wrap ">
+                                    <div class="card-header" style="font-size:0.75rem;color:white;background-color:#1b55f3" >
+                                        Si todas las respuestas son negativas pregunte "Ni siquiera cuando estuvo en la escuela?"</div>
+                                     </div>
+                                      <div class="col-4 d-flex flex-wrap">
+                                    <div class="card-header" style="font-size:0.75rem;color:white;background-color:#1b55f3" >
+                                        Si todas las respuestas son negativas detenga la entrevista"</div>
+                                     </div>
+                                        <div class="col-4 d-flex flex-wrap">
+                                    <div class="card-header" style="font-size:0.75rem;color: white;background-color: #1b55f3 " >
+                                        Si la respuesta es afirmativa a cualquiera de estas preguntas, haga la pregunta 2 para cada sustancia que se haya consumido alguna vez
+                                        </div>
+                                     </div>
+                                  </div>
+                                    <div class="card-body">
+                                {% for i in "123456789" %}
+                                    {% with field_name="p1s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                                    </div>
+                                 </div>
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias  {{assistf.asistotras}} </div>
+                                </div>
+
+                                         <div class="radio-options">
+                                                    {% for choice in assistf.p1s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p1s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                </div>
+
+                            <!-- Panel 2 -->
+                            <div class="tab-pane fade" id="v-frecuencia" role="tabpanel" aria-labelledby="v-frecuencia-tab">
+                                    <div class="card mb-4 shadow-sm">
+                                  <div class="row align-items-top">
+                                     <div class="col-6 d-flex flex-wrap ">
+                                    <div class="card-header" style="font-size:0.75rem;color:white;background-color:#1b55f3" >
+                                        Si la respuesta es "NUNCA" en todas las secciones de la pregunta 2, pase a la pregunta 6</div>
+                                     </div>
+                                      <div class="col-6 d-flex flex-wrap">
+                                    <div class="card-header" style="font-size:0.75rem;color:white;background-color:#1b55f3" >
+                                        Si se ha consumido alguna sustancias de la pregunta 2 en los ultimos 3 meses,
+                                        continue con las preguntas 3,4,5 para cada sustancia consumida</div>
+                                     </div>
+
+                                     </div>
+                                  </div>
+                                {% for i in "123456789" %}
+                                    {% with field_name="p2s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header" >
+                                    Otras sustancias {{ assistf.asistotras2 }}
+                                    </div>
+                                    </div>
+                                    <div class="radio-options">
+                                                    {% for choice in assistf.p2s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p2s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+
+
+                            <!-- Panel 3 -->
+                            <div class="tab-pane fade" id="v-deseo" role="tabpanel" aria-labelledby="v-deseo-tab">
+                                {% for i in "123456789" %}
+                                    {% with field_name="p3s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias {{ assistf.asistotras3 }}</div>
+                                      <div class="radio-options">
+                                                    {% for choice in assistf.p3s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p3s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                              </div>
+
+                            <!-- Panel 4 -->
+                            <div class="tab-pane fade" id="v-problemas" role="tabpanel" aria-labelledby="v-problemas-tab">
+                                {% for i in "123456789" %}
+                                    {% with field_name="p4s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias
+
+                                        {{ assistf.asistotras4 }}
+                                    </div>
+                                     <div class="radio-options">
+                                                    {% for choice in assistf.p4s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p4s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Panel 5 -->
+                            <div class="tab-pane fade" id="v-dejado" role="tabpanel" aria-labelledby="v-dejado-tab">
+                                    <div class="card mb-4 shadow-sm">
+                                    <div class="col-md-12">
+                                  <div class="row justify-content-center align-items-top">
+
+                                    <div class="card-header" style="font-size:0.75rem;color:white;background-color: #1b55f3" >
+                                        Haga las preguntas 6 y 7 para todas las sustancias usadas alguna vez (es decir las mencionadas en la pregunta 1)
+                                        </div>
+                                  </div>
+                                    </div>
+                                    </div>
+                                {% for i in "123456789" %}
+                                    {% with field_name="p5s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias
+
+                                        {{ assistf.asistotras5 }}
+                                    </div>
+                                     <div class="radio-options">
+                                                    {% for choice in assistf.p5s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p5s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Panel 6 -->
+                            <div class="tab-pane fade" id="v-preocupacion" role="tabpanel" aria-labelledby="v-preocupacion-tab">
+
+
+
+                                {% for i in "123456789" %}
+                                    {% with field_name="p6s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias
+
+                                        {{ assistf.asistotras6 }}
+                                    </div>
+                                      <div class="radio-options">
+                                                    {% for choice in assistf.p6s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p6s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                      </div>
+                                 </div>
+
+                            <!-- Panel 7 -->
+                            <div class="tab-pane fade" id="v-reducir" role="tabpanel" aria-labelledby="v-reducir-tab">
+                                {% for i in "123456789" %}
+                                    {% with field_name="p7s"|add:i %}
+                                        {% get_form_field assistf field_name as campo %}
+                                        {% if campo %}
+                                        <div class="card mb-4 shadow-sm">
+                                            <div class="card-header">
+                                                {{ campo.label }}
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="radio-options">
+                                                    {% for choice in campo %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ campo.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header">Otras sustancias {{ assistf.asistotras7}}
+
+
+                                    </div>
+                                      <div class="radio-options">
+                                                    {% for choice in assistf.p7s10 %}
+                                                    <div class="radio-option">
+                                                        <input type="radio"
+                                                               name="{{ assistf.p7s10.name }}"
+                                                               id="{{ choice.id_for_label }}"
+                                                               value="{{ choice.data.value }}"
+                                                               {% if choice.data.selected %}checked{% endif %}
+                                                               class="form-check-input">
+                                                        <label for="{{ choice.id_for_label }}" class="form-check-label">
+                                                            {{ choice.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+
+
+
+                                </div>
+                            </div>
+
+                            <!-- Panel 8 -->
+                           <div class="tab-pane fade" id="v-inyectada" role="tabpanel" aria-labelledby="v-inyectada-tab">
+               <div class="card mb-4 shadow-sm">
+                   <div class="card-header">
+               {{ assistf.p8s1.label }}
+            </div>
+            <div class="card-body">
+            <div class="radio-options">
+              {% for choice in assistf.p8s1 %}
+            <div class="radio-option">
+            <input type="radio"
+                   name="{{ assistf.p8s1.name }}"
+                   id="{{ choice.id_for_label }}"
+                   value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %}
+                   class="form-check-input">
+                   <label for="{{ choice.id_for_label }}" class="form-check-label">
+                          {{ choice.choice_label }}
+                   </label>
+            </div>
+               {% endfor %}
+            </div>
+         </div>
+         </div>
+         <div class="card mb-4 shadow-sm">
+  <!-- Card Header (Título) -->
+         <div class="card-header py-2" style="font-size:0.75rem; color:white; background-color: #1b55f3">
+         A los usuarios que se hayan inyectado drogas en los últimos 3 meses
+         se les deberá preguntar acerca de sus hábitos de inyección durante ese periodo
+         para determinar sus niveles de riesgo y el mejor curso de intervención.
+         </div>
+
+  <!-- Card Body (Contenido) -->
+         <div class="card-body">
+         <div class="row align-items-center">
+
+         {% for choice in assistf.habitosinyectarse %}
+            {% if forloop.counter == 1 %}
+             <!-- Columna para el texto secundario -->
+         <div class="col-md-5 mb-1 " style="font-size:0.75rem" >  <!-- mb-3 agrega margen inferior -->
+            <div class="p-3 bg-secondary rounded text-white">
+               Cuatro días por mes en promedio en los últimos tres meses más o menos
+            </div>
+          </div>
+          <div class="col-md-2 " >
+              <div class="radio-options ">
+              <div class="radio-option">
+              <input type="radio"
+                 name="{{ assistf.habitosinyectarse.name }}"
+                 id="{{ choice.id_for_label }}"
+                 value="{{ choice.data.value }}"
+                 {% if choice.data.selected %}checked{% endif %}
+                 class="form-check-input">
+                  <label for="{{ choice.id_for_label }}" class="form-check-label">
+                         {{ choice.choice_label }}
+                  </label>
+                  </div>
+                 </div>
+            </div>
+
+        <div class="col-md-5 mb-1 ">
+           <div class="card-header py-2" style="font-size:0.75rem; color:white; background-color: #1b55f3">
+            Intervencion breve que incluye los riesgos de tarjeta de inyeccion.
+           </div>
+        </div>
+          {% else %}
+
+  <!--    <div class="row align-items-center" style="margin-top:-25px;"> -->
+         <div class="col-md-5 p-3 bg-secondary rounded text-white" style="font-size:0.75rem;margin-top:5px;">
+          Mas de cuatro días por mes en promedio durante los últimos tres meses
+        </div>
+            <div class="col-md-2 align-items-center" >
+              <div class="radio-options ">
+              <div class="radio-option">
+              <input type="radio"
+                 name="{{ assistf.habitosinyectarse.name }}"
+                 id="{{ choice.id_for_label }}"
+                 value="{{ choice.data.value }}"
+                 {% if choice.data.selected %}checked{% endif %}
+                 class="form-check-input">
+                  <label for="{{ choice.id_for_label }}" class="form-check-label">
+                         {{ choice.choice_label }}
+                  </label>
+                  </div>
+                 </div>
+            </div>
+        <div class="col-md-5 ">
+          <div class="card-header py-2" style="font-size:0.75rem; color:white; background-color: #1b55f3;margin-top:5px">
+         Evaluacion adicional y tratamiento mas intensivo.
+         </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        </div>
+        </div>
+        </div>
+        </div> <!-- se cierra el tab-pane de la pregunta 8 -->
+
+                            <!-- Panel 9 -->
+                            <div class="tab-pane fade " id="v-resultado" role="tabpanel" aria-labelledby="v-resultado-tab">
+                              <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                            <table class="table table-hover">
+                              <thead>
+        <tr>
+            <th>Sustancia</th>
+            <th>Puntuación</th>
+            <th style="font-size:0.75rem" >Límites de puntuación y
+            Nivel de riesgo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in "1,2,3,4,5,6,7,8,9,10"|split:"," %}
+            {% get_form_field assistf "puntos"|add:i as campo %}
+            <tr>
+
+                <td>{{ campo.label }}
+                    {% if forloop.counter == 10 %}
+                    {{ assistf.asistotras1 }}
+                    {% endif %}
+                </td>
+
+                <td  style="background-color: {% with puntos=campo.value|default:0|add:0 %}
+                     {% if puntos <= 3 %}green{% elif puntos <= 26 %}yellow{% else %}red{% endif %};
+                       {% endwith %}" >
+
+                    <div class="form-control form-control">
+                        {{ campo.value|default:"0" }}
+                    </div>
+                </td>
+
+                <!-- Columna 3: Límites de puntuación (3 líneas) -->
+                <td style="font-size:.6rem;back-ground:skyblue;">
+                    0-3: Bajo<br>
+                    4-26:Moderado<br>
+                    27+: Alto
+                </td>
+
+                <!-- Columna 4: Nivel de riesgo actual (3 líneas) -->
+
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+              </div>
+          </div>
+
+     </div>
+
+                            <!-- Panel 10 -->
+
+                                <div class="tab-pane fade" id="v-riesgos" role="tabpanel" aria-labelledby="v-riesgos-tab">
+    <div class="container-fluid py-3">
+
+        <!-- 1. MENÚ DE NAVEGACIÓN FUNCIONAL Y ACCESIBLE -->
+        <div class="overflow-auto mb-4">
+            <ul class="nav nav-tabs flex-nowrap" id="riesgosTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-3" id="tabaco-tab" data-bs-toggle="tab" data-bs-target="#tabaco-panel" type="button" role="tab" aria-controls="tabaco-panel" aria-selected="true">Tabaco</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="alcohol-tab" data-bs-toggle="tab" data-bs-target="#alcohol-panel" type="button" role="tab" aria-controls="alcohol-panel" aria-selected="false">Alcohol</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="cannabis-tab" data-bs-toggle="tab" data-bs-target="#cannabis-panel" type="button" role="tab" aria-controls="cannabis-panel" aria-selected="false">Cannabis</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="cocaina-tab" data-bs-toggle="tab" data-bs-target="#cocaina-panel" type="button" role="tab" aria-controls="cocaina-panel" aria-selected="false">Cocaína</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-nowrap px-3" id="estimulantes-tab" data-bs-toggle="tab" data-bs-target="#estimulantes-panel" type="button" role="tab" aria-controls="estimulantes-panel" aria-selected="false">Estimulantes tipo anfetamina</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="inhalantes-tab" data-bs-toggle="tab" data-bs-target="#inhalantes-panel" type="button" role="tab" aria-controls="inhalantes-panel" aria-selected="false">Inhalantes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-nowrap px-3" id="sedantes-tab" data-bs-toggle="tab" data-bs-target="#sedantes-panel" type="button" role="tab" aria-controls="sedantes-panel" aria-selected="false">Sedantes o pastillas para dormir</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="alucinogenos-tab" data-bs-toggle="tab" data-bs-target="#alucinogenos-panel" type="button" role="tab" aria-controls="alucinogenos-panel" aria-selected="false">Alucinógenos</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-3" id="opiaceos-tab" data-bs-toggle="tab" data-bs-target="#opiaceos-panel" type="button" role="tab" aria-controls="opiaceos-panel" aria-selected="false">Opiáceos</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 2. CONTENEDOR PARA TODOS LOS PANELES DE INFORMACIÓN -->
+        <div class="tab-content" id="riesgosTabContent">
+
+            <!-- Panel para Tabaco (Con tu texto original) -->
+            <div class="tab-pane fade show active" id="tabaco-panel" role="tabpanel" aria-labelledby="tabaco-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos1.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">Fumar tabaco con regularidad está asociado con:</p>
+                            <ul>
+                                <li>Envejecimiento prematuro y arrugas en la piel.</li>
+                                <li>Condición física inferior y tiempos de recuperación más largos después de un resfriado o gripa.</li>
+                                <li>Infecciones respiratorias y asma.</li>
+                                <li>Alta presión sanguínea.</li>
+                                <li>Diabetes mellitus.</li>
+                                <li>Aborto espontáneo, parto prematuro y bebés de bajo peso al nacer.</li>
+                                <li>Enfermedades renales.</li>
+                                <li>Enfermedades crónicas de las vías respiratorias, entre ellas enfisema.</li>
+                                <li>Enfermedades cardíacas, apoplejías.</li>
+                                <li>Enfermedades cardiovasculares.</li>
+                                <li>Cáncer de pulmón, vejiga, mama, boca, garganta y esófago.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Alcohol (Con tu texto original) -->
+            <div class="tab-pane fade" id="alcohol-panel" role="tabpanel" aria-labelledby="alcohol-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos2.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo excesivo de alcohol está asociado con:</p>
+                            <ul>
+                                <li>Resacas, conducta violenta y agresiva, accidentes y lesiones, náusea y vómitos.</li>
+                                <li>Disminución en el desempeño sexual, envejecimiento prematuro.</li>
+                                <li>Problemas digestivos, úlceras, inflamación del páncreas, alta presión sanguínea.</li>
+                                <li>Ansiedad y depresión, dificultad en las relaciones personales, problemas económicos y laborales.</li>
+                                <li>Dificultad para recordar cosas y resolver problemas.</li>
+                                <li>Deformidades y daño cerebral en bebés de mujeres embarazadas.</li>
+                                <li>Daño cerebral permanente que lleva a la pérdida de memoria, déficit cognitivo y desorientación.</li>
+                                <li>Apoplejía, daño muscular y en los nervios.</li>
+                                <li>Enfermedad del hígado y páncreas.</li>
+                                <li>Cáncer de boca.</li>
+                                <li>Suicidio.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Cannabis (Con tu texto original) -->
+            <div class="tab-pane fade" id="cannabis-panel" role="tabpanel" aria-labelledby="cannabis-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos3.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de cannabis está asociado con:</p>
+                            <ul>
+                                <li>Problemas de atención y motivación.</li>
+                                <li>Ansiedad, paranoia, pánico, depresión.</li>
+                                <li>Disminución de la memoria y capacidad de resolver problemas.</li>
+                                <li>Presión sanguínea alta.</li>
+                                <li>Asma y bronquitis.</li>
+                                <li>Psicosis, en particular en personas con historial personal o familiar de esquizofrenia.</li>
+                                <li>Enfermedades cardíacas y enfermedad pulmonar obstructiva crónica.</li>
+                                <li>Cáncer de las vías respiratorias superiores y de garganta.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Cocaína (Con tu texto original) -->
+            <div class="tab-pane fade" id="cocaina-panel" role="tabpanel" aria-labelledby="cocaina-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos4.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de cocaína está asociado con:</p>
+                            <ul>
+                                <li>Dificultad para dormir, aceleramiento del corazón, dolores de cabeza, pérdida de peso.</li>
+                                <li>Aletargamiento, hormigueo, piel húmeda, rascarse o arrancarse la piel.</li>
+                                <li>Ansias o deseo intenso, estrés por el estilo de vida.</li>
+                                <li>Accidentes y lesiones, problemas económicos.</li>
+                                <li>Cambios del estado de ánimo, ansiedad, depresión, manías.</li>
+                                <li>Paranoia, pensamientos irracionales, dificultad para recordar cosas.</li>
+                                <li>Conducta agresiva y violenta.</li>
+                                <li>Psicosis después del consumo repetido de altas dosis.</li>
+                                <li>Muerte repentina por enfermedades cardiovasculares agudas.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Estimulantes (Contenido del div "estimulantes" original, que era el de inhalantes) -->
+            <!-- NOTA: Tu código original tenía el mismo texto para "estimulantes" e "inhalantes". Lo he mantenido así. -->
+            <div class="tab-pane fade" id="estimulantes-panel" role="tabpanel" aria-labelledby="estimulantes-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos5.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de estimulantes tipo anfetamina está asociado con:</p>
+                            <ul>
+                                <li>Dificultad para dormir.</li>
+                                <li>Perdida de apetito y peso, deshidratacion.</li>
+                                <li>Reduccion de resistencia a las infecciones.</li>
+                                <li>Tension en la mandibula, dolores de cabeza, dolor muscular.</li>
+                                <li>Cambios en el estado de animo, ansiedad, depresion, agitacion, manias y panico.</li>
+                                <li>Temblores, latido irregular del corazon, falta de aliento.</li>
+                                <li>Dificultad para concetrarse y recordar cosas.</li>
+                                <li>Paranoia, conducta violenta y agresiva.</li>
+                                <li>Psicosis despues del consumo repetido de altas dosis.</li>
+                                <li>Daño cerebral permanente.</li>
+                                <li>Daño hepatico, hemorragia cerebral, muerte repentina por enfermedades cardiovasculares.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Inhalantes (Con tu texto original) -->
+            <div class="tab-pane fade" id="inhalantes-panel" role="tabpanel" aria-labelledby="inhalantes-tab">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos6.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de inhalantes está asociado con:</p>
+                             <ul>
+                                <li>Síntomas semejantes a los de la gripa, sinusitis, sangrado de nariz, náusea y vómito, indigestión, úlceras estomacales, diarrea, mareos, alucinaciones, náusea.</li>
+                                <li>Aletargamiento, desorientación, visión borrosa.</li>
+                                <li>Dolores de cabeza, accidentes y lesiones, conducta impredecible y peligrosa, dificultades para la coordinación, reacciones lentas.</li>
+                                <li>Poco abastecimiento de oxígeno al cuerpo, pérdida de memoria, confusión, depresión, agresión, cansancio extremo.</li>
+                                <li>Delirio, convulsiones, coma, daño en los órganos (corazón, pulmones, hígado y riñones).</li>
+                                <li>Muerte por insuficiencia cardíaca.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Sedantes (Añadido, ya que estaba en el menú pero faltaba el contenido) -->
+            <div class="tab-pane fade" id="sedantes-panel" role="tabpanel" aria-labelledby="sedantes-tab">
+                 <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos7.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo de sedantes o pastillas para dormir está asociado con:</p>
+                            <!-- Texto genérico placeholder ya que no estaba en tu código original -->
+                             <ul>
+                                <li>Aletargamiento, mareo y confusion.</li>
+                                <li>Dificultad para concetrarse y recordar cosas.</li>
+                                <li>Nausea, dolores de cabeza, paso inestable.</li>
+                                <li>Problemas para dormir.</li>
+                                <li>Ansiedad y depresion.</li>
+                                <li>Tolerancia y dependencia despues de un periodo corto de tiempo.</li>
+                                <li>Sintomas de abstinencia severos.</li>
+                                <li>Sobredosis y muerte si se consume con alcohol, opiaceos y otras drogas depresivas.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Alucinógenos (Con tu texto original) -->
+            <div class="tab-pane fade" id="alucinogenos-panel" role="tabpanel" aria-labelledby="alucinogenos-tab">
+                 <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos8.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de alucinógenos está asociado con:</p>
+                            <ul>
+                                <li>Cambios visuales, auditivos, táctiles y olfativos, conducta impredecible.</li>
+                                <li>Dificultad para dormir.</li>
+                                <li>Náusea y vómito.</li>
+                                <li>Taquicardia y alta presión sanguínea.</li>
+                                <li>Cambios en el estado de ánimo.</li>
+                                <li>Ansiedad, pánico y paranoia.</li>
+                                <li>Visiones retrospectivas.</li>
+                                <li>Empeoramiento de enfermedades mentales como la esquizofrenia.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel para Opiáceos (Usando el texto que tenías en el div "otrasdroxas") -->
+            <div class="tab-pane fade" id="opiaceos-panel" role="tabpanel" aria-labelledby="opiaceos-tab">
+                 <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        {% with nivel=assistf.puntos9.value|nivel_riesgo %}
+                        <div class="p-4 rounded" style="{% if nivel == 'Alto' %} background-color:#dc3545; color:white; {% elif nivel == 'Medio' %} background-color:#ffc107; color:black; {% elif nivel == 'Bajo' %} background-color:#198754; color:white; {% endif %}">
+                            <h3 class="mb-3">Nivel de Riesgo: {{ nivel }}</h3>
+                            <p class="lead">El consumo regular de opiáceos está asociado con:</p>
+                            <ul>
+                                <li>Comezón, náusea y vómito.</li>
+                                <li>Aletargamiento, constipación, caries, periodos menstruales irregulares.</li>
+                                <li>Dificultad para concentrarse y recordar cosas.</li>
+                                <li>Depresión, disminución de impulso sexual, impotencia.</li>
+                                <li>Dificultades económicas, comisión de delitos.</li>
+                                <li>Estrés en relaciones personales.</li>
+                                <li>Problemas para conservar el trabajo y en la vida personal.</li>
+                                <li>Tolerancia, dependencia, síndrome de abstinencia.</li>
+                                <li>Sobredosis y muerte por paro cardíaco.</li>
+                            </ul>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+                   </div> <!-- se cierra tab content -->
+                 </div> <!-- tab content container -->
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary btn-save">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
+                    </div>
+       </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Este es el lugar donde se mostrará el valor -->
+
+<!-- Este es tu script corregido -->
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // 1. Selecciona el campo principal
+    const campoPrincipal = document.querySelector('[name="asistotras"]');
+
+    // 2. Solo si el campo existe, añade el listener
+    if (campoPrincipal) {
+
+        // 3. Este bloque se ejecuta CADA VEZ que el usuario escribe algo
+        campoPrincipal.addEventListener('input', function() {
+
+            // 4. OBTÉN el valor actual EN ESTE MOMENTO
+            let valorActual = this.value;
+
+            // 5. MANIPULA el valor actual. (Importante: revisa si hay texto para evitar errores)
+            let valorModificado = ''; // Por defecto, es vacío
+            if (valorActual) { // Si hay algo escrito...
+                // ...capitaliza la primera letra y únelo con el resto.
+                valorModificado = valorActual.charAt(0).toUpperCase() + valorActual.slice(1);
+            }
+
+            // 6. Selecciona todos los campos secundarios
+            const otrosCampos = document.querySelectorAll('input[name^="asistotras"]:not([name="asistotras"])');
+
+            // 7. Itera y asigna el VALOR MODIFICADO a cada uno
+            otrosCampos.forEach(function(campo) {
+                campo.readOnly = false;
+                campo.value = valorModificado; // <-- Usamos la variable recién calculada
+                campo.readOnly = true;
+            });
+        });
+    }
+});
+
+
+
+</script>
+
+
+
+
+
+
+{% endblock %}

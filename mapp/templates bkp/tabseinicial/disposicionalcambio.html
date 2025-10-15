@@ -1,0 +1,150 @@
+
+          <div class="tab-pane" id="disposicionalcambio">
+               <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black">
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Cuanto fue el mayor tiempo que se propuso y logro no consumir alcohol.drogas, (mayor periodo de abstinencia, y si no se lo ha propuesto marque '0':</div>
+                 </div>
+                 <div class="col-2 d-flex flex-wrap ">
+                       {{einicialf.maximotiempo.label}}
+
+                 <div class="d-inline-block" >
+                            {{ einicialf.maximotiempo}}
+                 </div>
+                 </div>
+                <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurriom.label}}
+                       {{ einicialf.cuandoocurriom}}
+                </div>
+                 <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurrioa.label}}
+                       {{ einicialf.cuandoocurrioa}}
+
+                  </div>
+                  </div>
+
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Por que se abstuvo en esa ocasion y que hizo para mantenerse sin consumir</div>
+                 </div>
+                 <div class="col-6 d-flex flex-wrap">
+                    {{einicialf.motivo}}
+                 </div>
+                 </div>
+               </div> <!-- se cierra el container -->
+             <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black">
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >En los ultimos 6 meses cuanto tiempo ha sido el mayor periodo que ha tenido sin consumir</div>
+                 </div>
+                 <div class="col-2 d-flex flex-wrap ">
+                       {{einicialf.mayortiempo.label}}
+                 <div class="d-inline-block" >
+                            {{ einicialf.mayortiempo}}
+                 </div>
+                  </div>
+                <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurriom6.label}}
+                       {{ einicialf.cuandoocurriom6}}
+                </div>
+                 <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurrioa6.label}}
+                       {{ einicialf.cuandoocurrioa6}}
+
+                  </div>
+                  </div>
+
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Por que se abstuvo en esa ocasion y que hizo para mantenerse sin consumir</div>
+                 </div>
+                 <div class="col-6 d-flex flex-wrap">
+                    {{einicialf.motivo6}}
+                 </div>
+                 </div>
+               </div> <!-- se cierra el container -->
+             <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+               <div class="row align-items-center">
+               <div class="col-6 d-flex flex-wrap p-2">
+               <div class="d-inline-block " style="color:black;">Actualmente que tan importante es para usted el dejar de consumir alcohol/drogas?</div>
+               </div>
+               <div class="col-6 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.quetanimportante %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+
+                  </div>
+                  </div>
+
+                  <div class="row ">
+                  <div class="col-12 d-flex flex-wrap">
+                         <div class="d-inline-block " style="width:80%">En una escala del 1 al 10 (en donde 1 es nada y 10 es mucho) que tan seguro se siente de no consumir alcohol/drogas?</div>
+                         <div class="d-inline-block " style="width:20%">{{einicialf.quetanseguro}}</div>
+                  </div>
+                  </div>
+               <div class="row align-items-center">
+               <div class="col-4 d-flex flex-wrap p-2">
+               <div class="d-inline-block " style="color:black;">En estos momentos usted piensa que </div>
+               </div>
+               <div class="col-8 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.piensaque %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+
+                  </div>
+                </div>
+                 <div class="row align-items-center" style="background-color:silver;">
+                 <div class="col-4 d-flex flex-wrap p-2">
+                   <div class="d-inline-block " >Que tan dispuesto esta para recibir los servicios de internamiento?</div>
+                 </div>
+                  <div class="col-8 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.dispuesto %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+                   </div>
+                  </div>
+
+                 <div class="row align-items-center" >
+                 <div class="col d-flex flex-wrap bm-2">
+                     <div class="d-inlne-block">Mencione tres principales razones por las cuales es importante dejar de consumir</div>
+                 </div>
+                 </div>
+
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Uno</div>
+                     <div class="d-inline-block" style="width:90%">{{einicialf.razon1}}</div>
+                 </div>
+                 </div>
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Dos</div>
+                     <div class="d-inline-block" style="width:90%">{{einicialf.razon2}}</div>
+                 </div>
+                 </div>
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Tres</div>
+                     <div class="d-inline-block" style="width:90%;margin-bottom:1rem">{{einicialf.razon3}}</div>
+                 </div>
+                 </div>
+
+             </div>
+
+
+             </div>  <!-- se cierra el tab de disposicion al cambio-->

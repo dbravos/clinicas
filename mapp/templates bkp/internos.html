@@ -1,0 +1,270 @@
+<!-- datosgrales.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Internos</title>
+    <style>
+     body {
+      font-family: Arial, sans-serif;
+      margin : 0;
+      padding:0;
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      font-size : 12px;
+    }
+     .panel {
+        background-color:  #78bff3 ;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin: 10px;
+        }
+
+       h5.top-left {
+       position: absolute;
+       top: 0;
+       left: 0;
+       margin: 0;
+       padding: 10px;
+       }
+
+
+
+        /* Estilos para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+
+          }
+        th, td {
+            padding: 2px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        #responsable {
+            width : 64.5%;
+            padding: 4px;
+            border: 1px solid #ddd;
+         }
+
+         #dependientes {
+            width : 64.5%;
+            padding: 3px;
+            border: 1px solid #ddd;
+         }
+
+
+        /* Estilos para los campos del formulario */
+        .campo-label {
+            width: 40%; /* Ancho fijo para las etiquetas */
+            display: inline-block;
+
+        }
+         .continuacion-label {
+            width: 50%; /* Ancho fijo para las etiquetas */
+            display: inline-block;
+            padding : 3px;
+            margin : 0px;
+        }
+
+
+        .label-responsable {
+            width: 10%; /* Ancho fijo para las etiquetas */
+            display: inline-block;
+            padding :3px;
+            margin : 0px;
+
+        }
+
+       .checkbox-container {
+            display: inline-block;
+            align-items: center;
+        }
+
+        .label-dependientes {
+            width: 40%; /* Ancho fijo para las etiquetas */
+            display: inline;
+            margin-bottom:2px;
+            margin-right:25px;
+            margin-left:20px;
+         }
+
+        input[type="checkbox"] {
+            display: inline-block;
+        }
+
+
+        .opciones-radio {
+         display: inline-flex; /* Cambiado a inline-flex para alinear en la misma línea */
+         align-items: center; /* Alinea verticalmente el contenido */
+         }
+
+        .opciones-radio input[type="radio"] {
+         width: 12px; /* Tamaño del radio button */
+         height: 12px; /* Tamaño del radio button */
+         margin-right: 5px; /* Espacio entre los radio buttons */
+         padding : 5px;
+         }
+
+        .elquegraba {
+          position:absolute;
+          top:600px;
+          left:1200px;
+          font-size:15px;
+          height: 35px;
+          width: 100px;
+          background-color: blue;
+          color: white;
+          float: right;
+         }
+        .comentarios {
+            position: absolute;
+            top: 450px;
+            left: 950px;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+        <div class="tab-container">
+           <a href="{%url 'listaint' %}"  class="btn btn-link" style="color:white;font-size:18px; margin-left:1200px;top:0; ">Regresar </a>
+           <h5><span style="color:white;">Interno : <span style="color:white;"> {{interno.nombrecompleto}}</span></h5>
+              <div class="tabs">
+                <button class="tab-link" onclick="openTab(event, 'tab1')">Datos generales</button>
+                <button class="tab-link" onclick="openTab(event, 'tab2')">Continuacion</button>
+                <button class="tab-link" onclick="openTab(event, 'tab3')">Cuotas y formas</button>
+              </div>
+        </div>
+            <!-- comienza la primer pestaña -->
+            <div id="tab1" class="tab-content" style="display:none;">
+             <!-- Formulario dentro de una tabla -->
+                <form method="POST"  action="{% url 'grabainterno' id=interno.pk %}">
+                {% csrf_token %}
+                <div class="panel">
+                  <table>
+                   {% for field in internof %}
+                   {% if forloop.counter0|divisibleby:3 %}
+                      <tr> <!-- Iniciar una nueva fila cada 3 campos -->
+                   {% endif %}
+                      <td>
+                      <label for="{{ field.id_for_label }}" class="campo-label">{{ field.label }}</label>
+                        {% if field.widget.attrs.class == 'opciones-radio' %}
+                           <div class="opciones-radio">
+                            {{ field }}
+                           </div>
+                         {% else %}
+                            {{ field }}
+                         {% endif %}
+                       </td>
+
+                     {% if forloop.counter|divisibleby:3 or forloop.last %}
+                       </tr> <!-- Cerrar la fila después de 3 campos o en el último campo -->
+                     {% endif %}
+                     {% endfor %}
+                   </table>
+
+                   <section id="responsable">
+                    <h6>Responsable</h6>
+                    {% for field in intresponsablef %}
+                      {% if forloop.counter0|divisibleby:3 %}
+                        <tr> <!-- Iniciar una nueva fila cada 3 campos -->
+                      {% endif %}
+                      <td>
+                      <label for="{{ field.id_for_label }}" class="label-responsable">{{ field.label }}</label>
+                       {{ field }}
+                      </td>
+
+                      {% if forloop.counter|divisibleby:3 or forloop.last %}
+                        </tr> <!-- Cerrar la fila después de 3 campos o en el último campo -->
+                      {% endif %}
+                    {% endfor %}
+                   </section>
+
+                   <section id="dependientes">
+                     <div class="checkbox-container">
+                      <h6>Dependientes</h6>
+                      {% for field in intdependientesf %}
+                       {% if forloop.counter0|divisibleby:3 %}
+                          <tr> <!-- Iniciar una nueva fila cada 3 campos -->
+                       {% endif %}
+                       <td>
+                       <label for="{{ field.id_for_label }}" class="label-dependientes">{{ field.label }}</label>
+                        {{ field }}
+                       </td>
+                       {% if forloop.counter|divisibleby:3 or forloop.last %}
+                          </tr> <!-- Cerrar la fila después de 3 campos o en el último campo -->
+                       {% endif %}
+                      {% endfor %}
+                      </div>
+                   </section>
+                     <div class="container" id="comentarios" >
+                       <label for="Comentarios" style="position:absolute;top:425px;left:1030px;font-size:16px">Comentarios</label>
+                        <div class="comentarios">
+                          <textarea name="comentarios" rows=5 cols=35>{{interno.comentarios}}</textarea>
+                        </div>
+                     </div>
+                     <button type="submit" style="margin-top:-30px; font-size:15px; height: 35px; width: 100px; background-color: blue; color: white; float: right;" >Grabar</button>
+
+                </div> <!--cierre del panel -->
+            </div> <!-- Aqui se cierra la pestaña uno-->
+
+             <div id="tab2" class="tab-content" style="display:block;">
+             <!-- Formulario dentro de una tabla -->
+               <form method="POST" action="{% url 'grabainterno' id=interno.pk %} >
+                {% csrf_token %}
+                <div class="panel">
+                  <table>
+                   {% for field in intprovienef %}
+                   {% if forloop.counter0|divisibleby:4 %}
+                      <tr> <!-- Iniciar una nueva fila cada 3 campos -->
+                   {% endif %}
+                      <td>
+                      <label for="{{ field.id_for_label }}" class="continuacion-label">{{ field.label }}</label>
+                             {{ field }}
+
+                       </td>
+
+                     {% if forloop.counter|divisibleby:4 or forloop.last %}
+                       </tr> <!-- Cerrar la fila después de 3 campos o en el último campo -->
+                     {% endif %}
+                     {% endfor %}
+                   </table>
+                  <button type="submit" class="elquegraba"  >Grabar</button>
+                  </div>
+
+                 </form>
+             </div>
+        </div> <!-- Aqui se cierra la pestaña dos-->
+    </form>
+</body>
+<script>
+
+
+    function openTab(evt, tabName) {
+     // Oculta todo el contenido de las pestañas
+     var i, tabcontent, tablinks;
+     tabcontent = document.getElementsByClassName("tab-content");
+     for (i = 0; i < tabcontent.length; i++) {
+         tabcontent[i].style.display = "none";
+         tabcontent[i].classList.remove("active");
+       }
+
+        // Elimina la clase 'active' de todos los botones de las pestañas
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Muestra el contenido de la pestaña actual y añade una clase 'active' al botón de la pestaña activa
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.className += " active";
+        }
+</script>
+</html>

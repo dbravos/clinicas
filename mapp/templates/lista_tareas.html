@@ -1,0 +1,128 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-list-check me-2"></i>
+                        Tareas Escaneadas
+                    </h4>
+                    <div>
+                        <a href="{% url 'escanear_tarea' %}" class="btn btn-light btn-sm me-2">
+                            <i class="bi bi-scanner me-1"></i> Nueva Tarea
+                        </a>
+                        <a href="{% url 'seleccionainterno' id=expediente %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-x-lg"></i> Cerrar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Info del expediente -->
+                    <div class="alert alert-info">
+                        <strong>Expediente:</strong> {{ expediente }}
+                        <strong>Nombre:</strong> {{ interno.nombrecompleto }}
+                        <span class="badge bg-secondary ms-2">{{ tareas.count }} tareas</span>
+                    </div>
+
+                    <!-- Lista de tareas -->
+                    {% if tareas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha de Escaneo</th>
+                                    <th>Archivo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tarea in tareas %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ tarea.fecha_creacion|date:"d/m/Y" }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ tarea.fecha_creacion|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if tarea.imagen_tarea %}
+                                        <i class="bi bi-file-earmark-image text-primary me-1"></i>
+                                        {{ tarea.imagen_tarea.name|slice:"-20:" }}
+                                        <br>
+                                        <small class="text-muted">{{ tarea.imagen_tarea.size|filesizeformat }}</small>
+                                        {% else %}
+                                        <span class="text-muted">Sin archivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if tarea.imagen_tarea %}
+                                            <a href="{{ tarea.imagen_tarea.url }}"
+                                               target="_blank"
+                                               class="btn btn-outline-primary"
+                                               title="Ver tarea">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ tarea.imagen_tarea.url }}"
+                                               download
+                                               class="btn btn-outline-success"
+                                               title="Descargar">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            {% endif %}
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#eliminarModal{{ tarea.id }}"
+                                                    title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal de eliminación -->
+                                        <div class="modal fade" id="eliminarModal{{ tarea.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        ¿Estás seguro de que deseas eliminar esta tarea?
+                                                        <br>
+                                                        <small class="text-muted">Fecha: {{ tarea.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <form method="POST" action="{% url 'eliminar_tarea' tarea.id %}">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <h4 class="text-muted mt-3">No hay tareas escaneadas</h4>
+                        <p class="text-muted">Comienza escaneando tu primera tarea.</p>
+                        <a href="{% url 'escanear_tarea' %}" class="btn btn-primary">
+                            <i class="bi bi-scanner me-2"></i> Escanear Primera Tarea
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

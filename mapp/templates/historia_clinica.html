@@ -1,0 +1,908 @@
+{% extends "dgenerales.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Barra de herramientas -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Historia Clínica - {{ interno.nombrecompleto|default:"Paciente" }}</h4>
+                <div>
+                    <button type="button" class="btn btn-success me-2" onclick="imprimirHistoriaClinica()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a href="{% url 'seleccionainterno' id=interno.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Regresar al Menú
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Contenedor principal para impresión -->
+    <div id="contenedor-impresion">
+        <form method="post" id="historiaClinicaForm">
+            {% csrf_token %}
+
+            <!-- Encabezado para impresión -->
+            <div class="d-print-block d-none">
+                <div class="text-center mb-4">
+                    <h2>Historia Clínica</h2>
+                    <h4>Expediente: {{ interno.numeroexpediente }}</h4>
+                    <p class="mb-0">Fecha de impresión: {% now "d/m/Y H:i" %}</p>
+                    <hr>
+                </div>
+            </div>
+
+            <!-- Información del Paciente -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Información del Paciente</h5>
+                    <span class="badge bg-light text-dark">Expediente: {{ interno.numeroexpediente }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Expediente:</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ interno.numeroexpediente }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.fecha.label }}:</label>
+                            {{ historiaclinicaf.fecha }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.medico.label }}:</label>
+                            <span class="fw-bold">{{ mem_user_nombre }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antecedentes Familiares -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Antecedentes Familiares</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Padres -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Padres</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'padres' in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Hermanos -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Hermanos</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'hermanos' in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Cónyuge -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Cónyuge</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'conyugue' in field.name or 'conyuge' in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Hijos -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Hijos</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'hijos' in field.name and 'conyugue' not in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Colaterales -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Colaterales</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'colaterales' in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Convivientes -->
+                    <div class="form-section">
+                        <h6 class="fw-bold text-primary">Convivientes</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'convivientes' in field.name %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hábitos y Condiciones -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Hábitos y Condiciones de Vida</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.frecuenciaBath.label }}:</label>
+                            {{ historiaclinicaf.frecuenciaBath }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.inmunizacion.label }}:</label>
+                            {{ historiaclinicaf.inmunizacion }}
+                        </div>
+                    </div>
+
+                    <div class="form-section mt-3">
+                        <h6 class="fw-bold text-primary">Tipo de Habitación</h6>
+                        <div class="row">
+                            {% for field in historiaclinicaf %}
+                                {% if 'habitacion' in field.name %}
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check">
+                                        {{ field }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ historiaclinicaf.alimentacion }}
+                                <label class="form-check-label fw-bold" for="{{ historiaclinicaf.alimentacion.id_for_label }}">
+                                    {{ historiaclinicaf.alimentacion.label }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ historiaclinicaf.actividadFisica }}
+                                <label class="form-check-label fw-bold" for="{{ historiaclinicaf.actividadFisica.id_for_label }}">
+                                    {{ historiaclinicaf.actividadFisica.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antecedentes Personales -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Antecedentes Personales Patológicos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.enfermedadActual.label }}:</label>
+                            {{ historiaclinicaf.enfermedadActual }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.alergias.label }}:</label>
+                            {{ historiaclinicaf.alergias }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.traumaticos.label }}:</label>
+                            {{ historiaclinicaf.traumaticos }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.adiccion.label }}:</label>
+                            {{ historiaclinicaf.adiccion }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.internamientoporAdiccion.label }}:</label>
+                            {{ historiaclinicaf.internamientoporAdiccion }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.padecimientoActual.label }}:</label>
+                            {{ historiaclinicaf.padecimientoActual }}
+                        </div>
+                    </div>
+
+                    <div class="form-section mt-3">
+                        <h6 class="fw-bold text-primary">Antecedentes Quirúrgicos y Hospitalarios</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ historiaclinicaf.quirurgico }}
+                                    <label class="form-check-label" for="{{ historiaclinicaf.quirurgico.id_for_label }}">
+                                        {{ historiaclinicaf.quirurgico.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ historiaclinicaf.hospitalizaciones }}
+                                    <label class="form-check-label" for="{{ historiaclinicaf.hospitalizaciones.id_for_label }}">
+                                        {{ historiaclinicaf.hospitalizaciones.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ historiaclinicaf.transfuciones }}
+                                    <label class="form-check-label" for="{{ historiaclinicaf.transfuciones.id_for_label }}">
+                                        {{ historiaclinicaf.transfuciones.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sistemas -->
+                    <div class="form-section mt-4">
+                        <h6 class="fw-bold text-primary mb-3">Sistemas</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.digestivo.label }}:</label>
+                                {{ historiaclinicaf.digestivo }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.cardiovascular.label }}:</label>
+                                {{ historiaclinicaf.cardiovascular }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.respiratorio.label }}:</label>
+                                {{ historiaclinicaf.respiratorio }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.urinario.label }}:</label>
+                                {{ historiaclinicaf.urinario }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.genital.label }}:</label>
+                                {{ historiaclinicaf.genital }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.hematologico.label }}:</label>
+                                {{ historiaclinicaf.hematologico }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.endocrino.label }}:</label>
+                                {{ historiaclinicaf.endocrino }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.osteomuscular.label }}:</label>
+                                {{ historiaclinicaf.osteomuscular }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.nervioso.label }}:</label>
+                                {{ historiaclinicaf.nervioso }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.sensorial.label }}:</label>
+                                {{ historiaclinicaf.sensorial }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">{{ historiaclinicaf.psicomatico.label }}:</label>
+                                {{ historiaclinicaf.psicomatico }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signos Vitales -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Signos Vitales y Medidas Antropométricas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.TA.label }}:</label>
+                            {{ historiaclinicaf.TA }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.FC.label }}:</label>
+                            {{ historiaclinicaf.FC }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.FR.label }}:</label>
+                            {{ historiaclinicaf.FR }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.temperatura.label }}:</label>
+                            {{ historiaclinicaf.temperatura }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.PCO2.label }}:</label>
+                            {{ historiaclinicaf.PCO2 }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.peso.label }}:</label>
+                            {{ historiaclinicaf.peso }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.talla.label }}:</label>
+                            {{ historiaclinicaf.talla }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.IMC.label }}:</label>
+                            {{ historiaclinicaf.IMC }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.glucosa.label }}:</label>
+                            {{ historiaclinicaf.glucosa }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examen Físico -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Examen Físico por Sistemas</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Cabeza -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Cabeza</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.cabeza.label }}:</label>
+                                {{ historiaclinicaf.cabeza }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.cabello.label }}:</label>
+                                {{ historiaclinicaf.cabello }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.pupilas.label }}:</label>
+                                {{ historiaclinicaf.pupilas }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.faringe.label }}:</label>
+                                {{ historiaclinicaf.faringe }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.amigdalas.label }}:</label>
+                                {{ historiaclinicaf.amigdalas }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.adenomegalias.label }}:</label>
+                                {{ historiaclinicaf.adenomegalias }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.cicatriz.label }}:</label>
+                                {{ historiaclinicaf.cicatriz }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.observaciones.label }}:</label>
+                                {{ historiaclinicaf.observaciones }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cuello -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Cuello</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.cuello.label }}:</label>
+                                {{ historiaclinicaf.cuello }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.traquea.label }}:</label>
+                                {{ historiaclinicaf.traquea }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.tiroides.label }}:</label>
+                                {{ historiaclinicaf.tiroides }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.adenomegaliasCuello.label }}:</label>
+                                {{ historiaclinicaf.adenomegaliasCuello }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.pulsos.label }}:</label>
+                                {{ historiaclinicaf.pulsos }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesCuello.label }}:</label>
+                                {{ historiaclinicaf.observacionesCuello }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tórax y Axilar -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Tórax y Axilar</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.torax.label }}:</label>
+                                {{ historiaclinicaf.torax }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.movsRespiratorios.label }}:</label>
+                                {{ historiaclinicaf.movsRespiratorios }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.camposPulmonares.label }}:</label>
+                                {{ historiaclinicaf.camposPulmonares }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.ruidosCardiacos.label }}:</label>
+                                {{ historiaclinicaf.ruidosCardiacos }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.adenomagliasAxilar.label }}:</label>
+                                {{ historiaclinicaf.adenomagliasAxilar }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesAxilar.label }}:</label>
+                                {{ historiaclinicaf.observacionesAxilar }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Abdomen -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Abdomen</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.abdomen.label }}:</label>
+                                {{ historiaclinicaf.abdomen }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.doloralPalpar.label }}:</label>
+                                {{ historiaclinicaf.doloralPalpar }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.viceromegalias.label }}:</label>
+                                {{ historiaclinicaf.viceromegalias }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ historiaclinicaf.peristalsis.label }}:</label>
+                                {{ historiaclinicaf.peristalsis }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesAbdomen.label }}:</label>
+                                {{ historiaclinicaf.observacionesAbdomen }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Miembros -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Miembros</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.miembrossuperiores.label }}:</label>
+                                {{ historiaclinicaf.miembrossuperiores }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.miembrosinferiores.label }}:</label>
+                                {{ historiaclinicaf.miembrosinferiores }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesMiembros.label }}:</label>
+                                {{ historiaclinicaf.observacionesMiembros }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Genitales -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Genitales</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.genitales.label }}:</label>
+                                {{ historiaclinicaf.genitales }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesGenitales.label }}:</label>
+                                {{ historiaclinicaf.observacionesGenitales }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examen Mental -->
+            <div class="card mb-4">
+                <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
+                    <h5 class="mb-0">Examen Mental</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Inspección General -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Inspección General</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.edadAparente.label }}:</label>
+                                {{ historiaclinicaf.edadAparente }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.posicion.label }}:</label>
+                                {{ historiaclinicaf.posicion }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ historiaclinicaf.actitud.label }}:</label>
+                                {{ historiaclinicaf.actitud }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesInspeccion.label }}:</label>
+                                {{ historiaclinicaf.observacionesInspeccion }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lenguaje -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Lenguaje</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.fluidez.label }}:</label>
+                                {{ historiaclinicaf.fluidez }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.lenguaje.label }}:</label>
+                                {{ historiaclinicaf.lenguaje }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesLenguaje.label }}:</label>
+                                {{ historiaclinicaf.observacionesLenguaje }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Funciones Intelectuales -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Funciones Intelectuales</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.funcionesIntelectuales.label }}:</label>
+                                {{ historiaclinicaf.funcionesIntelectuales }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.memoria.label }}:</label>
+                                {{ historiaclinicaf.memoria }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesFunciones.label }}:</label>
+                                {{ historiaclinicaf.observacionesFunciones }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Afectividad -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Afectividad</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.afectividad.label }}:</label>
+                                {{ historiaclinicaf.afectividad }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesAfectividad.label }}:</label>
+                                {{ historiaclinicaf.observacionesAfectividad }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sensopercepción -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Sensopercepción</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.sensopercepcion.label }}:</label>
+                                {{ historiaclinicaf.sensopercepcion }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesSensopercepcion.label }}:</label>
+                                {{ historiaclinicaf.observacionesSensopercepcion }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ideación -->
+                    <div class="system-group">
+                        <h6 class="fw-bold text-primary mb-3">Ideación</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ historiaclinicaf.ideacion.label }}:</label>
+                                {{ historiaclinicaf.ideacion }}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">{{ historiaclinicaf.observacionesIdeacion.label }}:</label>
+                                {{ historiaclinicaf.observacionesIdeacion }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnóstico y Tratamiento -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Diagnóstico y Tratamiento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.dependenciaA.label }}:</label>
+                            {{ historiaclinicaf.dependenciaA }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.observacionesDependencia.label }}:</label>
+                            {{ historiaclinicaf.observacionesDependencia }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.pronosticoParalaVida.label }}:</label>
+                            {{ historiaclinicaf.pronosticoParalaVida }}
+                        </div>
+                    </div>
+
+                    <div class="form-section mt-3">
+                        <h6 class="fw-bold text-primary">Tratamiento Indicado</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ historiaclinicaf.tratamientoRecidencia }}
+                                    <label class="form-check-label" for="{{ historiaclinicaf.tratamientoRecidencia.id_for_label }}">
+                                        {{ historiaclinicaf.tratamientoRecidencia.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ historiaclinicaf.dietaNormal }}
+                                    <label class="form-check-label" for="{{ historiaclinicaf.dietaNormal.id_for_label }}">
+                                        {{ historiaclinicaf.dietaNormal.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.otroTratamiento.label }}:</label>
+                            {{ historiaclinicaf.otroTratamiento }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.justificacion.label }}:</label>
+                            {{ historiaclinicaf.justificacion }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">{{ historiaclinicaf.observacionesTratamiento.label }}:</label>
+                            {{ historiaclinicaf.observacionesTratamiento }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción (solo mostrar en pantalla, no en impresión) -->
+            <div class="row mb-4 d-print-none">
+                <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-save"></i> Guardar Historia Clínica
+                    </button>
+                    <button type="button" class="btn btn-success btn-lg me-2" onclick="imprimirHistoriaClinica()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a href="{% url 'seleccionainterno' id=interno.id %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Regresar al Menú
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-calcular IMC
+    function calcularIMC() {
+        const peso = parseFloat(document.getElementById('{{ historiaclinicaf.peso.id_for_label }}')?.value);
+        const talla = parseFloat(document.getElementById('{{ historiaclinicaf.talla.id_for_label }}')?.value);
+
+        if (peso && talla && talla > 0) {
+            const tallaMetros = talla / 100;
+            const imc = (peso / (tallaMetros * tallaMetros)).toFixed(2);
+            const imcField = document.getElementById('{{ historiaclinicaf.IMC.id_for_label }}');
+            if (imcField) {
+                imcField.value = imc;
+            }
+        }
+    }
+
+    // Función para imprimir
+    function imprimirHistoriaClinica() {
+        if (confirm('¿Estás seguro de que quieres imprimir la historia clínica?')) {
+            window.print();
+        }
+    }
+
+    // Agregar event listeners para peso y talla
+    document.addEventListener('DOMContentLoaded', function() {
+        const pesoField = document.getElementById('{{ historiaclinicaf.peso.id_for_label }}');
+        const tallaField = document.getElementById('{{ historiaclinicaf.talla.id_for_label }}');
+
+        if (pesoField) pesoField.addEventListener('input', calcularIMC);
+        if (tallaField) tallaField.addEventListener('input', calcularIMC);
+    });
+</script>
+
+<style>
+    .form-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+    .system-group {
+        background-color: white;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+    }
+    .form-check-input {
+        margin-top: 0;
+        margin-right: 8px;
+    }
+
+    /* Estilos para impresión */
+    @media print {
+        .btn, .d-print-none {
+            display: none !important;
+        }
+        .card {
+            break-inside: avoid;
+            border: 1px solid #000 !important;
+            margin-bottom: 10px !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+            border-bottom: 1px solid #000 !important;
+        }
+        body {
+            font-size: 12pt;
+            line-height: 1.2;
+        }
+        .container-fluid {
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+        .form-section, .system-group {
+            margin-bottom: 10px !important;
+            padding: 8px !important;
+        }
+    }
+</style>
+{% endblock %}

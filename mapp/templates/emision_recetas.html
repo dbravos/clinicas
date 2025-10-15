@@ -1,0 +1,624 @@
+{% extends "dgenerales.html" %}
+
+<body>
+{% block content %}
+{% load forms_tags %}
+{% load custom_filters %}
+{% load form_utils %}
+
+    <title>Emisión de Recetas - Expediente {{ interno.numeroexpediente }}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2980b9;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input[type="date"],
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 150px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-print {
+            background-color: #27ae60;
+        }
+
+        .btn-print:hover {
+            background-color: #219653;
+        }
+
+        .history-section {
+            margin-top: 40px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .history-item {
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 5px;
+        }
+
+        .history-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .history-field {
+            margin-bottom: 5px;
+        }
+
+        .history-field strong {
+            color: #2c3e50;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .history-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .btn-history {
+            padding: 6px 12px;
+            font-size: 14px;
+            background-color: #27ae60;
+        }
+
+        .expediente-info {
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Estilos para impresión */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                font-size: 14px;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .prescription-header {
+                text-align: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+            .prescription-data {
+                margin-bottom: 20px;
+            }
+            .prescription-field {
+                margin-bottom: 8px;
+            }
+            .prescription-receta {
+                margin-top: 30px;
+                border-top: 1px solid #000;
+                padding-top: 15px;
+            }
+            .prescription-footer {
+                margin-top: 50px;
+                text-align: right;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .col {
+                margin-bottom: 15px;
+            }
+
+            .history-content {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .history-actions {
+                position: static;
+                margin-top: 10px;
+                text-align: right;
+            }
+        }
+    </style>
+
+    <div class="container no-print">
+        <h1>Emisión de Recetas Médicas</h1>
+
+        <!-- Información del expediente -->
+        <div class="expediente-info">
+            <strong>Expediente:</strong> {{ interno.numeroexpediente }}<br>
+            <strong>Paciente:</strong> {{ interno.nombrecompleto }}
+          <a class="btn btn-sm btn-secondary float-end" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar">
+                        <i class="bi bi-arrow-left me-1"></i>Volver a Menú
+         </a>
+        </div>
+
+        <!-- Mensajes de Django -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form id="recetaf" name="recetaf" method="POST">
+            {% csrf_token %}
+
+            <!-- Campo expediente oculto -->
+            <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
+
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required value="{{ today|date:'Y-m-d' }}">
+            </div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="ta">TA (Tensión Arterial):</label>
+                        <input type="text" id="ta" name="ta" maxlength="8" placeholder="Ej: 120/80">
+                    </div>
+                    <div class="col">
+                        <label for="fr">FR (Frecuencia Respiratoria):</label>
+                        <input type="text" id="fr" name="fr" maxlength="8" placeholder="Ej: 16">
+                    </div>
+                    <div class="col">
+                        <label for="rc">RC (Ritmo Cardíaco):</label>
+                        <input type="text" id="rc" name="rc" maxlength="8" placeholder="Ej: 72">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="temperatura">Temperatura:</label>
+                        <input type="text" id="temperatura" name="temperatura" maxlength="8" placeholder="Ej: 36.5">
+                    </div>
+                    <div class="col">
+                        <label for="peso">Peso (kg):</label>
+                        <input type="text" id="peso" name="peso" maxlength="8" placeholder="Ej: 70.5">
+                    </div>
+                    <div class="col">
+                        <label for="talla">Talla (m):</label>
+                        <input type="text" id="talla" name="talla" maxlength="8" placeholder="Ej: 1.75">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="imc">IMC (Índice de Masa Corporal):</label>
+                <input type="text" id="imc" name="imc" maxlength="8" placeholder="Se calculará automáticamente" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="alergias">Alergias:</label>
+                <input type="text" id="alergias" name="alergias" maxlength="20" placeholder="Máximo 20 caracteres">
+            </div>
+
+            <div class="form-group">
+                <label for="diagnostico">Diagnóstico:</label>
+                <textarea id="diagnostico" name="diagnostico" placeholder="Ingrese el diagnóstico del paciente"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="receta">Receta:</label>
+                <textarea id="receta" name="receta" placeholder="Ingrese la receta médica" required></textarea>
+            </div>
+
+            <!-- Campo historial oculto para Django -->
+            <textarea id="historial" name="historial" style="display: none;">{{ receta.historial|default:'' }}</textarea>
+
+            <div class="btn-container">
+                <button type="submit">Guardar Receta</button>
+                <button type="button" id="btnPrintCurrent" class="btn-print">Imprimir Receta Actual</button>
+            </div>
+        </form>
+
+        <div class="history-section">
+            <h2>Historial de Recetas - Expediente: {{ interno.numeroexpediente }}</h2>
+            <div id="historialRecetas">
+                <div class="no-history">No hay recetas registradas en el historial</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección para impresión -->
+    <div id="printSection" class="print-section" style="display: none;"></div>
+
+    <script>
+        // Historial almacenado en el campo del modelo Django
+        let historialRecetas = [];
+        const expedienteActual = "{{ interno.numeroexpediente }}";
+
+        // Referencias a elementos del DOM
+        const recetaf = document.getElementById('recetaf');
+        const historialRecetasContainer = document.getElementById('historialRecetas');
+        const historialField = document.getElementById('historial');
+        const fechaInput = document.getElementById('fecha');
+        const btnPrintCurrent = document.getElementById('btnPrintCurrent');
+        const printSection = document.getElementById('printSection');
+
+        // Establecer fecha actual por defecto
+        const today = new Date();
+        fechaInput.value = today.toISOString().split('T')[0];
+
+        // Cargar historial existente desde el campo del modelo
+        function cargarHistorialDesdeModelo() {
+            const historialTexto = historialField.value;
+            if (historialTexto && historialTexto.trim() !== '') {
+                try {
+                    historialRecetas = JSON.parse(historialTexto);
+                } catch (e) {
+                    console.error('Error al parsear historial:', e);
+                    historialRecetas = [];
+                }
+            }
+            actualizarHistorial();
+        }
+
+        // Event Listeners
+        document.getElementById('peso').addEventListener('input', calcularIMC);
+        document.getElementById('talla').addEventListener('input', calcularIMC);
+        btnPrintCurrent.addEventListener('click', imprimirRecetaActual);
+
+        // Evento para enviar el formulario
+        recetaf.addEventListener('submit', function(e) {
+            // Prevenir envío normal para procesar datos primero
+            e.preventDefault();
+
+            // Validar campos requeridos
+            if (!document.getElementById('receta').value) {
+                alert('Por favor, ingrese la receta médica');
+                return;
+            }
+
+            // Agregar receta actual al historial
+            agregarAlHistorial();
+
+            // Actualizar campo historial para Django
+            historialField.value = JSON.stringify(historialRecetas);
+
+            // Enviar formulario
+            this.submit();
+        });
+
+        // Función para obtener datos del formulario
+        function obtenerDatosFormulario() {
+            return {
+                expediente: expedienteActual,
+                fecha: fechaInput.value,
+                ta: document.getElementById('ta').value,
+                fr: document.getElementById('fr').value,
+                rc: document.getElementById('rc').value,
+                temperatura: document.getElementById('temperatura').value,
+                peso: document.getElementById('peso').value,
+                talla: document.getElementById('talla').value,
+                imc: document.getElementById('imc').value,
+                alergias: document.getElementById('alergias').value,
+                diagnostico: document.getElementById('diagnostico').value,
+                receta: document.getElementById('receta').value
+            };
+        }
+
+        // Función para agregar al historial
+        function agregarAlHistorial() {
+            const formData = obtenerDatosFormulario();
+
+            // Agregar al historial
+            historialRecetas.unshift(formData);
+
+            // Limpiar campos del formulario (excepto expediente)
+            document.getElementById('ta').value = '';
+            document.getElementById('fr').value = '';
+            document.getElementById('rc').value = '';
+            document.getElementById('temperatura').value = '';
+            document.getElementById('peso').value = '';
+            document.getElementById('talla').value = '';
+            document.getElementById('imc').value = '';
+            document.getElementById('alergias').value = '';
+            document.getElementById('diagnostico').value = '';
+            document.getElementById('receta').value = '';
+
+            // Restablecer fecha actual
+            fechaInput.value = today.toISOString().split('T')[0];
+        }
+
+        // Función para calcular IMC
+        function calcularIMC() {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const talla = parseFloat(document.getElementById('talla').value);
+
+            if (peso && talla && talla > 0) {
+                const imc = peso / (talla * talla);
+                document.getElementById('imc').value = imc.toFixed(2);
+            } else {
+                document.getElementById('imc').value = '';
+            }
+        }
+
+        // Función para actualizar la visualización del historial
+        function actualizarHistorial() {
+            // Limpiar el contenedor
+            historialRecetasContainer.innerHTML = '';
+
+            // Si no hay historial, mostrar mensaje
+            if (historialRecetas.length === 0) {
+                historialRecetasContainer.innerHTML = '<div class="no-history">No hay recetas registradas en el historial</div>';
+                return;
+            }
+
+            // Crear elementos para cada registro en el historial
+            historialRecetas.forEach((registro, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                // Formatear la fecha para mostrar
+                const fechaObj = new Date(registro.fecha);
+                const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+
+                // Crear contenido del historial
+                historyItem.innerHTML = `
+                    <div class="history-date">${fechaFormateada}</div>
+                    <div class="history-content">
+                        <div class="history-field"><strong>TA:</strong> ${registro.ta || 'No registrado'}</div>
+                        <div class="history-field"><strong>FR:</strong> ${registro.fr || 'No registrado'}</div>
+                        <div class="history-field"><strong>RC:</strong> ${registro.rc || 'No registrado'}</div>
+                        <div class="history-field"><strong>Temperatura:</strong> ${registro.temperatura || 'No registrado'}</div>
+                        <div class="history-field"><strong>Peso:</strong> ${registro.peso || 'No registrado'}</div>
+                        <div class="history-field"><strong>Talla:</strong> ${registro.talla || 'No registrado'}</div>
+                        <div class="history-field"><strong>IMC:</strong> ${registro.imc || 'No registrado'}</div>
+                        <div class="history-field"><strong>Alergias:</strong> ${registro.alergias || 'No registrado'}</div>
+                    </div>
+                    <div class="history-field"><strong>Diagnóstico:</strong> ${registro.diagnostico || 'No registrado'}</div>
+                    <div class="history-field"><strong>Receta:</strong> ${registro.receta || 'No registrado'}</div>
+                    <div class="history-actions">
+                        <button class="btn-history btn-print" onclick="imprimirRecetaDesdeHistorial(${index})">Imprimir</button>
+                    </div>
+                `;
+
+                historialRecetasContainer.appendChild(historyItem);
+            });
+        }
+
+        // Función para imprimir receta actual
+        function imprimirRecetaActual() {
+            const formData = obtenerDatosFormulario();
+            imprimirReceta(formData);
+        }
+
+        // Función para imprimir receta desde el historial
+        function imprimirRecetaDesdeHistorial(index) {
+            const registro = historialRecetas[index];
+            imprimirReceta(registro);
+        }
+
+        // Función para imprimir receta
+        function imprimirReceta(datos) {
+            // Validar que haya datos de receta
+            if (!datos.receta) {
+                alert('No hay receta para imprimir');
+                return;
+            }
+
+            // Formatear la fecha
+            const fechaObj = new Date(datos.fecha);
+            const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Crear contenido para impresión
+            const printContent = `
+                <div class="prescription-header">
+                    <h1>Receta Médica</h1>
+                    <p><strong>Expediente:</strong> ${datos.expediente}</p>
+                    <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+                </div>
+
+                <div class="prescription-data">
+                    <div class="prescription-field"><strong>TA (Tensión Arterial):</strong> ${datos.ta || 'No registrado'}</div>
+                    <div class="prescription-field"><strong>FR (Frecuencia Respiratoria):</strong> ${datos.fr || 'No registrado'}</div>
+                    <div class="prescription-field"><strong>RC (Ritmo Cardíaco):</strong> ${datos.rc || 'No registrado'}</div>
+                    <div class="prescription-field"><strong>Temperatura:</strong> ${datos.temperatura || 'No registrado'}</div>
+                    <div class="prescription-field"><strong>Peso:</strong> ${datos.peso || 'No registrado'} kg</div>
+                    <div class="prescription-field"><strong>Talla:</strong> ${datos.talla || 'No registrado'} m</div>
+                    <div class="prescription-field"><strong>IMC (Índice de Masa Corporal):</strong> ${datos.imc || 'No registrado'}</div>
+                    <div class="prescription-field"><strong>Alergias:</strong> ${datos.alergias || 'No registrado'}</div>
+                </div>
+
+                <div class="prescription-field"><strong>Diagnóstico:</strong> ${datos.diagnostico || 'No registrado'}</div>
+
+                <div class="prescription-receta">
+                    <h2>Receta Médica:</h2>
+                    <p>${datos.receta.replace(/\n/g, '<br>')}</p>
+                </div>
+
+                <div class="prescription-footer">
+                    <p>_________________________</p>
+                    <p>Firma del Médico</p>
+                </div>
+            `;
+
+            // Insertar contenido en la sección de impresión
+            printSection.innerHTML = printContent;
+            printSection.style.display = 'block';
+
+            // Imprimir
+            window.print();
+
+            // Ocultar la sección de impresión después de imprimir
+            setTimeout(() => {
+                printSection.style.display = 'none';
+            }, 100);
+        }
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarHistorialDesdeModelo();
+        });
+    </script>
+
+
+</body>
+{% endblock %}
