@@ -160,3 +160,16 @@ if not DEBUG:
         print("✅ Script de superusuario cargado")
     except Exception as e:
         print(f"⚠️  Error cargando script de superusuario: {e}")
+
+# Cargar datos automáticamente en producción (solo una vez)
+if not DEBUG:
+    try:
+        # Verificar si ya se cargaron los datos
+        from django.contrib.auth.models import User
+        if User.objects.count() == 0:  # Si no hay usuarios, cargar datos
+            from scripts.loaddata import cargar_datos
+            cargar_datos()
+        else:
+            print("✅ Los datos ya fueron cargados previamente")
+    except Exception as e:
+        print(f"⚠️  Error en carga de datos: {e}")
