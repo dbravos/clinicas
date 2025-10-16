@@ -63,7 +63,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djmoney',
-    'mapp'
+    'mapp',
+    'prueba',
 ]
 
 # MIDDLEWARE - AÑADE WHITENOISE

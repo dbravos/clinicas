@@ -21,20 +21,21 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgrales,lusuarios,\
-                        agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,seleccionainterno,\
-                        grabainterno,probar,consentimiento,einicial,assist,grabaeinicial,grabalo,psicosis,assist_cfg,\
-                        psicosis_cfg,sdevida_cfg,sdevida,usodrogas,usodrogas_cfg,ansiedad,ansiedad_cfg,depresion,depresion_cfg,\
-                        marcadores_cfg,marcadores,riesgos,riesgos_cfg,razones,razones_cfg,valorizacion,valorizacion_cfg,\
-                        listaSesiones,capturaSesion,capturaSesionGrupal,listaSesionesGrupales,planConsejeria,escanear_tarea,\
-                        lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
-                        listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
-                        cerrar_sesion,home_temp
+# from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgrales,lusuarios,\
+#                        agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,seleccionainterno,\
+#                        grabainterno,probar,consentimiento,einicial,assist,grabaeinicial,grabalo,psicosis,assist_cfg,\
+#                        psicosis_cfg,sdevida_cfg,sdevida,usodrogas,usodrogas_cfg,ansiedad,ansiedad_cfg,depresion,depresion_cfg,\
+#                        marcadores_cfg,marcadores,riesgos,riesgos_cfg,razones,razones_cfg,valorizacion,valorizacion_cfg,\
+#                        listaSesiones,capturaSesion,capturaSesionGrupal,listaSesionesGrupales,planConsejeria,escanear_tarea,\
+#                        lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
+#                        listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
+#                        cerrar_sesion,home
 
+from prueba.views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_temp, name='home'),
+    path('', home, name='home'),
    # path('', primermenu, name='Menu principal'),
    # path('menuprincipal/', primermenu, name='Menu principal'),
    # path('listaint/',listaint,name='listaint'),
