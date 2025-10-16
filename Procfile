@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn ctrlinfo.wsgi:application --bind 0.0.0.0:${PORT:-8080}
+web: python manage.py migrate && gunicorn ctrlinfo.wsgi:application --bind 0.0.0.0:${PORT:-8000}
