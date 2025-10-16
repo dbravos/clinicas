@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djmoney',
     'mapp',
-    'prueba',
+   
 ]
 
 # MIDDLEWARE - AÑADE WHITENOISE
