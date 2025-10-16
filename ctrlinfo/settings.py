@@ -15,15 +15,15 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ALLOWED_HOSTS corregido
 #if DEBUG:
-#    ALLOWED_HOSTS = ['*']  # Desarrollo
+ALLOWED_HOSTS = ['*']  # Desarrollo
 #else:
-ALLOWED_HOSTS = [
-        'localhost',
-        '127.0.0.1',
-        '.up.railway.app',
-        '.railway.app'
-        '.onrender.com'
-    ]
+# ALLOWED_HOSTS = [
+#        'localhost',
+#        '127.0.0.1',
+#        '.up.railway.app',
+#        '.railway.app'
+#        '.onrender.com'
+#    ]
 
 # DATABASE CONFIGURATION - CORREGIDO
 if os.environ.get('DATABASE_URL'):
