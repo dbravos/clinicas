@@ -1,31 +1,41 @@
 import os
 import django
-import subprocess
-import sys
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ctrlinfo.settings')
 django.setup()
 
 from django.core.management import call_command
+from django.contrib.auth.models import User
+import json
 
 
 def cargar_datos():
     try:
-        print("🔧 Intentando cargar datos desde datos.json...")
+        print("🔧 Iniciando carga de datos...")
 
-        # Verificar si el archivo existe
-        if not os.path.exists('datos.json'):
-            print("❌ Archivo datos.json no encontrado")
-            return
+        # VERIFICAR SI HAY MÁS USUARIOS BESIDES EL SUPERUSUARIO
+        total_usuarios = User.objects.count()
+        print(f"👥 Usuarios en BD: {total_usuarios}")
 
-        # Cargar datos
-        call_command('loaddata', 'datos.json')
-        print('✅ Datos cargados exitosamente desde datos.json')
+        # Si solo existe el superusuario admin, cargar datos
+        if total_usuarios <= 1:  # Solo admin o ninguno
+            print("📦 Cargando datos desde datos.json...")
+
+            if not os.path.exists('datos.json'):
+                print("❌ Archivo datos.json no encontrado")
+                return
+
+            # Cargar datos
+            call_command('loaddata', 'datos.json')
+            print('✅ Datos de prueba cargados exitosamente!')
+        else:
+            print("⚠️  Ya existen datos de usuarios. Saltando carga.")
 
     except Exception as e:
         print(f'❌ Error cargando datos: {e}')
+        import traceback
+        print(traceback.format_exc())
 
 
-# Ejecutar automáticamente
 if __name__ == '__main__':
     cargar_datos()
