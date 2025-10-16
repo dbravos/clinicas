@@ -14,14 +14,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'clave-local-desarrollo')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ALLOWED_HOSTS corregido
-if DEBUG:
-    ALLOWED_HOSTS = ['*']  # Desarrollo
-else:
-    ALLOWED_HOSTS = [
+#if DEBUG:
+#    ALLOWED_HOSTS = ['*']  # Desarrollo
+#else:
+ALLOWED_HOSTS = [
         'localhost',
         '127.0.0.1',
         '.up.railway.app',
         '.railway.app'
+        '.onrender.com'
     ]
 
 # DATABASE CONFIGURATION - CORREGIDO
