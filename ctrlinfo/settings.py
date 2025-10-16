@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djmoney',
     'mapp',
-   
+
 ]
 
 # MIDDLEWARE - AÑADE WHITENOISE
@@ -152,3 +152,11 @@ LOGGING = {
         },
     },
 }
+
+# Crear superusuario automáticamente en producción
+if not DEBUG:
+    try:
+        from scripts.createsuperuser import *
+        print("✅ Script de superusuario cargado")
+    except Exception as e:
+        print(f"⚠️  Error cargando script de superusuario: {e}")
