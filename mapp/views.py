@@ -51,6 +51,10 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+def home_temp(request):
+    return HttpResponse("¡Mi Django funciona en Railway! 🚀")
+
+
 def primermenu(request):
 
     interno = Internos.objects.first()
