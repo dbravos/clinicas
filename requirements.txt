@@ -5,3 +5,4 @@ whitenoise
 python-dotenv
 dj-database-url
 django-money
+Pillow==10.0.0
