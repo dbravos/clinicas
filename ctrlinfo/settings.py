@@ -166,7 +166,7 @@ if not DEBUG:
     try:
         # Verificar si ya se cargaron los datos
         from django.contrib.auth.models import User
-        if User.objects.count() == 0:  # Si no hay usuarios, cargar datos
+        if User.objects.count() < 2:  # Si no hay usuarios, cargar datos
             from scripts.loaddata import cargar_datos
             cargar_datos()
         else:
