@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Clínica</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 100px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-control { width: 100%; padding: 8px; margin-top: 5px; }
+        .btn { background: blue; color: white; padding: 10px; border: none; width: 100%; }
+        .error { color: red; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h2>Acceso Clínicas</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>ID de Clínica:</label>
+            {{ form.clinica_id }}
+            {% if form.clinica_id.errors %}
+                <div class="error">{{ form.clinica_id.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Contraseña:</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="error">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn">Entrar</button>
+    </form>
+</body>
+</html>

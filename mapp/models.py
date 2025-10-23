@@ -6,10 +6,38 @@ import calendar
 # Create your models here.
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+# models.py - AGREGA esto al inicio del archivo
+from django.db import models
+
+
+class ClinicaManager(models.Manager):
+    def get_queryset(self):
+        # Obtener la clínica actual de la sesión
+        def get_clinica_actual():
+            try:
+                from django.contrib.sessions.models import Session
+                from django.contrib.auth.models import AnonymousUser
+                from django.db import connection
+
+                # Verificar si hay una sesión activa
+                if hasattr(self, '_request'):
+                    return self._request.session.get('clinica_actual', 'Demostracion')
+
+                # Intentar obtener de thread local
+                import threading
+                if hasattr(threading.current_thread(), '_clinica_actual'):
+                    return threading.current_thread()._clinica_actual
+
+            except:
+                pass
+            return 'Demostracion'
+
+        clinica_actual = get_clinica_actual()
+        return super().get_queryset().filter(clinica=clinica_actual)
 
 
 class Usuarios(models.Model):
-    objects = models.Manager()
+
     usuario = models.BigIntegerField(verbose_name='No. Usuario',null=True,blank=True, default='',editable=False)
     nombre = models.CharField(max_length=30, verbose_name='Nombre',null=True,blank=True, default='')
     cargo = models.CharField(max_length=20,verbose_name='Cargo', null=True,blank=True, default='')
@@ -17,18 +45,19 @@ class Usuarios(models.Model):
     password=models.CharField(max_length=10,verbose_name='Password',null=True,blank=True, default='')
     cedula=models.CharField(max_length=20,verbose_name='Cedula',null=True,blank=True, default='')
     expedidapor=models.CharField(max_length=30,verbose_name='Expedida por',null=True,blank=True, default='')
-
+    clinica=models.CharField(max_length=30,verbose_name='Clinica',null=True,blank=True, default='Demostracion')
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Estados(models.Model):
 
-    objects = models.Manager()
     edo = models.CharField(verbose_name='ID',null=True,blank=True, default='',max_length=3)
     nombre = models.CharField(max_length=20, verbose_name='Nombre',null=True,blank=True, default='')
     pais = models.CharField(max_length=3,verbose_name='Pais', null=True,blank=True, default='')
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()
 
 class DatosGrales(models.Model):
 
-    objects = models.Manager()
     nombre = models.CharField(max_length=30, verbose_name='Nombre',null=True,blank=True, default='')
     calleynumero = models.CharField(max_length=50,verbose_name='Calle y numero', null=True,blank=True, default='')
     colonia=models.CharField(max_length=50,verbose_name='Colonia',null=True,blank=True, default='')
@@ -47,11 +76,11 @@ class DatosGrales(models.Model):
     responsable = models.CharField(max_length=30, verbose_name='Responsable', null=True, blank=True, default='')
     cedula = models.CharField(max_length=20, verbose_name='Cedula', null=True, blank=True, default='')
     cargo = models.CharField(max_length=20, verbose_name='Cargo', null=True, blank=True, default='')
-
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Internos(models.Model):
 
-    objects = models.Manager()
 
     opcionesSexo=[('F','Femenino'),('M','Masculino')]
     opcionesEstadocivil=[('S','Soltero'),('C','Casado'),('V','Viudo'),('D','Divorciado')]
@@ -146,7 +175,8 @@ class Internos(models.Model):
     proxseseg = models.DateField(verbose_name='Próxima sesión EG', null=True, blank=True)
     fechariesgo = models.DateField(verbose_name='Fecha de riesgo', null=True, blank=True)
     nacionalidad = models.CharField(max_length=15, verbose_name='Nacionalidad', null=True, blank=True)
-
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 
     def __str__(self):
@@ -154,7 +184,6 @@ class Internos(models.Model):
 
 class Einicial(models.Model):
 
-    objects=models.Manager()
 
     opcionesConsumo = [(0, 'No'), (1, 'Si')]
     opcionesForma = [(0,'Ingerida'),(1,'Inyectada'),(2,'Fumada'),(3,'Inhalada'),(4,'Otras')]
@@ -268,7 +297,8 @@ class Einicial(models.Model):
     razon1=models.CharField(verbose_name='Razon 1',max_length=50,null=True,blank=True)
     razon2=models.CharField(verbose_name='Razon 2',max_length=50,null=True,blank=True)
     razon3=models.CharField(verbose_name='Razon 3',max_length=50,null=True,blank=True)
-
+    clinica=models.CharField(verbose_name='Clinica',max_length=30,null=True,blank=True,default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     @property
     def resumen_razones_principales(self):
@@ -328,7 +358,6 @@ class Einicial(models.Model):
 
 class Assist(models.Model):
 
-    objects=models.Manager()
 
     opcionesSioNo = [(0, 'No'), (1, 'Si')]
     opcionesCinco =[(0,'Nunca'),(3,'Una o Dos veces'),(4,'Mensualmente'),(5,'Semanalmente'),(6,'Diario o casi diario')]
@@ -436,7 +465,8 @@ class Assist(models.Model):
     riesgo8=models.SmallIntegerField(verbose_name='',null=True,blank=True)
     riesgo9=models.SmallIntegerField(verbose_name='',null=True,blank=True)
     riesgo10=models.SmallIntegerField(verbose_name='',null=True,blank=True)
-
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def calcular_puntos(self):
         """Calcula automáticamente todos los puntos basados en los campos pXsY"""
@@ -561,7 +591,6 @@ class Assist(models.Model):
 
 class SituacionFamiliar(models.Model):
 
-    objects=models.Manager()
 
     opcionesAcuerdooNo = [(5, '5'), (4, '4'), (3, '3'), (2, '2'), (1, '1')]
     opcionesCuandoesta = [(1, 'No'), (2, 'Si, pero solo mis amigos'), (3, 'Si, pero solo mi familia'), (4, 'Si, tanto mi familia como mis amigos')]
@@ -617,10 +646,11 @@ class SituacionFamiliar(models.Model):
     estadointernado = models.SmallIntegerField(verbose_name='En los ultimos 12 meses ha estado internado en algun hospitalo?',choices=opcionesConflicto, null=True, default=0)
     porque = models.CharField(max_length=60, verbose_name='Por que?', null=True,blank=True)
     porconsumo = models.SmallIntegerField(verbose_name='Ha sido por problemas de consumo?',choices=opcionesConflicto, null=True,  default=0)
+    clinica=models.CharField(max_length=30,verbose_name='Clinica',null=True,blank=True,default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Cfisicas(models.Model):
 
-    objects=models.Manager()
 
     opcionesAfectado = [(1, 'Nada'), (2, 'Poco'), (3, 'Regular'), (4, 'Bastante')]
     opcionesComoeslarelacion = [(1, 'Muy buena'), (2, 'Buena'), (3, 'Regular'), (4, 'Mala'), (5, ' Muy mala')]
@@ -711,6 +741,8 @@ class Cfisicas(models.Model):
     fpn3 = models.SmallIntegerField(verbose_name='Es imprtante para ti cumplir con las normas que tienen tus padres y/o sustitutos acerca de tomar alchol y/o consumir drogas?',choices=opcionesSioNo,null=True, default=0)
     rsexuales = models.SmallIntegerField(verbose_name='Has tenido relaciones sexuales despues de consumir alcohol y/o drogas?',choices=opcionesSioNo,null=True, default=0)
     involucrado = models.SmallIntegerField(verbose_name='Te has involucrado en una situacion de abuso fisico a consecuencia de haber consumido alcohol y/o drogas?',choices=opcionesSioNo,null=True, default=0)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     @property
     def consecuencias_fisicas(self):
@@ -778,7 +810,6 @@ class Cfisicas(models.Model):
 
 class Cmentales(models.Model):
 
-    objects=models.Manager()
 
     opcionesAfectado = [(1, 'Nada'), (2, 'Poco'), (3, 'Regular'), (4, 'Bastante')]
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
@@ -857,6 +888,8 @@ class Cmentales(models.Model):
     otro1 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
     otro2 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
     otro3 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     @property
     def consecuencias_emocionales(self):
@@ -921,7 +954,6 @@ class Cmentales(models.Model):
 
 class Crelaciones(models.Model):
 
-    objects=models.Manager()
 
     opcionesAfectado = [(1, 'Nada'), (2, 'Poco'), (3, 'Regular'), (4, 'Bastante')]
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
@@ -1037,6 +1069,9 @@ class Crelaciones(models.Model):
     rotro4 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
     rotro5 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
     fechaduracionycausa = models.CharField(max_length=50,verbose_name='Fecha duracion y causa',null=True,blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
     # Dentro de tu modelo (ej. Cfisicas o un nuevo modelo de Relaciones)
 
@@ -1128,7 +1163,6 @@ class Crelaciones(models.Model):
 
 class Tratamientos(models.Model):
 
-    objects=models.Manager()
 
     opcionesSatisfecho = [(1, 'Muy satisfecho'), (2, 'Satisfecho'), (3, 'Inseguro'), (4, 'Insatisfecho'), (5, 'Muy insatisfecho')]
 
@@ -1192,11 +1226,11 @@ class Tratamientos(models.Model):
     meta10=models.CharField(verbose_name='Relaciones de pareja',max_length=100,null=True,blank=True)
     problemas=models.TextField(verbose_name='Problemas presentados durante la sesion (al comunicarse, su actitud)',null=True,blank=True)
     observaciones=models.TextField(verbose_name='Observaciones :',null=True,blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 
 class Psicosis(models.Model):
-
-    objects=models.Manager()
 
 
     opcionesQuesiente = [(0, 'Nada'), (1, 'Muy poco'), (2, 'Poco'), (3, 'Bastante'), (4, 'Mucho')]
@@ -1222,6 +1256,9 @@ class Psicosis(models.Model):
     psfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     psconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
     pspuntos = models.SmallIntegerField(verbose_name="Puntaje",null=True,blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
     @property
     def sintomas_psicosis(self):
@@ -1274,7 +1311,6 @@ class Psicosis(models.Model):
 
 class Sdevida(models.Model):
 
-    objects=models.Manager()
     opcionesSatisfecho = [(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'),(6, '6'), (7, '7'), (8, '8'), (9, '9'), (10, '10')]
 
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
@@ -1292,6 +1328,8 @@ class Sdevida(models.Model):
     svp12=models.SmallIntegerField(choices=opcionesSatisfecho,verbose_name='Satisfaccion en general', null=True, default=0)
     svfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     svconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 
     @property
@@ -1355,7 +1393,6 @@ class Sdevida(models.Model):
 
 class Usodrogas(models.Model):
 
-    objects=models.Manager()
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
 
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
@@ -1381,11 +1418,11 @@ class Usodrogas(models.Model):
     udp20 = models.SmallIntegerField(choices=opcionesSioNo, verbose_name='Ha estado en un tratamiento especificamente relacionado con el uso de drogas?', null=True, default=0)
     udfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     udconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
-
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Ansiedad(models.Model):
 
-    objects=models.Manager()
     opcionesAnsiedad = [(0, 'Poco o Nada'), (1, 'Mas o Menos'),(2,'Moderadamente'),(3,'Severamente')]
 
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
@@ -1413,7 +1450,8 @@ class Ansiedad(models.Model):
     anfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     anconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
     anpuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
-
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     @property
     def sintomas_ansiedad(self):
@@ -1465,7 +1503,6 @@ class Ansiedad(models.Model):
 
 class Depresion(models.Model):
 
-    objects=models.Manager()
     opcionesP1 = [(0, 'No me siento triste'), (1, 'Me siento triste'),(2,'Me siento triste todo el tiempo y no puedo evitarlo'),(3,'Estoy tan triste o infeliz que no puedo soportarlo')]
     opcionesP2 = [(0, 'No siento que me estan castigando'), (1, 'Siento que me podrian castigar'),(2,'Creo que me van a castigar'),(3,'Siento que se me esta castigando')]
     opcionesP3 = [(0, 'En general tengo esperanzas en mi futuro'), (1, 'Me siento sin esperanzas por mi futuro'),(2,'Siento que no puedo esperar nada del futuro'),(3,'Siento que el futuro no tiene esperanza y las cosas no pueden mejorar')]
@@ -1514,6 +1551,9 @@ class Depresion(models.Model):
     depfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     depconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
     deppuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
 # Dentro de tu modelo Depresion
 
@@ -1557,7 +1597,6 @@ class Depresion(models.Model):
 
 class Marcadores(models.Model):
 
-    objects=models.Manager()
     opcionesSioNo=[(1,'Si'),(0,'No')]
     opcionesSustancia=[(0,'Marihuana'),(1,'Anfetaminas'),(2,'Cristal,Ice'),(3,'Opio, Morfina'),(4,'Rivotril, Psicotropicos')]
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
@@ -1583,11 +1622,12 @@ class Marcadores(models.Model):
 
     marfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     marconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 
 class Riesgos(models.Model):
 
-    objects=models.Manager()
     opcionesFrecuencia=[(0,'Nunca'),(1,'Una vez al mes o menos'),(2,'Dos o cuatro veces al año'),(3,'Dos o tres veces a la semana')]
     opcionesCuantas=[(0,'1 o 2'),(1,'3 o 4'),(2,'5 o 6'),(3,'7 o 9'),(4,'10 o mas')]
     opcionesSeisoMas=[(0,'Nunca'),(1,'Menos de una vez al mes'),(2,'Mensualmente'),(3,'Semanalmente'),(4,'Diario o casi diario')]
@@ -1604,10 +1644,11 @@ class Riesgos(models.Model):
     riesgosP9 = models.SmallIntegerField(choices=opcionesOtras,verbose_name='i).- Algun familiar o doctor se ha preocupado por la forma de beber o le ha sugerido que le baje ?', null=True, default=0)
     riesgofecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank=True)
     riesgoconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
-
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Razones(models.Model):
-    objects = models.Manager()
+
+
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
     factores = models.TextField(verbose_name='Menciona factores que te indujeron a consumir sustancias por primera vez', null=True, blank=True, default='')
     motivos = models.TextField(verbose_name='Por que motivo(s) volviste a seguir consumiendo sustancias', null=True, blank=True, default='')
@@ -1618,10 +1659,12 @@ class Razones(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones y/o comentarios', null=True,blank=True, default='')
     razonesfecha = models.DateField(verbose_name="Fecha de custionario", default=date.today, null=True, blank=True)
     razonesconsejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
 
 class Valorizacion(models.Model):
-    objects = models.Manager()
 
     opcionesSustancias = [(0, 'Alcohol  '), (1, 'Tabaco   '), (2, 'Marihuana'), (3, 'Cocaina  '), (4, 'Crack    '),
                        (5, 'Pastillas'),(6, 'Otras    ')]
@@ -1640,10 +1683,11 @@ class Valorizacion(models.Model):
     valorizacionfecha = models.DateField(verbose_name="Fecha de custionario", default=date.today, null=True, blank=True)
     valorizacionconsejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
     ansiedad = models.CharField(verbose_name='Ansiedad', max_length=30, null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
 class CIndividual(models.Model):
-
-    objects = models.Manager()
 
 
     expediente = models.CharField(max_length=10, null=True, blank=True,verbose_name='No.Expediente')
@@ -1660,6 +1704,9 @@ class CIndividual(models.Model):
     tareas = models.TextField(verbose_name='Tareas', null=True, blank=True)
     quesetrabajo = models.TextField(verbose_name='Que se trabajo', null=True, blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
@@ -1674,7 +1721,6 @@ class CIndividual(models.Model):
 
 class CFamiliar(models.Model):
 
-    objects = models.Manager()
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     sesion = models.SmallIntegerField(verbose_name='Numero de sesion', null=True, blank=True, default=1)
@@ -1691,6 +1737,8 @@ class CFamiliar(models.Model):
     quesetrabajo = models.TextField(verbose_name='Que se trabajo', null=True, blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     familiares = models.TextField(verbose_name='Familiares', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
        return f"Familiar - Expediente: {self.expediente}, Sesión: {self.sesion}"
@@ -1703,7 +1751,6 @@ class CFamiliar(models.Model):
 
 
 class CGrupal(models.Model):
-    objects = models.Manager()
 
     # CAMPO EXPEDIENTE ELIMINADO - No aplica para grupales
     sesion = models.SmallIntegerField(verbose_name='Número de sesión', null=True, blank=True, default=1)
@@ -1726,6 +1773,8 @@ class CGrupal(models.Model):
     tareas = models.TextField(verbose_name='Tareas', null=True, blank=True)
     quesetrabajo = models.TextField(verbose_name='Qué se trabajó', null=True, blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     # RELACIÓN MUCHOS A MUCHOS CON INTERNOS
     participantes = models.ManyToManyField(
@@ -1747,7 +1796,7 @@ class CGrupal(models.Model):
 
 
 class PConsejeria(models.Model):
-    objects = models.Manager()
+
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True, blank=True)
@@ -1761,15 +1810,21 @@ class PConsejeria(models.Model):
     logros = models.TextField(verbose_name='Logro y mantenimiento de la abstinencia', null=True, blank=True)
     metasareasdevida = models.TextField(verbose_name='Metas por area de vida', null=True, blank=True)
     prevencion = models.TextField(verbose_name='Prevencion de recaidas', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
         return f"Expediente: {self.expediente}"
 
 class TareaConsejeria(models.Model):
+
     expediente = models.CharField(max_length=10)
     fecha_creacion = models.DateTimeField(default=timezone.now)
     descripcion = models.TextField(verbose_name="Descripción de la tarea")
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
     imagen_tarea = models.ImageField(
         upload_to='tareas_consejeria/%Y/%m/%d/',
         verbose_name="Imagen escaneada de la tarea",
@@ -1787,8 +1842,8 @@ class TareaConsejeria(models.Model):
         return f"Tarea {self.id} - {self.expediente}"
 
 class HojaAtencionPs(models.Model):
+
     opcionesLateralidad = [('Derecha', 'Derecha'), ('Izquierda', 'Izquierda')]
-    objects = models.Manager()
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
@@ -1800,6 +1855,9 @@ class HojaAtencionPs(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     resultados = models.TextField(verbose_name='Resultados', null=True, blank=True)
     diagnostico = models.TextField(verbose_name='Diagnosticos', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
@@ -1808,7 +1866,7 @@ class HojaAtencionPs(models.Model):
 
 class NotasEvolucionPS(models.Model):
 
-    objects = models.Manager()
+
     opcionesQueTipo=[('Individual','Individual'),('Grupal','Grupal')]
 
     expediente = models.CharField(max_length=10, null=True, blank=True,verbose_name='No.Expediente')
@@ -1825,6 +1883,9 @@ class NotasEvolucionPS(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     individualogrupal = models.CharField(verbose_name='Sesion Individual o Grupal',max_length=15,choices=opcionesQueTipo, null=True, default='Individual')
     selograron = models.BooleanField(verbose_name='Se logro objetivo?', null=True, default=False)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
@@ -1841,7 +1902,6 @@ class NotasEvolucionPS(models.Model):
 
 class Medico(models.Model):
 
-    objects = models.Manager()
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
@@ -1861,6 +1921,9 @@ class Medico(models.Model):
     diagnostico = models.TextField(verbose_name='Diagnostico', null=True, blank=True)
     pronostico = models.TextField(verbose_name='Pronostico', null=True, blank=True)
     tratamientosugerido = models.TextField(verbose_name='Tratamiento sugerido', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
@@ -1869,17 +1932,19 @@ class Medico(models.Model):
 
 class Recetas(models.Model):
 
-    objects = models.Manager()
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     historial = models.TextField(verbose_name='Historial de recetas', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
         return f"Expediente: {self.expediente}"
 
 class HistoriaClinica(models.Model):
-      objects = models.Manager()
+
+
       expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
       fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
       medico = models.SmallIntegerField(verbose_name="Medico", blank=True, null=True)
@@ -2047,3 +2112,20 @@ class HistoriaClinica(models.Model):
       otroTratamiento = models.TextField(verbose_name='Otro', null=True, blank=True)
       justificacion = models.TextField(verbose_name='Justificacion', null=True, blank=True)
       observacionesTratamiento = models.TextField(verbose_name='Observaciones', null=True, blank=True)
+      clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+      objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+class Clinicas(models.Model):
+    objects = models.Manager
+
+    clinica = models.CharField(max_length=30, unique=True, verbose_name='ID Clínica')
+    nombre = models.CharField(max_length=200)
+    password = models.CharField(max_length=128)  # Para guardar contraseña
+    numeroDeInternos = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.clinica} - {self.nombre}"
+
+    def check_password(self, raw_password):
+        # Verificación simple de contraseña
+        return self.password == raw_password

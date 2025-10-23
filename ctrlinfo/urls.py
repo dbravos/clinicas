@@ -29,13 +29,14 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         listaSesiones,capturaSesion,capturaSesionGrupal,listaSesionesGrupales,planConsejeria,escanear_tarea,\
                         lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
-                        cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso
+                        cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', primermenu, name='Menu principal'),
+    path('', login_clinica, name='login_clinica'),
+    path('dashboard/', dashboard, name='dashboard'),
     path('menuprincipal/', primermenu, name='Menu principal'),
     path('listaint/',listaint,name='listaint'),
     path('agregainterno/',agregainterno,name='agregainterno'),

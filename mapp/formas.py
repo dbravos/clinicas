@@ -2,7 +2,7 @@ from django import forms
 from mapp.models import Internos,DatosGrales,Usuarios,Einicial,Assist,Cfisicas,Cmentales,Crelaciones,\
                         Tratamientos,SituacionFamiliar,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,\
                         Riesgos,Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,\
-                        HojaAtencionPs,NotasEvolucionPS,Medico,Recetas,HistoriaClinica
+                        HojaAtencionPs,NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas
 
 from django.utils import timezone
 from django.forms import widgets,NumberInput
@@ -1394,3 +1394,15 @@ class HistoriaClinicaf(forms.ModelForm):
                     field.widget.attrs['class'] = 'form-control form-control-sm'
                 elif isinstance(field.widget, forms.CheckboxInput):
                     field.widget.attrs['class'] = 'form-check-input'
+
+
+class ClinicaLoginForm(forms.Form):
+    clinica_id = forms.CharField(
+        label="ID de tu Clínica",
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: CLINICA001'})
+    )
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )

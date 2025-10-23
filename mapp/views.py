@@ -16,6 +16,9 @@ import json
 import os
 from reportlab.pdfgen import canvas  # ✅ AGREGAR ESTA IMPORTACIÓN
 from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
+from django.http import HttpResponse
+from django.conf import settings
+
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -38,13 +41,13 @@ except ImportError:
 from mapp.models import Internos,Usuarios,DatosGrales,Einicial,Assist,SituacionFamiliar,Cfisicas,Cmentales,\
                         Crelaciones,Tratamientos,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,Riesgos,\
                         Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,HojaAtencionPs,\
-                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica
+                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas
 
 from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependientesf,IntProvienef,Einicialf,\
                     Assistf,SituacionFamiliarf,Cfisicasf,Cmentalesf,Crelacionesf,Tratamientosf,Psicosisf,Sdevidaf,\
                     Usodrogasf,Ansiedadf,Depresionf,Marcadoresf,Riesgosf,Razonesf,Valorizacionf,\
                     CIndividualf,CFamiliarf,CGrupalf,PConsejeriaf,TareaConsejeriaf,HojaAtencionPsf,NotasEvolucionPSf,\
-                    Medicof,Recetasf,HistoriaClinicaf
+                    Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm
 
 
 
@@ -2253,38 +2256,35 @@ def cerrar_sesion(request):
     return JsonResponse({'success': False})
 
 
-from pypdf import PdfMerger
-from django.http import HttpResponse
-from django.conf import settings
-import os
+# views.py - ACTUALIZA tu vista de login
+def login_clinica(request):
+    if request.method == 'POST':
+        form = ClinicaLoginForm(request.POST)
+        if form.is_valid():
+            clinica_id = form.cleaned_data['clinica_id']
+            password = form.cleaned_data['password']
+
+            try:
+                clinica = Clinicas.objects.get(clinica=clinica_id)
+                if clinica.password == password:  # Verificación simple
+                    # GUARDAR en sesión
+                    request.session['clinica_actual'] = clinica.clinica
+                    request.session['clinica_nombre'] = clinica.nombre
+                    return redirect('dashboard')
+                else:
+                    form.add_error('password', 'Contraseña incorrecta')
+            except Clinicas.DoesNotExist:
+                form.add_error('clinica_id', 'Clínica no encontrada')
+    else:
+        form = ClinicaLoginForm()
+
+    return render(request, 'login.html', {'form': form})
 
 
-def unir_contratos(request,id):
-    # Tus 3 archivos específicos
-    archivos_pdf = [
-        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato1.pdf'),
-        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato2.pdf'),
-        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato3.pdf')
-    ]
+def dashboard(request):
+    # Verificar que esté loggeado
+    if 'clinica_actual' not in request.session:
+        return redirect('login_clinica')
 
-    merger = PdfMerger()
-
-    for archivo in archivos_pdf:
-        if os.path.exists(archivo):
-            with open(archivo, 'rb') as pdf:
-                merger.append(pdf)
-                print(f"✅ Añadido: {os.path.basename(archivo)}")
-        else:
-            error_msg = f"❌ Error: No se encuentra {archivo}"
-            print(error_msg)
-            return HttpResponse(error_msg)
-
-    from io import BytesIO
-    pdf_combinado = BytesIO()
-    merger.write(pdf_combinado)
-    merger.close()
-
-    print("✅ PDFs combinados exitosamente")
-    response = HttpResponse(pdf_combinado.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="contrato_completo_clinica.pdf"'
-    return response
+    # Aquí van tus vistas normales
+    return render(request, 'MenuPrincipal.html')
