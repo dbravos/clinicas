@@ -101,6 +101,24 @@ def imprime_aviso(request,id):
                'fecha_formateada': "FECHA NO DISPONIBLE"
            })
 
+
+# En tu vista de consentimiento
+def consentimiento(request, id):
+    interno = get_object_or_404(Internos, pk=id)
+    datosgrales = DatosGrales.objects.first()  # O como obtengas estos datos
+
+    # Formatear fecha actual
+    from django.utils import timezone
+    fecha_actual = timezone.now().strftime('%d/%m/%Y %I:%M %p')
+
+    contexto = {
+        'interno': interno,
+        'datosgrales': datosgrales,
+        'fecha_actual': fecha_actual,
+    }
+
+    return render(request, 'carta_consentimiento.html', contexto)
+
 def probar(request):
     return render(request,'agregar.html')
 
@@ -264,7 +282,7 @@ def borrausuario(request,id):
     usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
     return render(request, 'lusuarios.html', {'usuarios': usuarios})
 
-def consentimiento(request,id):
+def consentimientoold(request,id):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="consentimiento.pdf"'
     interno = get_object_or_404(Internos, pk=id)
