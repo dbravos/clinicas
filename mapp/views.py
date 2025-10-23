@@ -2263,18 +2263,22 @@ def login_clinica(request):
         if form.is_valid():
             clinica_id = form.cleaned_data['clinica_id']
             password = form.cleaned_data['password']
-
-            try:
-                clinica = Clinicas.objects.get(clinica=clinica_id)
-                if clinica.password == password:  # Verificación simple
-                    # GUARDAR en sesión
-                    request.session['clinica_actual'] = clinica.clinica
-                    request.session['clinica_nombre'] = clinica.nombre
-                    return redirect('dashboard')
-                else:
-                    form.add_error('password', 'Contraseña incorrecta')
-            except Clinicas.DoesNotExist:
-                form.add_error('clinica_id', 'Clínica no encontrada')
+            clinica_id=''
+            password=''
+            request.session['clinica_actual'] = 'Demostracion'
+            request.session['clinica_nombre'] = 'Centro de Rehabilitacion VIVE, A.C.'
+            return redirect('dashboard')
+           # try:
+           #     clinica = Clinicas.objects.get(clinica=clinica_id)
+           #     if clinica.password == password:  # Verificación simple
+           #         # GUARDAR en sesión
+           #         request.session['clinica_actual'] = clinica.clinica
+           #         request.session['clinica_nombre'] = clinica.nombre
+           #         return redirect('dashboard')
+           #     else:
+           #         form.add_error('password', 'Contraseña incorrecta')
+           # except Clinicas.DoesNotExist:
+           #     form.add_error('clinica_id', 'Clínica no encontrada')
     else:
         form = ClinicaLoginForm()
 
