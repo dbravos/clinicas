@@ -1,0 +1,639 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrato de Ingreso </title>
+    <style>
+        @media print {
+            @page {
+                margin: 1cm;
+                size: letter;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.3;
+                color: #000;
+            }
+
+            .page-break {
+                page-break-before: always;
+                margin-top: 2cm;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .header, .footer {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .clinic-name {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .clinic-address, .clinic-phone {
+                font-size: 11px;
+                margin-bottom: 3px;
+            }
+
+            .document-title {
+                text-align: center;
+                font-size: 14px;
+                font-weight: bold;
+                margin: 15px 0;
+                text-decoration: underline;
+            }
+
+            .clause-title {
+                font-weight: bold;
+                margin-top: 12px;
+                margin-bottom: 5px;
+                font-size: 12px;
+            }
+
+            .clause-content {
+                margin-bottom: 10px;
+                text-align: justify;
+                font-size: 11px;
+            }
+
+            .signature-section {
+                margin-top: 30px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .signature-line {
+                border-top: 1px solid #000;
+                width: 180px;
+                text-align: center;
+                padding-top: 3px;
+                font-size: 10px;
+            }
+
+            .clauses-header {
+                text-align: center;
+                font-weight: bold;
+                margin: 15px 0;
+                letter-spacing: 3px;
+            }
+
+            .importe-letras {
+                font-style: italic;
+                margin-top: 3px;
+                font-size: 10px;
+            }
+        }
+
+        @media screen {
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.4;
+                margin: 20px;
+                padding: 0;
+                color: #333;
+                background: #f5f5f5;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #333;
+                padding-bottom: 10px;
+                position: relative; /* Agregar esto */
+                display: flex; /* Agregar esto */
+                align-items: center; /* Agregar esto */
+                justify-content: center; /* Agregar esto */
+
+            }
+
+            .clinic-name, .clinic-rfc {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .clinic-address {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+
+            .clinic-phone {
+                font-size: 12px;
+                margin-bottom: 15px;
+            }
+
+            .document-title {
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                margin: 20px 0;
+                text-decoration: underline;
+            }
+
+            .clause-title {
+                font-weight: bold;
+                margin-top: 15px;
+                margin-bottom: 5px;
+            }
+
+            .clause-content {
+                margin-bottom: 15px;
+                text-align: justify;
+            }
+
+            .signature-section {
+                margin-top: 40px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .signature-line {
+                border-top: 1px solid #333;
+                width: 200px;
+                text-align: center;
+                padding-top: 5px;
+            }
+
+            .solo-cargos {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .signature-sin-line {
+                width: 200px;
+                text-align: center;
+                padding-top: 5px;
+            }
+
+            .page-break {
+                border-top: 1px dashed #ccc;
+                margin: 30px 0;
+                padding-top: 20px;
+            }
+
+            .clauses-header {
+                text-align: center;
+                font-weight: bold;
+                margin: 20px 0;
+                letter-spacing: 3px;
+            }
+
+            .fecha-selector {
+                margin-top: 10px;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+            }
+
+            .importe-letras {
+                font-style: italic;
+                display : inline;
+                margin-left: 5px;
+                color: #666;
+                background: #f8f9fa;
+                padding: 3px 8px;
+                border-radius: 3px;
+                font-size: 12px;
+            }
+
+            .importe-container {
+                display : inline;
+                margin: 0;
+            }
+        }
+            .logo-container {
+               position: absolute;
+               left: 0;
+               top: 0;
+               }
+
+            .logo {
+                max-width: 200px; /* Ajusta el tamaño según necesites */
+                max-height: 200px;
+               }
+
+
+
+
+        @media print {
+               .logo {
+               max-width: 70px;
+               max-height: 70px;
+    }
+}
+        .fecha-firma-container {
+              margin-top: 40px;
+              text-align: center;
+              width: 100%;
+           }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                Imprimir Contrato
+            </button>
+            <button onclick="cerrarVentana()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
+                Cerrar
+            </button>
+
+            <div class="fecha-selector">
+                <label for="fechaSeleccion"><strong>Seleccionar fecha de ingreso:</strong></label>
+                <input type="date" id="fechaSeleccion" onchange="actualizarFecha()" style="margin-left: 10px; padding: 5px;">
+                <button onclick="usarFechaActual()" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                    Usar Fecha Actual
+                </button>
+            </div>
+        </div>
+
+        <!-- Página 1 -->
+        <div class="header">
+            <div class="logo-container">
+                <img src="/static/images/logo.jpg?v=2" alt="Logo" class="logo">
+
+            </div>
+            <div class="clinic-info">
+            <div class="clinic-name">{{datosgrales.nombre}}</div>
+            <div class="clinic-address">{{datosgrales.calleynumero}}</div>
+            <div class="clinic-address">{{datosgrales.colonia}}</div>
+            <div class="clinic-address">{{datosgrales.ciudad}},{{datosgrales.estado}},{{datosgrales.pais}}</div>
+            <div class="clinic-phone">Teléfono: {{datosgrales.telefono}}</div>
+             <div class="clinic-rfc">R.F.C.: {{datosgrales.rfc}} </div>
+            </div>
+        </div>
+
+        <div class="document-title">CONTRATO Y SOLICITUD DE INGRESO</div>
+
+        <div class="clause-content">
+            EL SUSCRITO <strong>{{interno.nombrecompleto}}</strong> EN LO SUCESIVO DENOMINADO COMO EL "INTERNO", POR MEDIO DE LA PRESENTE CONVIENE, ESTÁ DE ACUERDO Y POR LO TANTO SE OBLIGA Y OTORGA SU PLENO CONSENTIMIENTO EN FORMA VOLUNTARIA, SIN VICIO, NI DEFECTO OCULTO ALGUNO PARA SU INMEDIATO INGRESO A LAS INSTALACIONES DE LA ASOCIACIÓN CIVIL DENOMINADA <strong>{{datosgrales.nombre}}</strong> EN LO SUCESIVO DENOMINADA COMO "LA CLÍNICA", CON EL FIN DE LLEVAR A CABO UN PROCESO DE REHABILITACIÓN RESPECTO DEL USO OF DROGAS, ALCOHOL, FÁRMACO DEPENDENCIAS Y/O ENFERMEDAD EMOCIONAL EN SUS DISTINTAS CIRCUNSTANCIAS, PARA SU POSTERIOR REINTEGRACIÓN A LA SOCIEDAD.
+        </div>
+
+        <div class="clause-content">
+            ASÍ MISMO, DECLARA EL "INTERNO" QUE EN ESTE ACTO ACEPTA Y POR LO TANTO SE OBLIGA DE MANERA VOLUNTARIA A CUMPLIR TODOS Y CADA UNO DE LOS TÉRMINOS Y CONDICIONES DEL PRESENTE, ASÍ COMO EL REGLAMENTO INTERNO Y DEMÁS NORMAS ESTABLECIDAS POR "LA CLÍNICA" POR LO QUE SE OBLIGA Y SUJETA AL TENOR DE LAS SIGUIENTES CLÁUSULAS:
+        </div>
+
+        <div class="clauses-header">C L A U S U L A S</div>
+
+        <div class="clause-title">PRIMERA.- INGRESO.-</div>
+        <div class="clause-content">
+            AL MOMENTO DEL INGRESO DEL "INTERNO" A LAS INSTALACIONES DE "LA CLÍNICA", SE SOLICITARÁ DE FORMA VOLUNTARIA UNA APORTACIÓN DE:
+            <div class="importe-container">
+                <strong id="importeInicial">${{interno.aportacioninicial}}</strong>
+                <div class="importe-letras" id="importeInicialLetras"></div>
+            </div>
+            PARA CUBRIR GASTOS QUE SE GENERAN EN EL CUARTO DE OBSERVACIÓN, Y DEMÁS NECESIDADES QUE SE LLEGUEN A REQUERIR.
+        </div>
+
+        <div class="clause-title">SEGUNDA.- TERMINO.-</div>
+        <div class="clause-content">
+            EL TIEMPO ESTIPULADO DE INTERNAMIENTO O INGRESO VOLUNTARIO POR PARTE DEL "INTERNO" EN "LA CLÍNICA" SERÁ POR UN TÉRMINO DE <strong>{{interno.duracion}}</strong>, CONTADOS A PARTIR DE LA FECHA DE SUSCRIPCIÓN DEL PRESENTE, EN LO SUCESIVO EL "TÉRMINO".
+        </div>
+
+        <div class="clause-title">TERCERA.- PLENA CONVENCIONAL.-</div>
+        <div class="clause-content">
+            EN CASO QUE EL FAMILIAR Y/O PERSONA RESPONSABLE DEL INGRESO DEL "INTERNO" EN LO SUCESIVO EL O LA. C. <strong>{{interno.responsable}}</strong> DENOMINADO LA PARTE "RESPONSABLE", SOLICITE EL EGRESO DEL "INTERNO" ANTES DEL VENCIMIENTO DEL "TÉRMINO" ESTIPULADO EN LA CLÁUSULA INMEDIATA ANTERIOR, DE TAL MANERA QUE PERTURBE LA REHABILITACIÓN DEL "INTERNO", EL "RESPONSABLE" Y/O "INTERNO" TENDRÁN QUE CUBRIR EL TOTAL DE LA CUOTA VOLUNTARIA DE:
+            <div class="importe-container">
+                <strong id="importeTotal">${{interno.aportaciontotal}}</strong>
+                <div class="importe-letras" id="importeTotalLetras"></div>
+            </div>
+            INCLUYENDO LO ESTIPULADO EN LA CLÁUSULA PRIMERA DEL PRESENTE CONTRATO, MISMA CANTIDAD QUE SE TENDRÁ QUE LIQUIDAR EN SU TOTALIDAD PREVIO AL "TÉRMINO" DEL PRESENTE CONTRATO, POR INCUMPLIMIENTO EN LOS TÉRMINOS DEL CONTRATO SE TENDRÁ QUE CUBRIR LA TOTALIDAD DE LA CUOTA QUE SE MENCIONA CON ANTELACIÓN EN LA PRESENTE CLÁUSULA.
+        </div>
+
+        <div class="clause-content">
+            ASÍ MISMO, LAS PARTES CONVIENEN QUE LAS APORTACIONES QUE REALICE LA PARTE "RESPONSABLE" Y/O "INTERNO" POR CUALQUIER CONCEPTO A FAVOR DE "LA CLÍNICA" NO SON, NI SERÁN REEMBOLSABLES, YA QUE ESTAS SE DESTINAN PARA CUBRIR EL SOSTENIMIENTO DE LAS INSTALACIONES DE "LA CLÍNICA".
+        </div>
+
+        <div class="clause-content">
+            IGUALMENTE EL "RESPONSABLE" Y/O EL "INTERNO", ESTÁN CONSCIENTES QUE ES PARTE DE LA ETAPA DE DESINTOXICACIÓN, ASÍ COMO PARTE DE LAS POLÍTICAS DE "LA CLÍNICA", Y DE LA TERAPIA, QUE EL FAMILIAR NO PODRÁ VER AL "INTERNO" COMO MÍNIMO EN UN LAPSO DE 30 DÍAS.
+        </div>
+
+        <!-- Página 2 -->
+        <div class="page-break"></div>
+
+        <div class="header">
+                <div class="logo-container">
+                <img src="/static/images/logo.jpg?v=2" alt="Logo" class="logo">
+            </div>
+            <div class="clinic-info">
+            <div class="clinic-name">{{datosgrales.nombre}}</div>
+            <div class="clinic-address">{{datosgrales.calleynumero}}</div>
+            <div class="clinic-address">{{datosgrales.colonia}}</div>
+            <div class="clinic-address">{{datosgrales.ciudad}},{{datosgrales.estado}},{{datosgrales.pais}}</div>
+            <div class="clinic-phone">Teléfono: {{datosgrales.telefono}}</div>
+             <div class="clinic-rfc">R.F.C.: {{datosgrales.rfc}} </div>
+            </div>
+        </div>
+
+        <div class="clause-content">
+            CONTANDO A PARTIR DEL DÍA SIGUIENTE DE QUE EL "INTERNO" ES INTERNADO EN LAS INSTALACIONES DE <strong>"LA CLÍNICA"</strong>, SIENDO LA EXCEPCIÓN POR CAUSAS DE FUERZA MAYOR Y/O EN SU CASO QUE ESTÉ CUBIERTO EL TOTAL DE LA CUOTA VOLUNTARIA QUE SE MENCIONÓ CON ANTELACIÓN.
+        </div>
+
+        <div class="clause-title">CUARTA.- SEGURIDAD.-</div>
+        <div class="clause-content">
+            POR LA PROPIA SEGURIDAD E INTEGRIDAD FÍSICA DEL <strong>"INTERNO"</strong>, AL INGRESAR A LAS INSTALACIONES DE <strong>"LA CLÍNICA"</strong> LA PARTE <strong>"RESPONSABLE"</strong> Y/O EL <strong>"INTERNO"</strong>, AL MOMENTO DEL INGRESO BAJO PROTESTA DE DECIR VERDAD, TIENE LA OBLIGACIÓN DE PROPORCIONAR LOS DATOS DEL <strong>"INTERNO"</strong> RESPECTO A SU CONDICIÓN MÉDICA DE SALUD FÍSICA Y MENTAL, PARA QUE EN SU MOMENTO SE DETERMINE SU ESTANCIA O CANALIZACIÓN CORRESPONDIENTE. A LA VEZ POR MISMA SEGURIDAD DEL USUARIO, ESTA UNIDAD PUEDE CONTAR CON VIDEO Y AUDIO GRABACIÓN MONITOREO LAS 24 HRS.
+        </div>
+
+        <div class="clause-title">QUINTA.- RESPONSABILIDAD LEGAL.-</div>
+        <div class="clause-content">
+            LAS PARTES CONVIENEN QUE <strong>"LA CLÍNICA"</strong>, NO TENDRÁ RESPONSABILIDAD ALGUNA RESPECTO DE CUALQUIER CONTINGENCIA, ACCIDENTE, LESIÓN O DAÑO FÍSICO O MORAL, YA SEA PARCIAL O TOTAL, INCLUSIVE MUERTE, QUE PUEDA ACONTECERLE AL <strong>"INTERNO"</strong> DENTRO O FUERA DE LAS INSTALACIONES DE <strong>"LA CLÍNICA"</strong>, EN EL CASO DE QUE EL <strong>"INTERNO"</strong> EGRESE DE LAS INSTALACIONES DE <strong>"LA CLÍNICA"</strong> SIN AUTORIZACIÓN PREVIA Y POR ESCRITO POR PARTE DE <strong>"LA CLÍNICA"</strong>, ESTO DEBIDO A ALGUNA OMISIÓN O FALTA DE CUIDADO Y/O NEGLIGENCIA DEL MISMO "INTERNO" O POR CUALQUIER OTRA RAZÓN; ASÍ MISMO, EL <strong>"INTERNO"</strong> CONJUNTAMENTE CON LA PARTE <strong>"RESPONSABLE"</strong> DECLARA QUE NO ES, NI SERA SU VOLUNTAD, EL EJERCER EN CONTRA DE "LA CLINICA" ACCIÓN LEGAL ALGUNA ANTE LOS TRIBUNALES COMPETENTES PENALES, JUDICIALES, CIVILES, ADMINISTRATIVOS, LABORALES, FISCALES, YA SEAN LOCALES, ESTATALES O FEDERALES, O DE CUALQUIER OTRA NATURALEZA, NACIONALES O EXTRANJEROS, O DE CUALQUIERA DE SUS SUCURSALES, POR LO QUE EN ESTE ACTO LIBERA DE CUALQUIER RESPONSABILIDAD PRESENTE O FUTURA A <strong>"LA CLÍNICA"</strong> A CUALQUIERA DE SUS SUCURSALES, EN CASO DE HACER CASO OMISO A LO DICHO CON ANTELACIÓN INMEDIATA EL <strong>"RESPONSABLE"</strong> Y/O <strong>"INTERNO"</strong> DECLARA EXPRESAMENTE HACERSE SOLIDARIO CON <strong>"LA CLINICA"</strong>; DE LA MISMA FORMA, <strong>"LA CLINICA"</strong> NO TENDRÁ RESPONSABILIDAD ALGUNA RESPECTO TODAS Y CADA UNA DE LAS POSESIONES O PERTENENCIAS ADQUIRIDAS POR EL "INTERNO" DURANTE SU ESTANCIA EN LAS INSTALACIONES DE <strong>"LA CLINICA"</strong> TALES COMO SON ROPA, COBIJAS Y DEMAS ARTICULOS. TODA INFORMACIÓN PROPORCIONADA AL FAMILIAR Y/O USUARIOS SE MANEJARA BAJO LAS NORMAS OF CONFIDENCIALIDAD Y EL SECRETO PROFESIONAL.
+        </div>
+
+        <div class="clause-title">SEXTA.- COLABORACIÓN Y RESPONSABILIDAD.-</div>
+        <div class="clause-content">
+            <strong>"LA CLÍNICA"</strong> NO SE HACE RESPONSABLE POR LOS PROBLEMAS PENALES, JUDICIALES, CIVILES, ADMINISTRATIVOS, LABORALES, FISCALES, YA SEAN LOCALES, ESTATALES O FEDERALES, O DE CUALQUIER OTRA NATURALEZA, NACIONALES O EXTRANJEROS, PRESENTES O FUTUROS QUE EL "INTERNO" PUEDA TENER, POR LO TANTO, EN ESTE ACTO, EL "INTERNO" SE OBLIGA DE MANERA VOLUNTARIA, EN SU CASO, A COLABORAR Y PARTICIPAR EN UNA REVISIÓN DE HUELLAS DACTILARES O DIGITALES, RECONOCIMIENTO OF VOZ E IDENTIDAD POR LOS MEDIOS NECESARIOS, QUE SEA REQUERIDOS POR LAS AUTORIDADES COMPETENTES CORRESPONDIENTES.
+        </div>
+
+        <div class="clause-title">SÉPTIMA.- OBJETO SOCIAL.-</div>
+        <div class="clause-content">
+            EL OBJETIVO SOCIAL DE "LA CLÍNICA", ES AYUDAR A LAS PERSONAS, SECTORES Y REGIONES DE ESCASOS RECURSOS Y/O GRUPOS VULNERABLES, QUE PADEZCAN PROBLEMAS DE ALCOHOL, ENFERMEDADES EMOCIONALES Y FÁRMACO DEPENDENCIAS; PARA QUE ESTOS YA UNA VEZ REHABILITADOS PRESTEN AYUDA A LOS QUE LA NECESITEN, "LA CLÍNICA" NO ES
+        </div>
+
+        <!-- Página 3 -->
+        <div class="page-break"></div>
+        <div class="header">
+                <div class="logo-container">
+                <img src="/static/images/logo.jpg?v=2" alt="Logo" class="logo">
+                </div>
+            <div class="clinic-info">
+            <div class="clinic-name">{{datosgrales.nombre}}</div>
+            <div class="clinic-address">{{datosgrales.calleynumero}}</div>
+            <div class="clinic-address">{{datosgrales.colonia}}</div>
+            <div class="clinic-address">{{datosgrales.ciudad}},{{datosgrales.estado}},{{datosgrales.pais}}</div>
+            <div class="clinic-phone">Teléfono: {{datosgrales.telefono}}</div>
+            <div class="clinic-rfc">R.F.C.: {{datosgrales.rfc}} </div>
+            </div>
+        </div>
+
+        <div class="clause-content">
+            UNA ORGANIZACIÓN LUCRATIVA, SIN EMBARGO SE MANTIENE DE APORTACIONES Y/O DONACIONES VOLUNTARIAS DE LOS MISMOS FAMILIARES Y/O "RESPONSABLE" DEL "INTERNO", POR LO QUE EL "RESPONSABLE" SE COMPROMETE Y OBLIGA A PROPORCIONAR AL "INTERNO",
+        </div>
+
+        <div class="clause-content">
+            VITAMINAS, SUEROS Y MEDICAMENTOS PARA SU TRATAMIENTO DE ACUERDO A LA VALORACIÓN DEL MÉDICO.
+        </div>
+
+        <div class="clause-title">OCTAVA.- NECESIDADES EN GENERAL.-</div>
+        <div class="clause-content">
+            ES IMPORTANTE DECLARAR QUE <strong>"LA CLÍNICA"</strong> PERMANENTEMENTE TIENE LAS SIGUIENTES NECESIDADES: FRIJOL, ARROZ, CAFÉ, AZÚCAR, CLORO, PINO, ACEITE, ESCOBAS, HARINA, MANTECA, LATERIA, PAPEL HIGIÉNICO Y MATERIALES PARA CONSTRUCCIÓN, POR LO QUE CUALQUIER APOYO QUE SE NOS BRINDE ES PARA BENEFICIO DEL OBJETIVO DE LA INSTITUCIÓN.
+        </div>
+
+        <div class="clause-title">NOVENA.- DOMICILIO.-</div>
+        <div class="clause-content">
+            PARA EFECTOS DE OÍR Y RECIBIR NOTIFICACIONES LAS PARTES DEL PRESENTE SEÑALAN COMO SU DOMICILIO LOS SIGUIENTES:
+        </div>
+
+        <div class="clause-content">
+            <strong>"EL RESPONSABLE":</strong> {{interno.rcalle}} {{interno.rcolonia}} {{interno.rciudad}},{{interno.estado}}
+        </div>
+
+        <div class="clause-content">
+            <strong>"LA CLÍNICA":</strong> {{datosgrales.calleynumero}} {{datosgrales.colonia}} {{datosgrales.ciudad}},{{datosgrales.estado}}
+        </div>
+
+        <div class="clause-title">DÉCIMA.- NORMA OFICIAL MEXICANA.-</div>
+        <div class="clause-content">
+            <strong>"LA CLÍNICA"</strong> DECLARA QUE CUMPLE CON LA NORMA OFICIAL MEXICANA NOM-028-SSA2-2009 PARA LA PREVENCIÓN, TRATAMIENTO Y CONTROL DE LAS ADICCIONES, PUBLICADO EN EL DIARIO OFICIAL DE LA FEDERACIÓN Y DEMÁS LEYES Y NORMAS APLICADAS.
+        </div>
+
+        <div class="clause-title">DECIMO PRIMERA.- JURISDICCIÓN.-</div>
+        <div class="clause-content">
+            EN CASO DE CUALQUIER CONTROVERSIA QUE SUGIERE CON MOTIVO DE LA INTERPRETACIÓN, CUMPLIMIENTO Y/O EJECUCIÓN DEL PRESENTE, <strong>"LA CLÍNICA"</strong> LA PARTE <strong>"RESPONSABLE"</strong> Y EL <strong>"INTERNO"</strong> CONVIENEN Y POR LO TANTO SE SOMETEN A LA JURISDICCIÓN Y COMPETENCIA DE LOS TRIBUNALES DE LA CIUDAD DE TIJUANA, BAJA CALIFORNIA, Y POR LO TANTO RENUNCIAN A CUALQUIER OTRO FUERO O JURISDICCIÓN QUE LE PUDIERE CORRESPONDER POR RAZÓN DE SU DOMICILIO PRESENTE O FUTURO.
+        </div>
+
+        <div class="fecha-firma-container">
+            <div id="fechaContrato">{{datosgrales.ciudad}},{{datosgrales.estado}} A <span id="fechaTexto">{{ interno.fechaingreso }}</span></div>
+
+            <div class="signature-section">
+                <div class="signature-line">{{ interno.nombrecompleto }}</div>
+                <div class="signature-line">{{ interno.responsable }}</div>
+                <div class="signature-line">{{ datosgrales.responsable }}</div>
+            </div>
+            <div class="solo-cargos">
+                <div class="signature-sin-line">INTERNO</div>
+                <div class="signature-sin-line">RESPONSABLE</div>
+                <div class="signature-sin-line">ENCARGADO DE LA CLÍNICA</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Función para convertir números a letras en español
+        function numeroALetras(numero) {
+            // Limpiar el número de comas y caracteres no numéricos
+            numero = numero.toString().replace(/[^0-9.]/g, '');
+
+            // Convertir a número
+            let num = parseFloat(numero);
+
+            if (isNaN(num)) {
+                return "Cantidad no válida";
+            }
+
+            // Separar parte entera y decimal
+            let entero = Math.floor(num);
+            let decimal = Math.round((num - entero) * 100);
+
+            // Convertir parte entera
+            let letrasEntero = convertirEntero(entero);
+
+            // Convertir parte decimal
+            let letrasDecimal = "";
+            if (decimal > 0) {
+                letrasDecimal = " CON " + convertirEntero(decimal) + "/100";
+            }
+
+            return letrasEntero + " PESOS MEXICANOS" + letrasDecimal;
+        }
+
+        // Función auxiliar para convertir números enteros
+        function convertirEntero(numero) {
+            if (numero === 0) return "CERO";
+
+            const unidades = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+            const decenas = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+            const especiales = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+            const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+
+            let resultado = '';
+
+            // Miles de millones
+            if (numero >= 1000000000) {
+                let milesMillones = Math.floor(numero / 1000000000);
+                resultado += convertirEntero(milesMillones) + ' MIL ';
+                numero %= 1000000000;
+            }
+
+            // Millones
+            if (numero >= 1000000) {
+                let millones = Math.floor(numero / 1000000);
+                if (millones === 1) {
+                    resultado += 'UN MILLÓN ';
+                } else {
+                    resultado += convertirEntero(millones) + ' MILLONES ';
+                }
+                numero %= 1000000;
+            }
+
+            // Miles
+            if (numero >= 1000) {
+                let miles = Math.floor(numero / 1000);
+                if (miles === 1) {
+                    resultado += 'MIL ';
+                } else {
+                    resultado += convertirEntero(miles) + ' MIL ';
+                }
+                numero %= 1000;
+            }
+
+            // Centenas
+            if (numero >= 100) {
+                let centena = Math.floor(numero / 100);
+                if (centena === 1 && numero === 100) {
+                    resultado += 'CIEN ';
+                } else {
+                    resultado += centenas[centena] + ' ';
+                }
+                numero %= 100;
+            }
+
+            // Decenas y unidades
+            if (numero > 0) {
+                if (numero >= 10 && numero <= 19) {
+                    resultado += especiales[numero - 10] + ' ';
+                } else {
+                    let decena = Math.floor(numero / 10);
+                    let unidad = numero % 10;
+
+                    if (decena > 0) {
+                        resultado += decenas[decena];
+                        if (unidad > 0) {
+                            if (decena === 2) {
+                                resultado += 'I' + unidades[unidad].toLowerCase();
+                            } else {
+                                resultado += ' Y ' + unidades[unidad].toLowerCase();
+                            }
+                        }
+                        resultado += ' ';
+                    } else {
+                        resultado += unidades[unidad] + ' ';
+                    }
+                }
+            }
+
+            return resultado.trim();
+        }
+
+        // Función para actualizar los importes en letras
+        function actualizarImportesLetras() {
+            const importeInicial = document.getElementById('importeInicial').textContent;
+            const importeTotal = document.getElementById('importeTotal').textContent;
+
+            if (importeInicial) {
+                document.getElementById('importeInicialLetras').textContent =
+                    "(" + numeroALetras(importeInicial) + ")";
+            }
+
+            if (importeTotal) {
+                document.getElementById('importeTotalLetras').textContent =
+                    "(" + numeroALetras(importeTotal) + ")";
+            }
+        }
+
+        // Función CORREGIDA para formatear fecha en español - SIN PROBLEMA DE ZONA HORARIA
+        function formatearFechaEnEspanol(fecha) {
+            const meses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+
+            // CORRECCIÓN: Parsear la fecha manualmente para evitar problemas de zona horaria
+            const partes = fecha.split('-');
+            const año = parseInt(partes[0]);
+            const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0 a 11
+            const dia = parseInt(partes[2]);
+
+            return `${meses[mes]} ${dia} de ${año}`;
+        }
+
+        // Función para actualizar la fecha en el contrato
+        function actualizarFecha() {
+            const fechaSeleccion = document.getElementById('fechaSeleccion').value;
+            const fechaTexto = document.getElementById('fechaTexto');
+
+            if (fechaSeleccion) {
+                fechaTexto.textContent = formatearFechaEnEspanol(fechaSeleccion);
+            }
+        }
+
+        // Función para usar la fecha actual - CORREGIDA
+        function usarFechaActual() {
+            const fechaActual = new Date();
+            // Formatear como YYYY-MM-DD manualmente para evitar problemas de zona horaria
+            const año = fechaActual.getFullYear();
+            const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+            const dia = String(fechaActual.getDate()).padStart(2, '0');
+            const fechaFormateada = `${año}-${mes}-${dia}`;
+
+            document.getElementById('fechaSeleccion').value = fechaFormateada;
+            document.getElementById('fechaTexto').textContent = formatearFechaEnEspanol(fechaFormateada);
+        }
+
+        // Función mejorada para cerrar la ventana
+        function cerrarVentana() {
+            // Intentar cerrar la ventana
+            if (window.history.length > 1) {
+                // Si hay historial, regresar
+                window.history.back();
+            } else {
+                // Si no hay historial, cerrar la ventana (funciona en algunas situaciones)
+                window.close();
+
+                // Si window.close() no funciona, redirigir a una página anterior o mostrar mensaje
+                setTimeout(function() {
+                    // Intentar redirigir a la página principal o anterior
+                    window.location.href = '/'; // Cambia esto por tu URL principal
+                }, 1000);
+            }
+        }
+
+        // Inicializar con fecha actual y convertir importes al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si ya hay una fecha en el contrato
+            const fechaExistente = document.getElementById('fechaTexto').textContent.trim();
+
+            // Si no hay una fecha específica, usar la fecha actual
+            if (!fechaExistente || fechaExistente === "{{ interno.fechaingreso}}") {
+                usarFechaActual();
+            }
+
+            // Convertir importes a letras
+            actualizarImportesLetras();
+        });
+    </script>
+</body>
+
+{% endblock %}

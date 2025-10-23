@@ -29,7 +29,7 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         listaSesiones,capturaSesion,capturaSesionGrupal,listaSesionesGrupales,planConsejeria,escanear_tarea,\
                         lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
-                        cerrar_sesion
+                        cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso
 
 
 
@@ -95,6 +95,10 @@ urlpatterns = [
     path('imprimir-word/enviar/', imprimir_archivos_word, name='imprimir_archivos_word'),
     path('validar-usuario/', validar_usuario, name='validar_usuario'),
     path('cerrar-sesion/', cerrar_sesion, name='cerrar_sesion'),
+    path('contrato-completo/<int:id>', imprime_contrato, name='imprime_contrato'),
+    path('imprime_solicitud/<int:id>', imprime_solicitud, name='imprime_solicitud'),
+    path('imprime_aviso/<int:id>', imprime_aviso, name='imprime_aviso'),
+
 ]
 
 

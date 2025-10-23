@@ -499,18 +499,35 @@
   </div>
 </div>
 
-      <div class="form-actions">
+      <div class="form-actions mt-5">
       <button type="submit" class="btn btn-primary btn-save">
-        <i class="bi bi-save"></i> Guardar
+        <i class="bi bi-save"></i> Guardar registro
       </button>
       </div>
         </div>
     </form>
     {% endif%}
 </div>
-
-<button onclick="location.href='{% url 'consentimiento' id=interno.pk %}' "
-        type="button">Imprime Carta consentimiento</button>
+<div class="no-print" style="text-align: center; margin-top:-40px;margin-left:100px;">
+    <div style="display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+        <button onclick="location.href='{% url 'consentimiento' id=interno.pk %}'"
+                style="padding: 8px 12px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+         <i class="bi-file-text"></i>   Imprime Consentimiento
+        </button>
+        <button onclick="location.href='{% url 'imprime_contrato' id=interno.pk %}'"
+                style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+          <i class="bi-printer"></i> Imprime Contrato
+        </button>
+        <button onclick="location.href='{% url 'imprime_solicitud' id=interno.pk %}'"
+                style="padding: 8px 12px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+           <i class="bi-file-text"></i>  Imprime Solicitud
+        </button>
+        <button onclick="location.href='{% url 'imprime_aviso' id=interno.pk %}'"
+                style="padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+            <i class="bi-file-text"></i> Imprime Aviso
+        </button>
+    </div>
+</div>
 {% endblock %}
 </body>
 

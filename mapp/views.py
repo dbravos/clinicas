@@ -14,6 +14,8 @@ from django.db import transaction,DatabaseError
 import logging
 import json
 import os
+from reportlab.pdfgen import canvas  # ✅ AGREGAR ESTA IMPORTACIÓN
+from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -59,6 +61,45 @@ def primermenu(request):
 
     interno = Internos.objects.first()
     return render(request,'MenuPrincipal.html', {'interno': interno})
+
+def imprime_contrato(request,id):
+    interno = get_object_or_404(Internos, pk=id)
+    datosgrales = DatosGrales.objects.first()
+
+    return render(request,'imprime_contrato.html', {'interno': interno,'datosgrales':datosgrales})
+
+def imprime_solicitud(request,id):
+    interno = get_object_or_404(Internos, pk=id)
+    datosgrales = DatosGrales.objects.first()
+
+    return render(request,'solicitud_internacion.html', {'interno': interno,'datosgrales':datosgrales})
+
+def imprime_aviso(request,id):
+    interno = get_object_or_404(Internos, pk=id)
+    datosgrales = DatosGrales.objects.first()
+    # En tu vista
+
+
+    if interno.fechaingreso:
+        # Formatear la fecha como "17 de FEBRERO del 2024"
+       meses = {
+        1: "ENERO", 2: "FEBRERO", 3: "MARZO", 4: "ABRIL",
+        5: "MAYO", 6: "JUNIO", 7: "JULIO", 8: "AGOSTO",
+        9: "SEPTIEMBRE", 10: "OCTUBRE", 11: "NOVIEMBRE", 12: "DICIEMBRE"
+    }
+       fecha_formateada = f"{interno.fechaingreso.day} de {meses[interno.fechaingreso.month]} del {interno.fechaingreso.year}"
+
+       return render(request, 'aviso_internacion.html', {
+               'interno': interno,
+               'datosgrales': datosgrales,
+               'fecha_formateada': fecha_formateada  # ¡Aquí la agregas!
+                })
+    else:
+        return render(request, 'aviso_internacion.html', {
+               'interno': interno,
+               'datosgrales': datosgrales,
+               'fecha_formateada': "FECHA NO DISPONIBLE"
+           })
 
 def probar(request):
     return render(request,'agregar.html')
@@ -240,9 +281,10 @@ def consentimiento(request,id):
     # Agregar un título al reporte
 
 
-    logo="c:/viveprg/logo.jpg"
 
-    p.drawImage(logo,10,680,width=120,height=100)
+    logo_path = os.path.join(settings.BASE_DIR, 'mapp','static', 'images', 'logo.jpg')
+
+    p.drawImage(logo_path,10,680,width=120,height=100)
     p.drawString(140,mSuperior,datosgrales.nombre)
     p.drawString(140,mSuperior-avance,'RFC : '+datosgrales.rfc)
     p.drawString(140,mSuperior-2*avance,datosgrales.calleynumero+','+datosgrales.colonia)
@@ -2191,3 +2233,40 @@ def cerrar_sesion(request):
         request.session.flush()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
+
+
+from pypdf import PdfMerger
+from django.http import HttpResponse
+from django.conf import settings
+import os
+
+
+def unir_contratos(request,id):
+    # Tus 3 archivos específicos
+    archivos_pdf = [
+        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato1.pdf'),
+        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato2.pdf'),
+        os.path.join(settings.BASE_DIR, 'static', 'pdf', 'contrato3.pdf')
+    ]
+
+    merger = PdfMerger()
+
+    for archivo in archivos_pdf:
+        if os.path.exists(archivo):
+            with open(archivo, 'rb') as pdf:
+                merger.append(pdf)
+                print(f"✅ Añadido: {os.path.basename(archivo)}")
+        else:
+            error_msg = f"❌ Error: No se encuentra {archivo}"
+            print(error_msg)
+            return HttpResponse(error_msg)
+
+    from io import BytesIO
+    pdf_combinado = BytesIO()
+    merger.write(pdf_combinado)
+    merger.close()
+
+    print("✅ PDFs combinados exitosamente")
+    response = HttpResponse(pdf_combinado.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="contrato_completo_clinica.pdf"'
+    return response

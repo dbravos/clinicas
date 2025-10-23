@@ -1,0 +1,337 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso - {{datosgrales.nombre}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.3; /* Reducido para ahorrar espacio */
+            margin: 0;
+            padding: 15px;
+            color: #000;
+            font-size: 13px; /* Tamaño ligeramente menor */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px; /* Reducido */
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px; /* Reducido */
+        }
+
+        .logo-container {
+            flex: 0 0 auto;
+            margin-right: 15px; /* Reducido */
+        }
+
+        .logo {
+            max-width: 100px; /* Reducido */
+            height: auto;
+        }
+
+        .clinic-info {
+            flex: 1;
+        }
+
+        .organization {
+            font-weight: bold;
+            font-size: 16px; /* Reducido */
+            margin-bottom: 3px; /* Reducido */
+        }
+
+        .rfc {
+            font-size: 13px; /* Reducido */
+        }
+
+        .address {
+            font-size: 13px; /* Reducido */
+            margin-bottom: 3px; /* Reducido */
+        }
+
+        .date {
+            text-align: right;
+            margin-bottom: 20px; /* Reducido */
+        }
+
+        .recipient {
+            margin-bottom: 20px; /* Reducido */
+        }
+
+        .content {
+            margin-bottom: 20px; /* Reducido */
+        }
+
+        .patient-info, .doctor-info, .family-info {
+            margin-bottom: 15px; /* Reducido */
+        }
+
+        .field-label {
+            font-weight: bold;
+        }
+
+        .signature {
+            margin-top: 30px; /* Reducido */
+        }
+
+        .signature-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .left-section {
+            text-align: left;
+            flex: 1;
+        }
+
+        .right-section {
+            text-align: right;
+            flex: 1;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            margin-top: 20px; /* Reducido */
+            margin-bottom: 3px; /* Reducido */
+        }
+
+        .signature-title {
+            font-size: 13px; /* Reducido */
+            margin-bottom: 5px; /* Reducido */
+        }
+
+        /* ESTILOS OPTIMIZADOS PARA IMPRESIÓN */
+        @media print {
+            @page {
+                margin: 10mm; /* Margen reducido */
+                size: letter;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+                font-size: 12px; /* Tamaño óptimo para impresión */
+                line-height: 1.2; /* Compacto */
+            }
+
+            .container {
+                padding: 0;
+                max-width: 100%;
+                margin: 0 auto;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .header {
+                border-bottom: 1px solid #000;
+                margin-bottom: 15px;
+                padding-bottom: 8px;
+            }
+
+            .logo {
+                max-width: 90px; /* Más pequeño en impresión */
+            }
+
+            .organization {
+                font-size: 15px;
+            }
+
+            .date {
+                margin-bottom: 15px;
+            }
+
+            .recipient {
+                margin-bottom: 15px;
+            }
+
+            .content {
+                margin-bottom: 15px;
+            }
+
+            .patient-info, .doctor-info, .family-info {
+                margin-bottom: 12px;
+            }
+
+            .signature {
+                margin-top: 25px;
+            }
+
+            .signature-name {
+                margin-top: 15px;
+            }
+
+            /* Evitar que se corten elementos entre páginas */
+            .header, .signature-content {
+                page-break-inside: avoid;
+                break-inside: avoid-page;
+            }
+
+            /* Compactar párrafos */
+            p {
+                margin: 8px 0;
+            }
+        }
+
+        /* Estilo para el botón de impresión en pantalla */
+        .no-print {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .print-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        .close-btn {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="no-print">
+            <button onclick="window.print()" class="print-btn">
+                Imprimir Solicitud
+            </button>
+            <button onclick="cerrarVentana()" class="close-btn">
+                Cerrar
+            </button>
+        </div>
+
+        <div class="header">
+            <div class="logo-container">
+                <img src="/static/images/logo.jpg?v=2" alt="Logo" class="logo">
+            </div>
+            <div class="clinic-info">
+                <div class="organization">{{datosgrales.nombre}}</div>
+                <div class="rfc">R.F.C. {{datosgrales.rfc}}</div>
+                <div class="address">{{datosgrales.calleynumero}} {{datosgrales.colonia}}</div>
+                <div class="address">{{datosgrales.ciudad}},{{datosgrales.estado}},{{datosgrales.cp}}, {{datosgrales.pais}} TEL {{datosgrales.telefono}}</div>
+            </div>
+        </div>
+
+        <div class="date">
+            {{datosgrales.ciudad}},{{datosgrales.estado}} a {{ fecha_formateada }}
+        </div>
+
+        <div class="recipient">
+            <strong>AGENCIA DEL MINISTERIO PUBLICO DEL FUERO COMUN</strong><br>
+            <strong>FISCALIA GENERAL DE JUSTICIA DEL ESTADO DE BAJA CALIFORNIA :</strong><br>
+            <strong>PRESENTE</strong>
+        </div>
+
+        <div class="content">
+            <p>
+                Por medio de este conducto le envío un cordial saludo, y aprovecho para notificar a usted
+                para su conocimiento, el establecimiento especializado en tratamiento de adicciones denominado:
+            </p>
+
+            <p style="text-align: center; font-weight: bold;">
+                {{datosgrales.nombre}}<br>
+                Ubicado en: {{datosgrales.calleynumero}}<br>
+                {{datosgrales.colonia}}<br>
+                {{datosgrales.ciudad}},{{datosgrales.estado}}, C.P.{{datosgrales.cp}}<br>
+                Telefono {{datosgrales.telefono}}
+            </p>
+
+            <div class="patient-info">
+                <p><span class="field-label">Datos del paciente ingresado al plantel:</span></p>
+                <p>Nombre completo: {{interno.nombrecompleto}}</p>
+                <p>Edad: {{interno.edad}} años</p>
+                <p>Nacionalidad: MEXICANO</p>
+                <p>Fecha de ingreso: {{ fecha_formateada }}</p>
+            </div>
+
+            <div class="doctor-info">
+                <p>
+                    El paciente cuenta con la indicacion de un medico de(l) (la) Doctor(a):<br>
+                    Nombre de(l) (la) Doctor(a): NUBE PATRICIA LUCERO SIFUENTES<br>
+                    Numero de cedula: 10958799<br>
+                    Expedida por: UNIVERSIDAD XOCHICALCO
+                </p>
+            </div>
+
+            <div class="family-info">
+                <p><span class="field-label">Datos del familiar o representante legal que autoriza el internamiento:</span></p>
+                <p>Nombre completo: {{interno.responsable}}</p>
+                <p>Relacion o parentesco: {{interno.parentesco}}</p>
+                <p>Numero de telefono: {{interno.telefono}} {{interno.rtelefono}}</p>
+                <p>Nacionalidad: Mexicana</p>
+            </div>
+
+            <p>
+                Ambas por escrito las cuales fueron recabadas el día {{ fecha_formateada }}
+                lo anterior para el cumplimiento de la Norma028-SSA2-2009.
+            </p>
+
+            <p>
+                Agradeciendo de antemano todas sus atenciones, me despido de usted, quedando a sus ordenes.
+            </p>
+        </div>
+
+        <div class="signature">
+            <div class="signature-content">
+                <div class="left-section">
+                    <p><strong>ATENTAMENTE</strong></p>
+                    <div class="signature-name">{{datosgrales.responsable}}</div>
+                    <div class="signature-title">{{datosgrales.cargo}}</div>
+                </div>
+                <div class="right-section">
+                    <p>FIRMA DEL FAMILIAR O REPRESENTANTE LEGAL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función mejorada para cerrar la ventana
+        function cerrarVentana() {
+            // Intentar cerrar la ventana
+            if (window.history.length > 1) {
+                // Si hay historial, regresar
+                window.history.back();
+            } else {
+                // Si no hay historial, cerrar la ventana
+                window.close();
+
+                // Fallback: redirigir después de 1 segundo si no se cerró
+                setTimeout(function() {
+                    if (!window.closed) {
+                        window.location.href = '/'; // Cambia por tu URL principal
+                    }
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+{% endblock %}
