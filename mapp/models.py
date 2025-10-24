@@ -203,6 +203,7 @@ class Einicial(models.Model):
 
 
     expediente = models.CharField(max_length=10, primary_key=True, verbose_name='No.Expediente', unique=True,null=False,blank=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     consumo1 = models.BooleanField(verbose_name='Alcohol',null=True,blank=True,default=False)
     forma1 = models.SmallIntegerField(verbose_name='Forma de consumo',choices=opcionesForma,null=True,blank=True,default=0)
     frecuencia1 = models.CharField(verbose_name='Frecuencia de consumo',null=True,blank=True,max_length=20)
@@ -364,6 +365,7 @@ class Assist(models.Model):
     opcionesTres =[(0,'Nunca'),(6,'Si en los ultimos tres meses'),(3,'Si pero NO en los ultimos tres meses')]
     opcionesRiesgo=[(0,'Bajo'),(1,'Moderado'),(2,'Alto')]
     expediente=models.CharField(max_length=10, primary_key=True, verbose_name='No.Expediente', unique=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     p1s1=models.SmallIntegerField(verbose_name='a) Tabaco (cigarrillos,tabaco de mascar,puro,etc)',choices=opcionesSioNo,null=True,default=0)
     p1s2=models.SmallIntegerField(verbose_name='b) Bebidas alcoholicas (cerveza,licores,vino,etc.)',choices=opcionesSioNo,null=True,default=0)
     p1s3=models.SmallIntegerField(verbose_name='c) Cannabis (marihuana,mota,hierba,hachis,etc.)',choices=opcionesSioNo,null=True,default=0)
@@ -596,6 +598,7 @@ class SituacionFamiliar(models.Model):
     opcionesCuandoesta = [(1, 'No'), (2, 'Si, pero solo mis amigos'), (3, 'Si, pero solo mi familia'), (4, 'Si, tanto mi familia como mis amigos')]
     opcionesConflicto =[(1,'Si'),(0,'No')]
     expediente=models.CharField(max_length=10, primary_key=True, verbose_name='No.Expediente',null=False, blank=True, unique=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     quienesintegran=models.TextField(verbose_name='Quienes integran su familia (con quienes mas contacto tenga)',null=True,blank=True)
     hacercosasjuntos=models.SmallIntegerField(verbose_name='',choices=opcionesAcuerdooNo,null=True,default=1)
     nadiesepreocupa=models.SmallIntegerField(verbose_name='',choices=opcionesAcuerdooNo,null=True,   default=1)
@@ -658,6 +661,7 @@ class Cfisicas(models.Model):
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
 
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     fp1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Alteraciones en el ritmo cardiaco', null=True, default=0)
     fp1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,   default=1)
     fp2 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Presion arterial (baja o alta)', null=True, default=0)
@@ -815,6 +819,7 @@ class Cmentales(models.Model):
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
 
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     p1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Alucinaciones (ver,oir,sentir,saborear,oler cosas que no existen)', null=True, default=0)
     p1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,  default=1)
     p2 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Insomnio', null=True, default=0)
@@ -959,7 +964,7 @@ class Crelaciones(models.Model):
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
 
     expediente=models.CharField(max_length=10,primary_key=True, null=False,blank=True, verbose_name='No.Expediente', unique=True)
-
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     rp1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Aislamiento', null=True, default=0)
     rp1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,  blank=True, default=1)
     rp2 = models.SmallIntegerField(verbose_name='Correrle de la casa',choices=opcionesSioNo, null=True, default=0)
@@ -1169,6 +1174,7 @@ class Tratamientos(models.Model):
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
 
     expediente=models.CharField(max_length=10,primary_key=True, null=False, blank=True,verbose_name='No.Expediente', unique=True)
+    consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
     recibio = models.SmallIntegerField(choices=opcionesSioNo,null=True, default=0)
     a1 = models.SmallIntegerField(verbose_name='Centro de desintoxicacion',choices=opcionesSioNo,null=True, default=0)
     d1 = models.SmallIntegerField(choices=opcionesSioNo,null=True, default=0)
@@ -1633,6 +1639,7 @@ class Riesgos(models.Model):
     opcionesSeisoMas=[(0,'Nunca'),(1,'Menos de una vez al mes'),(2,'Mensualmente'),(3,'Semanalmente'),(4,'Diario o casi diario')]
     opcionesOtras=[(0,'No'),(1,'Si, pero no en el ultimo año'),(2,'Si, en el ultimo año')]
     expediente=models.CharField(max_length=10, primary_key=True,null=False, blank=True, verbose_name='No.Expediente', unique=True)
+
     riesgosP1 = models.SmallIntegerField(choices=opcionesFrecuencia,verbose_name='a).- Que tan frequente ingiere bebidas alcoholicas?', null=True, default=0)
     riesgosP2 = models.SmallIntegerField(choices=opcionesCuantas,verbose_name='b).- Cuantas copas toma en un dia tipico de los que toma?', null=True, default=0)
     riesgosP3 = models.SmallIntegerField(choices=opcionesSeisoMas,verbose_name='c).- Que tan frecuente tomas 6 o mas copas en la misma ocasion?', null=True, default=0)
@@ -1644,7 +1651,9 @@ class Riesgos(models.Model):
     riesgosP9 = models.SmallIntegerField(choices=opcionesOtras,verbose_name='i).- Algun familiar o doctor se ha preocupado por la forma de beber o le ha sugerido que le baje ?', null=True, default=0)
     riesgofecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank=True)
     riesgoconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
 
 class Razones(models.Model):
 

@@ -131,6 +131,12 @@ def listaint(request):
 
 
 def agregainterno(request):
+
+
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
     try:
         # 1. Obtener el último número de expediente
         ultimo = Internos.objects.order_by('-numeroexpediente').first()
@@ -141,6 +147,7 @@ def agregainterno(request):
 
         # 3. Crear el nuevo registro
         interno=Internos.objects.create(numeroexpediente=numero_expediente)
+        interno.quieninformo = mem_user_nombre
 
         internof = Internosf(instance=interno)
         intresponsablef= IntResponsablef(instance=interno)
@@ -250,7 +257,17 @@ def grabadatosgrales(request):
 
 def lusuarios(request):
     usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
-    return render(request, 'lusuarios.html', {'usuarios': usuarios})
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+
+    context = {'usuarios': usuarios,
+               'mem_user_no':mem_user_no,
+               'mem_user_nombre': mem_user_nombre,
+               'mem_user_permisos': mem_user_permisos
+               }
+    return render(request, 'lusuarios.html', context)
 
 def agregausuario(request):
     usuario = Usuarios()
@@ -259,7 +276,20 @@ def agregausuario(request):
     usuario.usuario=usuario.pk
     usuario.save()
     usuariof=Usuariosf(instance=usuario)
-    return render(request, 'usuarios.html', {'usuario':usuario,'usuariof':usuariof})
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    context = {'usuario': usuario,
+               'usuariof': usuariof,
+               'mem_user_no': mem_user_no,
+               'mem_user_nombre': mem_user_nombre,
+               'mem_user_permisos': mem_user_permisos
+               }
+
+
+
+    return render(request, 'usuarios.html', context)
 
 def grabadatosusuario(request,id):
     usuario = Usuarios.objects.get(pk=id)
@@ -271,19 +301,50 @@ def grabadatosusuario(request,id):
         messages.error(request,'No se Actualizo ' + str(id))
 
     usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
-    return render(request, 'lusuarios.html', {'usuarios': usuarios})
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    context = {'usuarios': usuarios,
+               'mem_user_no': mem_user_no,
+               'mem_user_nombre': mem_user_nombre,
+               'mem_user_permisos': mem_user_permisos
+               }
+
+    return render(request, 'lusuarios.html', context)
 
 def editausuario(request,id):
     usuario = get_object_or_404(Usuarios, pk=id)
     usuariof = Usuariosf(instance=usuario)
-    return render(request, 'usuarios.html', {'usuario':usuario,'usuariof':usuariof})
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    context = {'usuario': usuario,
+               'usuariof': usuariof,
+               'mem_user_no': mem_user_no,
+               'mem_user_nombre': mem_user_nombre,
+               'mem_user_permisos': mem_user_permisos
+               }
+
+    return render(request, 'usuarios.html', context)
 
 def borrausuario(request,id):
     usuario = get_object_or_404(Usuarios, pk=id)
     usuario.delete()
     messages.success(request, 'Usuario #' + str(usuario.usuario)+' borrado')
     usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
-    return render(request, 'lusuarios.html', {'usuarios': usuarios})
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    context = {'usuarios': usuarios,
+               'mem_user_no': mem_user_no,
+               'mem_user_nombre': mem_user_nombre,
+               'mem_user_permisos': mem_user_permisos
+               }
+
+    return render(request, 'lusuarios.html', context)
 
 def consentimientoold(request,id):
     response = HttpResponse(content_type='application/pdf')
@@ -365,22 +426,32 @@ def einicial(request, id):
     # Obtener o crear registros
     try:
         einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente)
-        situacionfamiliar = get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente)
-        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente)
-        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente)
-        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente)
-        tratamientos = get_object_or_404(Tratamientos, expediente=interno.numeroexpediente)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-
-
     except Http404:
         # Crear registros si no existen
         einicial = Einicial.objects.create(expediente=interno.numeroexpediente)
+    try:
+        situacionfamiliar = get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente)
+    except Http404:
         situacionfamiliar = SituacionFamiliar.objects.create(expediente=interno.numeroexpediente)
+    try:
+        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente)
+    except Http404:
         cfisicas = Cfisicas.objects.create(expediente=interno.numeroexpediente)
+    try:
+        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente)
+    except Http404:
         cmentales = Cmentales.objects.create(expediente=interno.numeroexpediente)
+    try:
+        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente)
+    except Http404:
         crelaciones = Crelaciones.objects.create(expediente=interno.numeroexpediente)
+    try:
+        tratamientos = get_object_or_404(Tratamientos, expediente=interno.numeroexpediente)
+    except Http404:
         tratamientos = Tratamientos.objects.create(expediente=interno.numeroexpediente)
+    try:
+        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
+    except Http404:
         valorizacion = Valorizacion.objects.create(expediente=interno.numeroexpediente)
 
     # Manejo de POST
@@ -455,6 +526,9 @@ def grabaeinicial(request, id):
             'tratamientos': Tratamientos,
 
         }
+        mem_user_no = request.session.get('usuario_no')
+        mem_user_nombre = request.session.get('usuario_nombre')
+        mem_user_permisos = request.session.get('usuario_permisos')
 
         with transaction.atomic():
             instancias = {}
@@ -462,7 +536,8 @@ def grabaeinicial(request, id):
                 try:
                     instancia, created = modelo.objects.get_or_create(
                         expediente=interno.numeroexpediente,
-                        defaults={'expediente': interno.numeroexpediente}
+
+                        defaults={'expediente': interno.numeroexpediente, 'consejero':mem_user_no,}
                     )
                     if created:
                         instancia.full_clean()
@@ -533,6 +608,9 @@ def grabaeinicial(request, id):
 def assist(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     try:
         assist = get_object_or_404(Assist, expediente=interno.numeroexpediente)
         assistf = Assistf(instance=assist)
@@ -541,6 +619,7 @@ def assist(request,id):
 
     except Http404:
         assist=Assist(expediente=interno.numeroexpediente)
+        assist.consejero=mem_user_no
         assist.save()
         assistf=Assistf(instance=assist)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -636,6 +715,8 @@ def grabalo(request, id):
 def psicosis(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     try:
         psicosis = get_object_or_404(Psicosis, expediente=interno.numeroexpediente)
         psicosisf = Psicosisf(instance=psicosis)
@@ -643,6 +724,7 @@ def psicosis(request,id):
         valorizacionf = Valorizacionf(instance=valorizacion)
     except Http404:
         psicosis=Psicosis(expediente=interno.numeroexpediente)
+        psicosis.psconsejero = mem_user_no
         psicosis.save()
         psicosisf=Psicosisf(instance=psicosis)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -654,13 +736,17 @@ def psicosis(request,id):
 def sdevida(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     try:
         sdevida = get_object_or_404(Sdevida, expediente=interno.numeroexpediente)
+
         sdevidaf = Sdevidaf(instance=sdevida)
         valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
         valorizacionf = Valorizacionf(instance=valorizacion)
     except Http404:
         sdevida=Sdevida(expediente=interno.numeroexpediente)
+        sdevida.svconsejero = mem_user_no
         sdevida.save()
         sdevidaf=Sdevidaf(instance=sdevida)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -672,6 +758,8 @@ def sdevida(request,id):
 def usodrogas(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     try:
         usodrogas = get_object_or_404(Usodrogas, expediente=interno.numeroexpediente)
         usodrogasf = Usodrogasf(instance=usodrogas)
@@ -680,6 +768,7 @@ def usodrogas(request,id):
 
     except Http404:
         usodrogas=Usodrogas(expediente=interno.numeroexpediente)
+        usodrogas.udconsejero = mem_user_no
         usodrogas.save()
         usodrogasf=Usodrogasf(instance=usodrogas)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -691,6 +780,8 @@ def usodrogas(request,id):
 def ansiedad(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     try:
         ansiedad = get_object_or_404(Ansiedad, expediente=interno.numeroexpediente)
         ansiedadf = Ansiedadf(instance=ansiedad)
@@ -699,6 +790,7 @@ def ansiedad(request,id):
 
     except Http404:
         ansiedad=Ansiedad(expediente=interno.numeroexpediente)
+        ansiedad.anconsejero = mem_user_no
         ansiedad.save()
         ansiedadf=Ansiedadf(instance=ansiedad)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -710,6 +802,9 @@ def ansiedad(request,id):
 def depresion(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     try:
         depresion = get_object_or_404(Depresion, expediente=interno.numeroexpediente)
         depresionf = Depresionf(instance=depresion)
@@ -717,6 +812,7 @@ def depresion(request,id):
         valorizacionf = Valorizacionf(instance=valorizacion)
     except Http404:
         depresion=Depresion(expediente=interno.numeroexpediente)
+        depresion.depconsejero = mem_user_no
         depresion.save()
         depresionf=Depresionf(instance=depresion)
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
@@ -728,11 +824,15 @@ def depresion(request,id):
 def marcadores(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     try:
         marcadores = get_object_or_404(Marcadores, expediente=interno.numeroexpediente)
         marcadoresf = Marcadoresf(instance=marcadores)
     except Http404:
         marcadores=Marcadores(expediente=interno.numeroexpediente)
+        marcadores.marconsejero = mem_user_no
         marcadores.save()
         marcadoresf=Marcadoresf(instance=marcadores)
 
@@ -741,11 +841,15 @@ def marcadores(request,id):
 def riesgos(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     try:
         riesgos = get_object_or_404(Riesgos, expediente=interno.numeroexpediente)
         riesgosf = Riesgosf(instance=riesgos)
     except Http404:
         riesgos=Riesgos(expediente=interno.numeroexpediente)
+        riesgos.riesgoconsejero = mem_user_no
         riesgos.save()
         riesgosf=Riesgosf(instance=riesgos)
 
@@ -754,11 +858,15 @@ def riesgos(request,id):
 def razones(request,id):
     interno = Internos.objects.get(pk=id)
     internof= Internosf(request.POST,instance=interno)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     try:
         razones = get_object_or_404(Razones, expediente=interno.numeroexpediente)
         razonesf = Razonesf(instance=razones)
     except Http404:
         razones=Razones(expediente=interno.numeroexpediente)
+        razones.razonesconsejero = mem_user_no
         razones.save()
         razonesf=Razonesf(instance=razones)
 
@@ -785,28 +893,64 @@ def valorizacion(request,id):
         valorizacion.razon1=einicial.razon1
         valorizacion.razon2=einicial.razon2
         valorizacion.razon3=einicial.razon3
-
         valorizacion.save()
         valorizacionf=Valorizacionf(instance=valorizacion)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Entrevistas Iniciales')
+        return render(request, 'dgenerales.html', {'interno': interno})
+
+    try:
         cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente)
         cfisicasf = Cfisicasf(instance=cfisicas)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias fisicas')
+        return render(request, 'dgenerales.html', {'interno': interno})
+    try:
         cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente)
         cmentalesf = Cmentalesf(instance=cmentales)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias fisicas')
+        return render(request, 'dgenerales.html', {'interno': interno})
+
+    try:
         crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente)
         crelacionesf = Crelacionesf(instance=crelaciones)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias en Relaciones')
+        return render(request, 'dgenerales.html', {'interno': interno})
+
+    try:
         psicosis = get_object_or_404(Psicosis, expediente=interno.numeroexpediente)
         psicosisf = Psicosisf(instance=psicosis)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Psicosis')
+        return render(request, 'dgenerales.html', {'interno': interno})
+    try:
         assist = get_object_or_404(Assist, expediente=interno.numeroexpediente)
         assistf = Assistf(instance=assist)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en ASSIST')
+        return render(request, 'dgenerales.html', {'interno': interno})
+
+    try:
         ansiedad = get_object_or_404(Ansiedad, expediente=interno.numeroexpediente)
         ansiedadf = Ansiedadf(instance=ansiedad)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Ansiedad')
+        return render(request, 'dgenerales.html', {'interno': interno})
+    try:
         depresion = get_object_or_404(Depresion, expediente=interno.numeroexpediente)
         depresionf = Depresionf(instance=depresion)
+    except Http404:
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Depresion')
+        return render(request, 'dgenerales.html', {'interno': interno})
+    try:
         sdevida = get_object_or_404(Sdevida, expediente=interno.numeroexpediente)
         sdevidaf = Depresionf(instance=sdevida)
-
     except Http404:
-        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Entrevista Inicial')
+        messages.error(request, f'Interno {interno.numeroexpediente} no existe en Satisfaccion de Vida')
+        return render(request, 'dgenerales.html', {'interno': interno})
+
 
     context = {'valorizacion': valorizacion,
                'valorizacionf': valorizacionf,
@@ -834,6 +978,10 @@ def valorizacion(request,id):
 def grabanew(request, id, modelos_config, forms_config, template_name, redirect_view, modelo_principal=Internos):
     principal = get_object_or_404(modelo_principal, pk=id)
     forms = {}
+
+
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
         # ... (la parte de get_or_create se queda igual) ...
@@ -1213,6 +1361,9 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
     interno = Internos.objects.get(pk=id)
     print(f'sesion={tipo_sesion}, id_interno_pk={id}, numero_expediente={interno.numeroexpediente}, accion={accion}')
 
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     if id is None and 'interno_actual_id' in request.session:
         id = request.session['interno_actual_id']
 
@@ -1264,6 +1415,7 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
         if form.is_valid():
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
+            sesion_guardar.consejero = mem_user_no
 
             # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
             if accion == 'editar' and request.POST.get('status') == '1':
@@ -1494,6 +1646,9 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
 def capturaSesionPS(request, accion, id=None, no_sesion=None):
     interno = Internos.objects.get(pk=id)
 
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
     if id is None and 'interno_actual_id' in request.session:
         id = request.session['interno_actual_id']
 
@@ -1541,6 +1696,7 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
         if form.is_valid():
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
+            sesion_guardar.psicologo = mem_user_no
 
             # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
             if accion == 'editar' and request.POST.get('status') == '1':
@@ -1672,6 +1828,8 @@ def planConsejeria(request, id):
     """
     # 1. Obtener el interno
     interno = get_object_or_404(Internos, pk=id)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
 
     # 2. Buscar consejería existente o crear una nueva
     try:
@@ -1683,6 +1841,7 @@ def planConsejeria(request, id):
     except PConsejeria.DoesNotExist:
         # Si no existe, crear una nueva
         pconsejeria = PConsejeria(expediente=interno.numeroexpediente)
+        pconsejeria.consejero = mem_user_no
         pconsejeria.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {pconsejeria.id} ===")
@@ -1990,7 +2149,8 @@ def medicoInicial(request, id):
     """
     # 1. Obtener el interno
     interno = get_object_or_404(Internos, pk=id)
-
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     # 2. Buscar consejería existente o crear una nueva
     try:
         # Primero intentar obtener una existente
@@ -2002,6 +2162,7 @@ def medicoInicial(request, id):
     except Medico.DoesNotExist:
         # Si no existe, crear una nueva
         medicoinicial = Medico(expediente=interno.numeroexpediente)
+        medicoinicial.medico = mem_user_no
         medicoinicial.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {medicoinicial.id} ===")
@@ -2065,6 +2226,7 @@ def emisionDerecetas(request,id):
     except Recetas.DoesNotExist:
         # Si no existe, crear una nueva
         receta = Recetas(expediente=interno.numeroexpediente)
+
         receta.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {receta.id} ===")
