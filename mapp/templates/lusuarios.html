@@ -36,8 +36,7 @@
                             <td class="text-end">
                                 <div class="btn-group" role="group">
 
-                                 {% if mem_user_permisos == 'admin' %}
-                                 {% if usuario.nombre != 'SuperUser' or mem_user_nombre == 'SuperUser' %}
+                               
                                     <a href="{% url 'editausuario' id=usuario.pk %}"
                                        class="btn btn-sm btn-outline-primary"
                                        data-bs-toggle="tooltip"
@@ -51,8 +50,7 @@
                                        onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
                                         <i class="bi bi-trash"></i>
                                     </a>
-                                    {% endif %}
-                                {% endif %}
+
 
                                 </div>
                             </td>
