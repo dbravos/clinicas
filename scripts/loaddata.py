@@ -9,43 +9,60 @@ from django.core.management import call_command
 
 # En scripts/loaddata.py, mejor crear datos programáticamente:
 def cargar_datos():
-    from django.contrib.auth.models import User
-    from mapp.models import Clinicas, Usuarios, DatosGrales
+    from mapp.models import Clinicas, DatosGrales, Usuarios
 
-    # Crear superusuario
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@clinicas.com', 'admin123')
+    print("🔧 Iniciando carga de datos...")
 
+    try:
+        # 1. ELIMINAR registros existentes
+        print("🗑️  Limpiando datos existentes...")
+        Usuarios.objects.all().delete()
+        DatosGrales.objects.all().delete()
+        Clinicas.objects.all().delete()
+        print("✅ Datos anteriores eliminados")
 
+        # 2. CREAR clínica principal
+        print("🏥 Creando clínica VIVE...")
+        clinica_vive = Clinicas.objects.create(
+            clinica="VIVE",
+            nombre="VIVE CONCIENTE, A.C.",
+            password="123456",
+            numeroDeInternos=0
+        )
+        print("✅ Clínica VIVE creada")
 
-    if not Clinicas.objects.exists():
-       Clinicas.objects.create(
-        clinica='VIVE',
-        nombre='VIVE CONCIENTE, A.C.',
-        password='123456',
-        numeroDeInternos=0
-    )
-    if not DatosGrales.objects.exists():
-       DatosGrales.objects.create(
-        clinica='VIVE',
-        nombre='VIVE CONCIENTE, A.C.',
-        password='123456',
-    )
+        # 3. CREAR datos generales
+        print("📋 Creando datos generales...")
+        DatosGrales.objects.create(
+            nombre="VIVE CONCIENTE, A.C.",
+            responsable="",
+            cedula="",
+            cargo="",
+            clinica="VIVE",
+            password="123456",
+            expediente=None,
+            recibo=0,
+            receta=0,
+            recibootros=0,
+            sesiong=0
+        )
+        print("✅ Datos generales creados")
 
-    if not Usuarios.objects.create(
-        usuario=1,
-        nombre='superUser',
-        permisos='admin',
-        password='123456',
-        clinica='VIVE'
+        # 4. CREAR usuario superuser
+        print("👤 Creando usuario superUser...")
+        Usuarios.objects.create(
+            usuario=1,
+            nombre="superUser",
+            cargo="",
+            permisos="admin",
+            password="123456",
+            cedula="",
+            expedidapor="",
+            clinica="VIVE"
+        )
+        print("✅ Usuario superUser creado")
 
-    ):
-        print ('Ya existe este usuario')
-    else:
-        print('✅ ¡Listo!')
+        print("🎉 Carga de datos completada exitosamente")
 
-
-
-
-    print("✅ Datos básicos creados")
-
+    except Exception as e:
+        print(f"❌ Error en carga de datos: {e}")
