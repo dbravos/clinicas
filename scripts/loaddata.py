@@ -10,13 +10,13 @@ from django.core.management import call_command
 # En scripts/loaddata.py, mejor crear datos programáticamente:
 def cargar_datos():
     from django.contrib.auth.models import User
-    from mapp.models import Clinicas, Usuarios
+    from mapp.models import Clinicas, Usuarios, DatosGrales
 
     # Crear superusuario
     if not User.objects.filter(username='admin').exists():
         User.objects.create_superuser('admin', 'admin@clinicas.com', 'admin123')
 
-    from mapp.models import Clinicas, Usuarios, DatosGrales
+
 
     if not Clinicas.objects.exists():
        Clinicas.objects.create(
@@ -32,20 +32,20 @@ def cargar_datos():
         password='123456',
     )
 
-    if not Usuarios.objects.exists():
-       Usuarios.objects.create(
+    if not Usuarios.objects.create(
         usuario=1,
         nombre='superUser',
         permisos='admin',
         password='123456',
         clinica='VIVE'
 
-    )
+    ):
+        print ('Ya existe este usuario')
+    else:
+        print('✅ ¡Listo!')
 
-    print('✅ ¡Listo!')
 
 
-          
 
     print("✅ Datos básicos creados")
 
