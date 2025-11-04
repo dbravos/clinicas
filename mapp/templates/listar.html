@@ -8,7 +8,7 @@
             <div class="d-flex flex-grow-1">
                 <ul class="nav nav-pills me-auto">
                     <li class="nav-item me-2">
-                        <a class="nav-link btn btn-primary text-white" href="{% url 'agregainterno' %}">
+                        <a class="nav-link btn btn-outline-secondary" href="{% url 'agregainterno' %}">
                             <i class="bi bi-plus-circle me-1"></i>Agregar Interno
                         </a>
                     </li>
@@ -62,7 +62,7 @@
                                            class="btn btn-sm btn-primary">
                                             <i class="bi bi-pencil"></i> Editar
                                         </a>
-                                        <a href="{% url 'seleccionainterno' id=interno.pk %}"
+                                        <a href="{% url 'listaint' %}"
                                            class="btn btn-sm btn-danger"
                                            onclick="return confirm('¿Está seguro que desea eliminar este registro?');">
                                             <i class="bi bi-trash"></i> Eliminar

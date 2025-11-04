@@ -197,8 +197,8 @@ def borrainterno(request,id):
     clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
     interno.delete()
-    messages.success(request, 'Interno de expediente  #' + str(interno.id)+' borrado')
-    internos = Internos.objects.raw('SELECT * FROM mapp_internos ORDER BY numeroexpediente')
+    messages.success(request, 'Interno de expediente  #' + str(id)+' borrado')
+    internos = Internos.objects.filter(clinca=clinica_actual)
     return render(request, 'listar.html', {'internos': internos})
 
 def grabainterno(request,id):
@@ -277,7 +277,7 @@ def datosgrales(request):
         datosgrales.clinica= clinica_actual
 
         datosgrales.save()
-        datosgralesf = DatosGrales.objects.get(clinica=clinica_actual)
+        datosgralesf = DatosGrales.objects.filter(clinica=clinica_actual)
 
     return render(request,'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
 
@@ -310,36 +310,47 @@ def lusuarios(request):
                }
     return render(request, 'lusuarios.html', context)
 
+
 def agregausuario(request):
+    clinica_actual = get_clinica_actual(request)
 
+    # Calcular el próximo número de usuario
+    ultimo_usuario = Usuarios.objects.filter(clinica=clinica_actual).order_by('-usuario').first()
+    nuevo_numero = (ultimo_usuario.usuario + 1) if ultimo_usuario else 1
 
-    clinica_actual=get_clinica_actual(request)
-    usuario = Usuarios()
-    usuario.usuario=0
-    usuario.save()
-    usuario.usuario=usuario.pk
-    usuario.clinica=clinica_actual
-    usuario.save()
-    usuariof=Usuariosf(instance=usuario)
+    # Crear usuario con get_or_create
+    usuario, created = Usuarios.objects.get_or_create(
+        usuario=nuevo_numero,
+        clinica=clinica_actual,
+        defaults={
+            'nombre': f'Usuario {nuevo_numero}',
+            'password': '123456',  # Password por defecto
+            'permisos': 'user',  # Permiso por defecto
+            'cargo': '',
+            'cedula': '',
+            'expedidapor': ''
+        }
+    )
+
+    usuariof = Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
 
-    context = {'usuario': usuario,
-               'usuariof': usuariof,
-               'mem_user_no': mem_user_no,
-               'mem_user_nombre': mem_user_nombre,
-               'mem_user_permisos': mem_user_permisos
-               }
-
-
+    context = {
+        'usuario': usuario,
+        'usuariof': usuariof,
+        'mem_user_no': mem_user_no,
+        'mem_user_nombre': mem_user_nombre,
+        'mem_user_permisos': mem_user_permisos
+    }
 
     return render(request, 'usuarios.html', context)
 
 def grabadatosusuario(request,id):
 
     clinica_actual=get_clinica_actual(request)
-    usuario = Usuarios.objects.get(pk=id,clinica=clinica_actual)
+    usuario = Usuarios.objects.get(usuario=id,clinica=clinica_actual)
     usuariof= Usuariosf(request.POST,instance=usuario)
     if usuariof.is_valid():
         usuariof.save()
@@ -347,7 +358,7 @@ def grabadatosusuario(request,id):
     else:
         messages.error(request,'No se Actualizo ' + str(id))
 
-    usuarios = Usuarios.objects.get(clinica=clinica_actual)
+    usuarios = Usuarios.objects.filter(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
@@ -380,10 +391,10 @@ def editausuario(request,id):
 
 def borrausuario(request,id):
     clinica_actual=get_clinica_actual(request)
-    usuario = get_object_or_404(Usuarios, pk=id,clinica=clinica_actual)
+    usuario = get_object_or_404(Usuarios, usuario=id,clinica=clinica_actual)
     usuario.delete()
     messages.success(request, 'Usuario #' + str(usuario.usuario)+' borrado')
-    usuarios = Usuarios.objects.get(clinica=clinica_actual)
+    usuarios = Usuarios.objects.filter(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
@@ -671,7 +682,7 @@ def assist(request,id):
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        assist = Assist.object.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        assist = Assist.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         assistf = Assistf(instance=assist)
 
     except Assist.DoesNotExist:
@@ -964,9 +975,9 @@ def marcadores(request,id):
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        marcadores = Marcadores.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        marcadores = Marcadores.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         marcadoresf = Marcadoresf(instance=marcadores)
-    except Marcadores.DoesNotExists:
+    except Marcadores.DoesNotExist:
         marcadores=Marcadores(expediente=interno.numeroexpediente)
         marcadores.marconsejero = mem_user_no
         marcadores.clinica = clinica_actual
@@ -984,9 +995,9 @@ def riesgos(request,id):
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        riesgos = Riesgos.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        riesgos = Riesgos.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         riesgosf = Riesgosf(instance=riesgos)
-    except Riesgos.DoesNotExists:
+    except Riesgos.DoesNotExist:
         riesgos=Riesgos(expediente=interno.numeroexpediente)
         riesgos.riesgoconsejero = mem_user_no
         riesgos.clinica = clinica_actual
@@ -1004,9 +1015,9 @@ def razones(request,id):
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        razones = Razones.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        razones = Razones.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         razonesf = Razonesf(instance=razones)
-    except Razones.DoesNotExists:
+    except Razones.DoesNotExist:
         razones=Razones(expediente=interno.numeroexpediente)
         razones.razonesconsejero = mem_user_no
         razones.clinica = clinica_actual
@@ -1022,9 +1033,9 @@ def valorizacion(request,id):
     interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     try:
-        valorizacion = Valorizacion.get.objects(Valorizacion, expediente=interno.numeroexpediente,clinica=clinica_actual)
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         valorizacionf = Valorizacionf(instance=valorizacion)
-    except Valorizacion.DoesNotExists:
+    except Valorizacion.DoesNotExist:
         valorizacion=Valorizacion(expediente=interno.numeroexpediente)
         valorizacion.clinica = clinica_actual
         valorizacion.save()
