@@ -296,8 +296,8 @@ def grabadatosgrales(request):
 
 def lusuarios(request):
     clinica_actual = get_clinica_actual(request)
+    usuarios = Usuarios.objects.filter(clinica=clinica_actual)
 
-    usuarios = Usuarios.objects.get(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
