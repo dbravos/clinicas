@@ -7,23 +7,45 @@ django.setup()
 from django.core.management import call_command
 
 
+# En scripts/loaddata.py, mejor crear datos programáticamente:
 def cargar_datos():
-    try:
-        print("🔧 Iniciando carga de datos...")
+    from django.contrib.auth.models import User
+    from mapp.models import Clinicas, Usuarios
 
-        if not os.path.exists('datos.json'):
-            print("❌ Archivo datos.json no encontrado")
-            return
+    # Crear superusuario
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@clinicas.com', 'admin123')
 
-        # Especificar codificación UTF-8 explícitamente
-        call_command('loaddata', 'datos.json', verbosity=1)
-        print('✅ Datos cargados exitosamente!')
+    from mapp.models import Clinicas, Usuarios, DatosGrales
 
-    except Exception as e:
-        print(f'❌ Error cargando datos: {e}')
-        import traceback
-        traceback.print_exc()
+    if not Clinicas.objects.exists():
+       Clinicas.objects.create(
+        clinica='VIVE',
+        nombre='VIVE CONCIENTE, A.C.',
+        password='123456',
+        numeroDeInternos=0
+    )
+    if not DatosGrales.objects.exists():
+       DatosGrales.objects.create(
+        clinica='VIVE',
+        nombre='VIVE CONCIENTE, A.C.',
+        password='123456',
+    )
+
+    if not Usuarios.objects.exists():
+       Usuarios.objects.create(
+        usuario=1,
+        nombre='superUser',
+        permisos='admin',
+        password='123456',
+        clinica='VIVE'
+
+    )
+
+    print('✅ ¡Listo!')
 
 
-if __name__ == '__main__':
-    cargar_datos()
+          
+
+    print("✅ Datos básicos creados")
+
