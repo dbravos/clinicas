@@ -1,38 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Login Clínica</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Start - Acceso Clínicas</title>
     <style>
-        body { font-family: Arial; max-width: 400px; margin: 100px auto; padding: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .form-control { width: 100%; padding: 8px; margin-top: 5px; }
-        .btn { background: blue; color: white; padding: 10px; border: none; width: 100%; }
-        .error { color: red; font-size: 14px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #a0a0a0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error::before {
+            content: '⚠';
+            font-size: 12px;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fee;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+        }
+
+        .alert-success {
+            background: #efe;
+            border: 1px solid #27ae60;
+            color: #229954;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>Acceso Clínicas</h2>
-
-    <form method="post">
-        {% csrf_token %}
-
-        <div class="form-group">
-            <label>ID de Clínica:</label>
-            {{ form.clinica_id }}
-            {% if form.clinica_id.errors %}
-                <div class="error">{{ form.clinica_id.errors }}</div>
-            {% endif %}
+    <div class="login-container">
+        <div class="logo">
+            <h1>🧠 Fresh Start</h1>
+            <p>Sistema de Gestión de Clínicas</p>
         </div>
 
-        <div class="form-group">
-            <label>Contraseña:</label>
-            {{ form.password }}
-            {% if form.password.errors %}
-                <div class="error">{{ form.password.errors }}</div>
-            {% endif %}
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
         </div>
+        {% endif %}
 
-        <button type="submit" class="btn">Entrar</button>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_clinica_id">🏥 ID de Clínica</label>
+                {{ form.clinica_id }}
+                {% if form.clinica_id.errors %}
+                    <div class="error">{{ form.clinica_id.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">🔒 Contraseña</label>
+                {{ form.password }}
+                <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+                {% if form.password.errors %}
+                    <div class="error">{{ form.password.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn"> Iniciar Sesión</button>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.querySelector('#id_password');
+            const toggleButton = document.querySelector('.password-toggle');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleButton.textContent = '🔒';
+            } else {
+                passwordField.type = 'password';
+                toggleButton.textContent = '👁️';
+            }
+        }
+
+        // Mejorar los campos automáticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                // Agregar placeholder si no tiene
+                if (!input.getAttribute('placeholder')) {
+                    const label = input.previousElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        input.setAttribute('placeholder', `Ingrese ${label.textContent.toLowerCase()}`);
+                    }
+                }
+
+                // Convertir a mayúsculas mientras se escribe (solo para clínica)
+                if (input.id === 'id_clinica_id') {
+                    input.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

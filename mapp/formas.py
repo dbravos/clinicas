@@ -6,7 +6,7 @@ from mapp.models import Internos,DatosGrales,Usuarios,Einicial,Assist,Cfisicas,C
 
 from django.utils import timezone
 from django.forms import widgets,NumberInput
-
+from datetime import date, timedelta
 
 class Internosf(forms.ModelForm):
 
@@ -752,17 +752,24 @@ class Valorizacionf(forms.ModelForm):
 class ExpedienteSoloForm(forms.Form):
     expediente = forms.CharField(max_length=10, label='No.Expediente')
 
+
 class CIndividualf(forms.ModelForm):
     class Meta:
         model = CIndividual
-        fields = '__all__'
-
+        exclude = ['expediente', 'clinica', 'consejero', 'sesion']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'proximasesion': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 class CFamiliarf(forms.ModelForm):
     class Meta:
         model = CFamiliar
-        fields = '__all__'
-
+        exclude = ['expediente', 'clinica', 'consejero', 'sesion']
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'proximasesion': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 class CGrupalf(forms.ModelForm):
     class Meta:
@@ -1389,11 +1396,17 @@ class HistoriaClinicaf(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Asegurar que todos los campos tengan clases CSS
         for field_name, field in self.fields.items():
+
+
+
             if 'class' not in field.widget.attrs:
                 if isinstance(field.widget, (forms.Select, forms.NumberInput, forms.TextInput, forms.Textarea)):
                     field.widget.attrs['class'] = 'form-control form-control-sm'
                 elif isinstance(field.widget, forms.CheckboxInput):
                     field.widget.attrs['class'] = 'form-check-input'
+
+            for field in self.fields.values():  # 👈 Esta línea lo resuelve
+                field.required = False  # Desac
 
 
 class ClinicaLoginForm(forms.Form):
@@ -1406,3 +1419,8 @@ class ClinicaLoginForm(forms.Form):
         label="Contraseña",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
+
+    def clean_clinica_id(self):
+        clinica_id = self.cleaned_data['clinica_id']
+        return clinica_id.strip().upper()  # ← QUITA ESPACIOS Y CONVIERTE A MAYÚSCULAS
+

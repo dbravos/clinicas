@@ -79,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mapp.middleware.ClinicaMiddleware',  # ← AGREGA esta línea
+
 ]
 
 
@@ -90,11 +91,12 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+                'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'mapp.context_processors.clinica_actual',
             ],
         },
     },
@@ -163,15 +165,15 @@ if not DEBUG:
     except Exception as e:
         print(f"⚠️  Error cargando script de superusuario: {e}")
 
-# Cargar datos automáticamente en producción (solo una vez)
-# if not DEBUG:
-#    try:
-#        # Verificar si ya se cargaron los datos
-#        from django.contrib.auth.models import User
-#        if User.objects.count() < 2:  # Si no hay usuarios, cargar datos
-#            from scripts.loaddata import cargar_datos
-#            cargar_datos()
-#        else:
-#            print("✅ Los datos ya fueron cargados previamente")
-#    except Exception as e:
-#        print(f"⚠️  Error en carga de datos: {e}")
+ # Cargar datos automáticamente en producción (solo una vez)
+#if not DEBUG:
+    try:
+        # Verificar si ya se cargaron los datos
+        from django.contrib.auth.models import User
+        if User.objects.count() < 2:  # Si no hay usuarios, cargar datos
+           from scripts.loaddata import cargar_datos
+           cargar_datos()
+        else:
+            print("✅ Los datos ya fueron cargados previamente")
+    except Exception as e:
+        print(f"⚠️  Error en carga de datos: {e}")

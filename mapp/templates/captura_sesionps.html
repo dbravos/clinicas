@@ -52,9 +52,9 @@
 
   <!-- Formulario principal -->
   <form action="{% if accion == 'editar' and instancia_sesion %}
-                {% url 'capturaSesionPS_con_id' accion='editar' id=interno.pk no_sesion=instancia_sesion.pk %}
+                {% url 'capturaSesionPS_con_id' accion='editar' id=interno.numeroexpediente no_sesion=instancia_sesion.pk %}
                 {% else %}
-                {% url 'capturaSesionPS' accion='agregar' id=interno.pk %}
+                {% url 'capturaSesionPS' accion='agregar' id=interno.numeroexpediente %}
                 {% endif %}"
         method="POST"
         class="needs-validation"

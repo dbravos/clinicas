@@ -52,7 +52,7 @@
               <li><a class="dropdown-item py-2" href="{% url 'listaSesionesGrupales'  %}"><i class="bi bi-collection me-2"></i>Notas de evolución grupal</a></li>
 
               <h6 class="dropdown-header text-primary mt-3">Planificación</h6>
-              <li><a class="dropdown-item py-2" href="{% url 'planConsejeria' id=interno.numeroexpediente  %}"><i class="bi bi-calendar-check me-2"></i>Plan de consejería</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'planConsejeria' id=interno.pk  %}"><i class="bi bi-calendar-check me-2"></i>Plan de consejería</a></li>
               <li><a class="dropdown-item py-2" href="{% url 'escanear_tarea' %}"><i class="bi bi-upload me-2"></i>Digitalización de tareas</a></li>
               <li><a class="dropdown-item py-2" href="{% url 'lista_tareas_escaneadas' %}"><i class="bi bi-list-task me-2"></i>Despliegue de tareas</a></li>
             </ul>
@@ -65,7 +65,7 @@
             </a>
             <ul class="dropdown-menu p-2">
               <li><a class="dropdown-item py-2" href="{% url 'hojaAtencionPs' id=interno.numeroexpediente %}"><i class="bi bi-file-earmark-medical me-2"></i>Hoja de atención psicologica</a></li>
-              <li><a class="dropdown-item py-2" href="{% url 'listaSesionesPS' id=interno.pk %}"><i class="bi bi-journal-medical me-2"></i>Notas de evolución psicologica</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesionesPS' id=interno.numeroexpediente %}"><i class="bi bi-journal-medical me-2"></i>Notas de evolución psicologica</a></li>
 
             </ul>
           </li>

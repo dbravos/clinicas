@@ -20,7 +20,7 @@
         <!-- Contenedor para los botones, alineado a la derecha y colapsable -->
         <div class="card-body">
 
-         <a  class="btn btn-sm btn-primary" href="{% url 'capturaSesionPS'  accion='agregar' id=interno.pk %}">
+         <a  class="btn btn-sm btn-primary" href="{% url 'capturaSesionPS'  accion='agregar' id=interno.numeroexpediente %}">
              <i class="bi bi-plus-circle me-1"></i>Agregar Nueva Sesión
          </a>
          <a class="btn btn-sm btn-secondary float-end" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar">

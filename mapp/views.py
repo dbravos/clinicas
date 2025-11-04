@@ -18,7 +18,7 @@ from reportlab.pdfgen import canvas  # ✅ AGREGAR ESTA IMPORTACIÓN
 from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
 from django.http import HttpResponse
 from django.conf import settings
-
+from datetime import date, timedelta
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -59,6 +59,8 @@ logger = logging.getLogger(__name__)
 def home_temp(request):
     return HttpResponse("¡Mi Django funciona en Railway! 🚀")
 
+def get_clinica_actual(request):
+    return request.session.get('clinica_actual', 'Demostracion')
 
 def primermenu(request):
 
@@ -126,36 +128,47 @@ def probar(request):
     return render(request,'agregar.html')
 
 def listaint(request):
-    internos = Internos.objects.raw('SELECT * FROM mapp_internos ORDER BY numeroexpediente')
+    clinica_actual=get_clinica_actual(request)
+    internos = Internos.objects.filter(clinica=clinica_actual).order_by('numeroexpediente')
     return render(request, 'listar.html', {'internos': internos})
 
 
 def agregainterno(request):
-
-
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
 
+    # Obtener la clínica actual de la sesión
+    clinica_actual = request.session.get('clinica_actual', 'Demostracion')
+
     try:
-        # 1. Obtener el último número de expediente
-        ultimo = Internos.objects.order_by('-numeroexpediente').first()
+        # 1. Obtener el último número de expediente DE LA CLÍNICA ACTUAL
+        ultimo = Internos.objects.filter(clinica=clinica_actual).order_by('-numeroexpediente').first()
 
         # 2. Generar nuevo número consecutivo
         nuevo_numero = int(ultimo.numeroexpediente) + 1 if ultimo else 1
         numero_expediente = str(nuevo_numero).zfill(6)  # Formato 000001
 
-        # 3. Crear el nuevo registro
-        interno=Internos.objects.create(numeroexpediente=numero_expediente)
-        interno.quieninformo = mem_user_nombre
+        # 3. Crear el nuevo registro CON LA CLÍNICA
+        interno = Internos.objects.create(
+            numeroexpediente=numero_expediente,
+            clinica=clinica_actual,  # ← ESTA LÍNEA ES CLAVE
+            quieninformo=mem_user_nombre
+        )
 
         internof = Internosf(instance=interno)
-        intresponsablef= IntResponsablef(instance=interno)
+        intresponsablef = IntResponsablef(instance=interno)
         intdependientesf = IntDependientesf(instance=interno)
         intprovienef = IntProvienef(instance=interno)
 
-        messages.success(request, f'Interno {numero_expediente} creado exitosamente')
-        return render(request, 'internosnw.html',{'interno': interno, 'internof': internof, 'intresponsablef': intresponsablef, 'intdependientesf':intdependientesf,'intprovienef':intprovienef })
+        messages.success(request, f'Interno {numero_expediente} creado exitosamente en {clinica_actual}')
+        return render(request, 'internosnw.html', {
+            'interno': interno,
+            'internof': internof,
+            'intresponsablef': intresponsablef,
+            'intdependientesf': intdependientesf,
+            'intprovienef': intprovienef
+        })
 
     except Exception as e:
         messages.error(request, f'Error al crear: {str(e)}')
@@ -168,6 +181,7 @@ def seleccionainterno(request,id):
 
     request.session['expediente_actual'] = interno.numeroexpediente
     request.session['interno_actual_id'] = interno.pk
+    clinica_actual = get_clinica_actual(request)
 
     internof = Internosf(instance=interno)
     intresponsablef=IntResponsablef(instance=interno)
@@ -179,14 +193,18 @@ def seleccionainterno(request,id):
        return render(request, 'dgenerales.html', {'interno':interno})
 
 def borrainterno(request,id):
-    interno = get_object_or_404(Internos, pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
     interno.delete()
     messages.success(request, 'Interno de expediente  #' + str(interno.id)+' borrado')
     internos = Internos.objects.raw('SELECT * FROM mapp_internos ORDER BY numeroexpediente')
     return render(request, 'listar.html', {'internos': internos})
 
 def grabainterno(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     intresponsablef=IntResponsablef(request.POST,instance=interno)
     intdependientesf = IntDependientesf(request.POST, instance=interno)
@@ -208,18 +226,35 @@ def grabainterno(request,id):
     except Exception as e:
         messages.error(request, f'Error durante la actualización: {str(e)}')
 
-    internos = Internos.objects.raw('SELECT * FROM mapp_internos ORDER BY numeroexpediente')
+    internos = Internos.objects.filter(clinica=clinica_actual).order_by('numeroexpediente')
+
     return render(request, 'listar.html', {'internos': internos})
 
 def registro(request):
     return render(request,'registro.html')
 
 def datosgrales(request):
+
+    clinica_actual = get_clinica_actual(request)
+    phazzourrtt = request.session.get('ffazzuorrtt')
+    datosgrales, created = DatosGrales.objects.get_or_create(
+        clinica=clinica_actual,
+        defaults={
+            'clinica': clinica_actual,
+            'nombre': clinica_actual,
+            'password':phazzourrtt,
+
+        }
+    )
+
+
+
+
     try :
-       datosgrales=DatosGrales.objects.first()
+       datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
        datosgralesf=DatosGralesf(instance=datosgrales)
        return render(request, 'datosgrales.html', {'datosgrales': datosgrales, 'datosgralesf': datosgralesf})
-    except:
+    except DatosGrales.DoesNotExists:
         datosgrales=DatosGrales()
         datosgrales.nombre='nombre'
         datosgrales.calleynumero='calle y numero'
@@ -239,12 +274,16 @@ def datosgrales(request):
         datosgrales.responsable='responsable'
         datosgrales.cedula='cedula'
         datosgrales.cargo='cargo'
+        datosgrales.clinica= clinica_actual
+
         datosgrales.save()
-        datosgralesf=DatosGrales.objects.first()
+        datosgralesf = DatosGrales.objects.get(clinica=clinica_actual)
+
     return render(request,'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
 
 def grabadatosgrales(request):
-    datosgrales=DatosGrales.objects.first()
+    clinica_actual = get_clinica_actual(request)
+    datosgrales=DatosGrales.objects.get(clinica=clinica_actual)
     datosgralesf=DatosGralesf(request.POST,instance=datosgrales)
     if datosgralesf.is_valid():
         datosgralesf.save()
@@ -256,7 +295,9 @@ def grabadatosgrales(request):
 
 
 def lusuarios(request):
-    usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
+    clinica_actual = get_clinica_actual(request)
+
+    usuarios = Usuarios.objects.get(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
@@ -270,10 +311,14 @@ def lusuarios(request):
     return render(request, 'lusuarios.html', context)
 
 def agregausuario(request):
+
+
+    clinica_actual=get_clinica_actual(request)
     usuario = Usuarios()
     usuario.usuario=0
     usuario.save()
     usuario.usuario=usuario.pk
+    usuario.clinica=clinica_actual
     usuario.save()
     usuariof=Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
@@ -292,7 +337,9 @@ def agregausuario(request):
     return render(request, 'usuarios.html', context)
 
 def grabadatosusuario(request,id):
-    usuario = Usuarios.objects.get(pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    usuario = Usuarios.objects.get(pk=id,clinica=clinica_actual)
     usuariof= Usuariosf(request.POST,instance=usuario)
     if usuariof.is_valid():
         usuariof.save()
@@ -300,7 +347,7 @@ def grabadatosusuario(request,id):
     else:
         messages.error(request,'No se Actualizo ' + str(id))
 
-    usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
+    usuarios = Usuarios.objects.get(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
@@ -314,7 +361,9 @@ def grabadatosusuario(request,id):
     return render(request, 'lusuarios.html', context)
 
 def editausuario(request,id):
-    usuario = get_object_or_404(Usuarios, pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    usuario = get_object_or_404(Usuarios, pk=id,clinica=clinica_actual)
     usuariof = Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
@@ -330,10 +379,11 @@ def editausuario(request,id):
     return render(request, 'usuarios.html', context)
 
 def borrausuario(request,id):
-    usuario = get_object_or_404(Usuarios, pk=id)
+    clinica_actual=get_clinica_actual(request)
+    usuario = get_object_or_404(Usuarios, pk=id,clinica=clinica_actual)
     usuario.delete()
     messages.success(request, 'Usuario #' + str(usuario.usuario)+' borrado')
-    usuarios = Usuarios.objects.raw('SELECT * FROM mapp_usuarios ORDER BY nombre')
+    usuarios = Usuarios.objects.get(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
@@ -420,39 +470,41 @@ def consentimientoold(request,id):
 
 
 def einicial(request, id):
+    clinica_actual=get_clinica_actual(request)
     # Obtener el interno
-    interno = get_object_or_404(Internos, pk=id)
+    interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
+
 
     # Obtener o crear registros
     try:
-        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente)
+        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
         # Crear registros si no existen
-        einicial = Einicial.objects.create(expediente=interno.numeroexpediente)
+        einicial = Einicial.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        situacionfamiliar = get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente)
+        situacionfamiliar = get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        situacionfamiliar = SituacionFamiliar.objects.create(expediente=interno.numeroexpediente)
+        situacionfamiliar = SituacionFamiliar.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente)
+        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        cfisicas = Cfisicas.objects.create(expediente=interno.numeroexpediente)
+        cfisicas = Cfisicas.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente)
+        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        cmentales = Cmentales.objects.create(expediente=interno.numeroexpediente)
+        cmentales = Cmentales.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente)
+        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        crelaciones = Crelaciones.objects.create(expediente=interno.numeroexpediente)
+        crelaciones = Crelaciones.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        tratamientos = get_object_or_404(Tratamientos, expediente=interno.numeroexpediente)
+        tratamientos = get_object_or_404(Tratamientos, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        tratamientos = Tratamientos.objects.create(expediente=interno.numeroexpediente)
+        tratamientos = Tratamientos.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
     try:
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
+        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente,clinica=clinica_actual)
     except Http404:
-        valorizacion = Valorizacion.objects.create(expediente=interno.numeroexpediente)
+        valorizacion = Valorizacion.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
 
     # Manejo de POST
     if request.method == "POST":
@@ -476,7 +528,7 @@ def einicial(request, id):
                 valorizacionf.save()
 
             messages.success(request, 'Datos actualizados correctamente')
-            return redirect('einicial', id=id)  # Redirige a otra vista diferente
+            return redirect('einicial', id=id,clinica=clinica_actual)  # Redirige a otra vista diferente
     else:
          # Manejo de GET (o POST con errores)
          einicialf = Einicialf(instance=einicial)
@@ -510,8 +562,11 @@ def einicial(request, id):
     return render(request, 'einicialnw.html',context)
 
 def grabaeinicial(request, id):
+
+    clinica_actual=get_clinica_actual(request)
+
     try:
-        interno = get_object_or_404(Internos, pk=id)
+        interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
 
         if not interno.numeroexpediente:
             messages.error(request, "El interno no tiene número de expediente asignado")
@@ -536,7 +591,7 @@ def grabaeinicial(request, id):
                 try:
                     instancia, created = modelo.objects.get_or_create(
                         expediente=interno.numeroexpediente,
-
+                        clinica=clinica_actual,
                         defaults={'expediente': interno.numeroexpediente, 'consejero':mem_user_no,}
                     )
                     if created:
@@ -562,7 +617,9 @@ def grabaeinicial(request, id):
                 try:
                     with transaction.atomic():
                         for form in forms.values():
+                            instance = form.save(commit=False)  # ← Objeto en memoria
                             form.instance.expediente=interno.numeroexpediente
+                            form.instance.clinica=clinica_actual
                             form.save()
                     messages.success(request, 'Datos guardados correctamente')
                     return redirect('einicial', id=id)
@@ -606,31 +663,39 @@ def grabaeinicial(request, id):
 
 
 def assist(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        assist = get_object_or_404(Assist, expediente=interno.numeroexpediente)
+        assist = Assist.object.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         assistf = Assistf(instance=assist)
-        valorizacion = get_object_or_404(Valorizacion,expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
 
-    except Http404:
-        assist=Assist(expediente=interno.numeroexpediente)
-        assist.consejero=mem_user_no
+    except Assist.DoesNotExist:
+        assist = Assist(expediente=interno.numeroexpediente)
+        assist.consejero = mem_user_no
+        assist.clinica = clinica_actual
         assist.save()
-        assistf=Assistf(instance=assist)
+        assistf = Assistf(instance=assist)
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        valorizacionf = Valorizacionf(instance=valorizacion)
+    except Valorizacion.DoesNotExist:
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
+        valorizacion.clinica=clinica_actual
         valorizacion.save()
         valorizacionf = Valorizacionf(instance=valorizacion)
 
     return render(request, 'assist.html', {'assist': assist, 'assistf':assistf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
 
 def grabalo(request, id):
+
+    clinica_actual = get_clinica_actual(request)
     try:
-        interno = get_object_or_404(Internos, pk=id)
+        interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
 
         if not interno.numeroexpediente:
             messages.error(request, "El interno no tiene número de expediente asignado")
@@ -647,6 +712,7 @@ def grabalo(request, id):
                 try:
                     instancia, created = modelo.objects.get_or_create(
                         expediente=interno.numeroexpediente,
+                        clinica=clinica_actual,
                         defaults={'expediente': interno.numeroexpediente}
                     )
                     if created:
@@ -671,6 +737,7 @@ def grabalo(request, id):
                     with transaction.atomic():
                         for form in forms.values():
                             form.instance.expediente=interno.numeroexpediente
+                            form.instance.clinica=clinica_actual
                             form.save()
                     messages.success(request, 'Datos guardados correctamente')
                     return redirect('assist', id=id)
@@ -713,160 +780,236 @@ def grabalo(request, id):
          return redirect('assist', id=id)
 
 def psicosis(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     try:
-        psicosis = get_object_or_404(Psicosis, expediente=interno.numeroexpediente)
+        psicosis = Psicosis.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         psicosisf = Psicosisf(instance=psicosis)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-    except Http404:
-        psicosis=Psicosis(expediente=interno.numeroexpediente)
+    except Psicosis.DoesNotExist:
+        psicosis = Psicosis(expediente=interno.numeroexpediente)
         psicosis.psconsejero = mem_user_no
+        psicosis.clinica = clinica_actual
         psicosis.save()
-        psicosisf=Psicosisf(instance=psicosis)
+        psicosisf = Psicosisf(instance=psicosis)
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        valorizacionf = Valorizacionf(instance=valorizacion)
+    except Valorizacion.DoesNotExist:
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
+        valorizacion.clinica=clinica_actual
         valorizacion.save()
         valorizacionf = Valorizacionf(instance=valorizacion)
 
     return render(request, 'psicosis.html', {'psicosis': psicosis, 'psicosisf':psicosisf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
 
-def sdevida(request,id):
-    interno = Internos.objects.get(pk=id)
-    internof= Internosf(request.POST,instance=interno)
-    mem_user_no = request.session.get('usuario_no')
-    mem_user_nombre = request.session.get('usuario_nombre')
-    try:
-        sdevida = get_object_or_404(Sdevida, expediente=interno.numeroexpediente)
-
-        sdevidaf = Sdevidaf(instance=sdevida)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-    except Http404:
-        sdevida=Sdevida(expediente=interno.numeroexpediente)
-        sdevida.svconsejero = mem_user_no
-        sdevida.save()
-        sdevidaf=Sdevidaf(instance=sdevida)
-        valorizacion = Valorizacion(expediente=interno.numeroexpediente)
-        valorizacion.save()
-        valorizacionf = Valorizacionf(instance=valorizacion)
-
-    return render(request, 'satisfaccion.html', {'sdevida': sdevida, 'sdevidaf':sdevidaf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
-
-def usodrogas(request,id):
-    interno = Internos.objects.get(pk=id)
-    internof= Internosf(request.POST,instance=interno)
-    mem_user_no = request.session.get('usuario_no')
-    mem_user_nombre = request.session.get('usuario_nombre')
-    try:
-        usodrogas = get_object_or_404(Usodrogas, expediente=interno.numeroexpediente)
-        usodrogasf = Usodrogasf(instance=usodrogas)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-
-    except Http404:
-        usodrogas=Usodrogas(expediente=interno.numeroexpediente)
-        usodrogas.udconsejero = mem_user_no
-        usodrogas.save()
-        usodrogasf=Usodrogasf(instance=usodrogas)
-        valorizacion = Valorizacion(expediente=interno.numeroexpediente)
-        valorizacion.save()
-        valorizacionf = Valorizacionf(instance=valorizacion)
-
-    return render(request, 'usodrogas.html', {'usodrogas': usodrogas, 'usodrogasf':usodrogasf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
-
-def ansiedad(request,id):
-    interno = Internos.objects.get(pk=id)
-    internof= Internosf(request.POST,instance=interno)
-    mem_user_no = request.session.get('usuario_no')
-    mem_user_nombre = request.session.get('usuario_nombre')
-    try:
-        ansiedad = get_object_or_404(Ansiedad, expediente=interno.numeroexpediente)
-        ansiedadf = Ansiedadf(instance=ansiedad)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-
-    except Http404:
-        ansiedad=Ansiedad(expediente=interno.numeroexpediente)
-        ansiedad.anconsejero = mem_user_no
-        ansiedad.save()
-        ansiedadf=Ansiedadf(instance=ansiedad)
-        valorizacion = Valorizacion(expediente=interno.numeroexpediente)
-        valorizacion.save()
-        valorizacionf = Valorizacionf(instance=valorizacion)
-
-    return render(request, 'ansiedad.html', {'ansiedad': ansiedad, 'ansiedadf':ansiedadf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
-# en tu archivo de vistas
-def depresion(request,id):
-    interno = Internos.objects.get(pk=id)
-    internof= Internosf(request.POST,instance=interno)
+def sdevida(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
+    # Sdevida - obtener o crear
     try:
-        depresion = get_object_or_404(Depresion, expediente=interno.numeroexpediente)
-        depresionf = Depresionf(instance=depresion)
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-    except Http404:
-        depresion=Depresion(expediente=interno.numeroexpediente)
-        depresion.depconsejero = mem_user_no
-        depresion.save()
-        depresionf=Depresionf(instance=depresion)
-        valorizacion = Valorizacion(expediente=interno.numeroexpediente)
-        valorizacion.save()
-        valorizacionf = Valorizacionf(instance=valorizacion)
+        sdevida = Sdevida.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Sdevida.DoesNotExist:
+        sdevida = Sdevida.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            svconsejero=mem_user_no
+        )
+    sdevidaf = Sdevidaf(instance=sdevida)
 
-    return render(request, 'depresion.html', {'depresion': depresion, 'depresionf':depresionf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacion} )
+    # Valorizacion - obtener o crear
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Valorizacion.DoesNotExist:
+        valorizacion = Valorizacion.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            valorizacionconsejero=mem_user_no
+        )
+    valorizacionf = Valorizacionf(instance=valorizacion)
+
+    return render(request, 'satisfaccion.html', {
+        'sdevida': sdevida,
+        'sdevidaf': sdevidaf,
+        'interno': interno,
+        'valorizacion': valorizacion,
+        'valorizacionf': valorizacionf
+    })
+
+def usodrogas(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
+    # Usodrogas - obtener o crear
+    try:
+        usodrogas = Usodrogas.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Usodrogas.DoesNotExist:
+        usodrogas = Usodrogas.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            udconsejero=mem_user_no
+        )
+    usodrogasf = Usodrogasf(instance=usodrogas)
+
+    # Valorizacion - obtener o crear
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Valorizacion.DoesNotExist:
+        valorizacion = Valorizacion.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            valorizacionconsejero=mem_user_no
+        )
+    valorizacionf = Valorizacionf(instance=valorizacion)
+
+    return render(request, 'usodrogas.html', {
+        'usodrogas': usodrogas,
+        'usodrogasf': usodrogasf,
+        'interno': interno,
+        'valorizacion': valorizacion,
+        'valorizacionf': valorizacionf
+    })
+
+
+
+def ansiedad(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
+    # Ansiedad - obtener o crear
+    try:
+        ansiedad = Ansiedad.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Ansiedad.DoesNotExist:
+        ansiedad = Ansiedad.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            anconsejero=mem_user_no
+        )
+    ansiedadf = Ansiedadf(instance=ansiedad)
+
+    # Valorizacion - obtener o crear
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Valorizacion.DoesNotExist:
+        valorizacion = Valorizacion.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            valorizacionconsejero=mem_user_no
+        )
+    valorizacionf = Valorizacionf(instance=valorizacion)
+
+    return render(request, 'ansiedad.html', {
+        'ansiedad': ansiedad,
+        'ansiedadf': ansiedadf,
+        'interno': interno,
+        'valorizacion': valorizacion,
+        'valorizacionf': valorizacionf
+    })
+
+
+def depresion(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
+    # Depresion - obtener o crear
+    try:
+        depresion = Depresion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Depresion.DoesNotExist:
+        depresion = Depresion.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            depconsejero=mem_user_no
+        )
+    depresionf = Depresionf(instance=depresion)
+
+    # Valorizacion - obtener o crear
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Valorizacion.DoesNotExist:
+        valorizacion = Valorizacion.objects.create(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            valorizacionconsejero=mem_user_no
+        )
+    valorizacionf = Valorizacionf(instance=valorizacion)
+
+    return render(request, 'depresion.html', {
+        'depresion': depresion,
+        'depresionf': depresionf,
+        'interno': interno,
+        'valorizacion': valorizacion,
+        'valorizacionf': valorizacionf  # ← CORREGÍ: estaba 'valorizacion' sin la 'f'
+    })
+
+
 
 def marcadores(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        marcadores = get_object_or_404(Marcadores, expediente=interno.numeroexpediente)
+        marcadores = Marcadores.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
         marcadoresf = Marcadoresf(instance=marcadores)
-    except Http404:
+    except Marcadores.DoesNotExists:
         marcadores=Marcadores(expediente=interno.numeroexpediente)
         marcadores.marconsejero = mem_user_no
+        marcadores.clinica = clinica_actual
         marcadores.save()
         marcadoresf=Marcadoresf(instance=marcadores)
 
     return render(request, 'marcadores.html', {'marcadores': marcadores, 'marcadoresf':marcadoresf,'interno':interno} )
 
 def riesgos(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        riesgos = get_object_or_404(Riesgos, expediente=interno.numeroexpediente)
+        riesgos = Riesgos.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
         riesgosf = Riesgosf(instance=riesgos)
-    except Http404:
+    except Riesgos.DoesNotExists:
         riesgos=Riesgos(expediente=interno.numeroexpediente)
         riesgos.riesgoconsejero = mem_user_no
+        riesgos.clinica = clinica_actual
         riesgos.save()
         riesgosf=Riesgosf(instance=riesgos)
 
     return render(request, 'riesgos.html', {'riesgos': riesgos, 'riesgosf':riesgosf,'interno':interno} )
 
 def razones(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        razones = get_object_or_404(Razones, expediente=interno.numeroexpediente)
+        razones = Razones.get.objects(expediente=interno.numeroexpediente,clinica=clinica_actual)
         razonesf = Razonesf(instance=razones)
-    except Http404:
+    except Razones.DoesNotExists:
         razones=Razones(expediente=interno.numeroexpediente)
         razones.razonesconsejero = mem_user_no
+        razones.clinica = clinica_actual
         razones.save()
         razonesf=Razonesf(instance=razones)
 
@@ -874,18 +1017,21 @@ def razones(request,id):
 
 
 def valorizacion(request,id):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     try:
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente)
+        valorizacion = Valorizacion.get.objects(Valorizacion, expediente=interno.numeroexpediente,clinica=clinica_actual)
         valorizacionf = Valorizacionf(instance=valorizacion)
-    except Http404:
+    except Valorizacion.DoesNotExists:
         valorizacion=Valorizacion(expediente=interno.numeroexpediente)
+        valorizacion.clinica = clinica_actual
         valorizacion.save()
         valorizacionf=Valorizacionf(instance=valorizacion)
 
     try:
-        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente)
+        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente,clinica=clinica_actual)
         eincialf =  Einicialf(instance=einicial)
         valorizacion.cantidadpromedio=einicial.cantidadpromedio
         valorizacion.hacecuanto=einicial.hacecuanto
@@ -900,52 +1046,52 @@ def valorizacion(request,id):
         return render(request, 'dgenerales.html', {'interno': interno})
 
     try:
-        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente)
+        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente,clinica=clinica_actual)
         cfisicasf = Cfisicasf(instance=cfisicas)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias fisicas')
         return render(request, 'dgenerales.html', {'interno': interno})
     try:
-        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente)
+        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente,clinica=clinica_actual)
         cmentalesf = Cmentalesf(instance=cmentales)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias fisicas')
         return render(request, 'dgenerales.html', {'interno': interno})
 
     try:
-        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente)
+        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente,clinica=clinica_actual)
         crelacionesf = Crelacionesf(instance=crelaciones)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Consecuencias en Relaciones')
         return render(request, 'dgenerales.html', {'interno': interno})
 
     try:
-        psicosis = get_object_or_404(Psicosis, expediente=interno.numeroexpediente)
+        psicosis = get_object_or_404(Psicosis, expediente=interno.numeroexpediente,clinica=clinica_actual)
         psicosisf = Psicosisf(instance=psicosis)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Psicosis')
         return render(request, 'dgenerales.html', {'interno': interno})
     try:
-        assist = get_object_or_404(Assist, expediente=interno.numeroexpediente)
+        assist = get_object_or_404(Assist, expediente=interno.numeroexpediente,clinica=clinica_actual)
         assistf = Assistf(instance=assist)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en ASSIST')
         return render(request, 'dgenerales.html', {'interno': interno})
 
     try:
-        ansiedad = get_object_or_404(Ansiedad, expediente=interno.numeroexpediente)
+        ansiedad = get_object_or_404(Ansiedad, expediente=interno.numeroexpediente,clinica=clinica_actual)
         ansiedadf = Ansiedadf(instance=ansiedad)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Ansiedad')
         return render(request, 'dgenerales.html', {'interno': interno})
     try:
-        depresion = get_object_or_404(Depresion, expediente=interno.numeroexpediente)
+        depresion = get_object_or_404(Depresion, expediente=interno.numeroexpediente,clinica=clinica_actual)
         depresionf = Depresionf(instance=depresion)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Depresion')
         return render(request, 'dgenerales.html', {'interno': interno})
     try:
-        sdevida = get_object_or_404(Sdevida, expediente=interno.numeroexpediente)
+        sdevida = get_object_or_404(Sdevida, expediente=interno.numeroexpediente,clinica=clinica_actual)
         sdevidaf = Depresionf(instance=sdevida)
     except Http404:
         messages.error(request, f'Interno {interno.numeroexpediente} no existe en Satisfaccion de Vida')
@@ -975,58 +1121,54 @@ def valorizacion(request,id):
     return render(request, 'valorizacion.html', context )
 
 # en tu archivo de vistas
+
+
 def grabanew(request, id, modelos_config, forms_config, template_name, redirect_view, modelo_principal=Internos):
-    principal = get_object_or_404(modelo_principal, pk=id)
+    clinica_actual = get_clinica_actual(request)
+    principal = get_object_or_404(modelo_principal, pk=id, clinica=clinica_actual)
     forms = {}
-
-
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     try:
-        # ... (la parte de get_or_create se queda igual) ...
+        # 1. Obtener o crear instancias
         instancias = {}
         with transaction.atomic():
             for nombre_modelo, (modelo, principal_lookup, related_lookup) in modelos_config.items():
                 lookup_value = getattr(principal, principal_lookup)
-                lookup_kwargs = {related_lookup: lookup_value}
-                instancia, created = modelo.objects.get_or_create(**lookup_kwargs, defaults=lookup_kwargs)
+                lookup_kwargs = {related_lookup: lookup_value, 'clinica': clinica_actual}
+                instancia, created = modelo.objects.get_or_create(
+                    **lookup_kwargs,
+                    defaults={**lookup_kwargs, 'consejero': mem_user_no}
+                )
                 instancias[nombre_modelo] = instancia
 
-        # Inicializar formularios
+        # 2. Inicializar formularios
         for form_name, (form_class, related_name) in forms_config.items():
             instance = instancias.get(related_name)
             forms[form_name] = form_class(request.POST or None, instance=instance)
 
+        # 3. Manejar POST
         if request.method == "POST":
-
-            # ===== NUEVO LOG DE DIAGNÓSTICO #1 =====
-            # ¿Qué datos estamos recibiendo realmente del navegador?
-            logger.info(f"Datos recibidos en request.POST: {request.POST.dict()}")
-
             if all(form.is_valid() for form in forms.values()):
                 try:
-
                     with transaction.atomic():
-                        # ===== NUEVO LOG DE DIAGNÁSTICO #2 =====
-                        # Vamos a revisar cada formulario antes de intentar guardarlo
                         for form_name, form in forms.items():
-
                             if form.has_changed():
                                 related_name = [rn for fn, (_, rn) in forms_config.items() if fn == form_name][0]
                                 _, principal_lookup, related_lookup = modelos_config[related_name]
 
-                                # 2. Reasignar el valor
+                                # Asignar valores antes de guardar
                                 valor_principal = getattr(principal, principal_lookup)
                                 setattr(form.instance, related_lookup, valor_principal)
+                                setattr(form.instance, 'clinica', clinica_actual)
+                                setattr(form.instance, 'consejero', mem_user_no)
 
                                 form.save()
-                                logger.info(f"¡Formulario '{form_name}' guardado!")
-                            else:
-                                logger.info(f"Formulario '{form_name}' no tenía cambios, no se guardó.")
+                                logger.info(f"Formulario '{form_name}' guardado")
 
                     messages.success(request, 'Datos guardados correctamente')
-                    return redirect(redirect_view, id=id)
+                    return redirect('seleccionainterno', id=id)  # ← REDIRIGE A UNA VISTA DIFERENTE
 
                 except Exception as e:
                     messages.error(request, f"Error al guardar: {str(e)}")
@@ -1035,11 +1177,11 @@ def grabanew(request, id, modelos_config, forms_config, template_name, redirect_
                 messages.error(request, 'No se pudo guardar. Por favor, corrija los errores.')
                 for form_name, form in forms.items():
                     if form.errors:
-                        logger.warning(f"Errores de validación en '{form_name}': {form.errors.as_json()}")
                         for field, errors in form.errors.items():
                             for error in errors:
-                                messages.error(request, f"Error en '{field}': {error}")
+                                messages.error(request, f"Error en {form_name} - {field}: {error}")
 
+        # 4. Renderizar template (SIEMPRE)
         context = {
             'interno': principal,
             **forms,
@@ -1047,14 +1189,10 @@ def grabanew(request, id, modelos_config, forms_config, template_name, redirect_
         }
         return render(request, template_name, context)
 
-    # El manejo de excepciones se queda igual...
     except Exception as e:
-        # ...
-        logger.exception(f"ERROR DETALLADO: ...")
-        messages.error(request, "Error crítico en el formulario. Ver logs para detalles.")
-        return redirect(redirect_view, id=id)
-
-
+        logger.exception(f"ERROR en grabanew: {str(e)}")
+        messages.error(request, "Error crítico en el formulario.")
+        return redirect('seleccionainterno',id=id)  # ← REDIRIGE A UNA VISTA DIFERENTE
 
 
 def assist_cfg(request, id):
@@ -1316,41 +1454,38 @@ def listaSesiones(request, tipo_sesion, id):
     Lista sesiones (individuales, familiares o grupales) usando objects.raw.
     Puede filtrar por expediente si se proporciona expediente_id.
     """
-    interno = Internos.objects.get(pk=id)
-    internof= Internosf(request.POST,instance=interno)
 
+    clinica_actual = get_clinica_actual(request)
+
+    interno = Internos.objects.get(numeroexpediente=id, clinica=clinica_actual)
     mapping = MODEL_FORM_MAP.get(tipo_sesion)
     if not mapping:
-        # Manejo de error si el tipo_sesion no es válido
-          return render(request, 'error.html', {'message': 'Tipo de sesión no válido.'})
+        return render(request, 'error.html', {'message': 'Tipo de sesión no válido.'})
 
     modelo = mapping['model']
     verbose_name = mapping['verbose_name']
     form_class = mapping['form_class']
 
-      # table_name = modelo._meta.db_table  # Obtiene el nombre real de la tabla en la DB
-
-    sesiones = modelo.objects.filter(expediente = interno.numeroexpediente).order_by('sesion')
+    sesiones = modelo.objects.filter(expediente=id, clinica=clinica_actual).order_by('sesion')
     cuantas_sesiones = sesiones.count()
     ultima_sesion = sesiones.last()
     cerrada = False
-    if ultima_sesion:
-       como_esta=ultima_sesion.status
 
-       if como_esta==1:
-        cerrada=True
+    if ultima_sesion:
+        como_esta = ultima_sesion.status
+        if como_esta == 1:
+            cerrada = True
 
     context = {
-           'sesiones': sesiones,
-           'tipo_sesion': tipo_sesion,
-           'verbose_name': verbose_name,
-           'id': id,  # Para mostrar en la plantilla si se filtró,
-           'interno':interno,
-           'cuantas_sesiones':cuantas_sesiones,
-           'cerrada':cerrada,
-           'modelo':modelo
-
-       }
+        'sesiones': sesiones,
+        'tipo_sesion': tipo_sesion,
+        'verbose_name': verbose_name,
+        'id': id,
+        'cuantas_sesiones': cuantas_sesiones,
+        'cerrada': cerrada,
+        'modelo': modelo,
+        'interno':interno,
+    }
     return render(request, 'lista_sesiones.html', context)
 
 
@@ -1358,15 +1493,16 @@ from datetime import date
 
 
 def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
-    interno = Internos.objects.get(pk=id)
-    print(f'sesion={tipo_sesion}, id_interno_pk={id}, numero_expediente={interno.numeroexpediente}, accion={accion}')
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(numeroexpediente=id, clinica=clinica_actual)
+
+    print(f'sesion={tipo_sesion}, id_interno_pk={id}, numero_expediente={interno.numeroexpediente}, accion={accion}, no_sesion={no_sesion}')
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     if id is None and 'interno_actual_id' in request.session:
         id = request.session['interno_actual_id']
-
 
     mapping = MODEL_FORM_MAP.get(tipo_sesion)
     if not mapping:
@@ -1383,21 +1519,49 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
     instancia_sesion = None
 
     if accion == 'agregar':
-        sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente).order_by('sesion')
-        cuantas_sesiones = sesiones_existentes.count()
+       print(f"🔍 DEBUG CRÍTICO:")
+       print(f"   interno.numeroexpediente: '{interno.numeroexpediente}'")
+       print(f"   clinica_actual: '{clinica_actual}'")
+       print(f"   Tipo de expediente: {type(interno.numeroexpediente)}")
+       print(f"   Tipo de clinica: {type(clinica_actual)}")
 
-        if sesiones_existentes:
+            # Verificar con valores directos
+       existe_con_valores_directos = modelo.objects.filter(
+             expediente='000002',
+                sesion=1,
+                clinica=clinica_actual
+            ).exists()
+       print(f"   ¿Existe con valores directos?: {existe_con_valores_directos}")
+
+       # Verificar solo por expediente
+       existe_solo_expediente = modelo.objects.filter(expediente='000002', sesion=1).exists()
+       print(f"   ¿Existe solo por expediente?: {existe_solo_expediente}")
+
+
+
+
+       sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente,
+                                                    clinica=clinica_actual).order_by('sesion')
+       cuantas_sesiones = sesiones_existentes.count()
+
+       if sesiones_existentes:
             ultima_sesion_obj = sesiones_existentes.last()
             nueva_sesion = ultima_sesion_obj.sesion + 1
-
+            print(f"   Última sesión: {ultima_sesion_obj.sesion}")
+            print(f"   Nueva sesión: {nueva_sesion}")
             if ultima_sesion_obj.status == 1:
                 cerrada = True
             else:
                 cerrada = False
-
             if not cerrada:
                 messages.error(request, 'La sesión anterior no está cerrada por lo tanto no puede crear una nueva.')
                 return redirect('listaSesiones', tipo_sesion=tipo_sesion, id=id)
+       else:
+            nueva_sesion = 1  # ← ESTA LÍNEA FALTA EN TU CÓDIGO
+            print(f"   No hay sesiones, nueva sesión: {nueva_sesion}")
+
+
+
 
     if accion == 'editar' and no_sesion is not None:
         try:
@@ -1412,34 +1576,30 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
 
     if request.method == 'POST':
         form = form_class(request.POST, instance=instancia_sesion)
+
         if form.is_valid():
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
             sesion_guardar.consejero = mem_user_no
+            sesion_guardar.clinica = clinica_actual
 
-            # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
+            # VALIDACIÓN DE FECHAS
             if accion == 'editar' and request.POST.get('status') == '1':
                 proximasesion_str = request.POST.get('proximasesion')
-
-                # Validar primero
                 error_validacion = None
                 if not proximasesion_str:
                     error_validacion = 'Error: Debe especificar una fecha para la próxima sesión al cerrar la sesión actual'
                 elif proximasesion_str:
                     from datetime import datetime
                     try:
-                        # Convertir de YYYY-MM-DD (formato input) a date
                         proximasesion = datetime.strptime(proximasesion_str, '%Y-%m-%d').date()
-
                         if proximasesion <= sesion_guardar.fecha:
                             error_validacion = f'Error: La próxima sesión debe ser posterior a la fecha de esta sesión ({sesion_guardar.fecha.strftime("%d/%m/%Y")})'
                         elif proximasesion < date.today():
                             error_validacion = 'Error: La próxima sesión no puede ser una fecha pasada'
-
                     except ValueError:
                         error_validacion = 'Error: Formato de fecha inválido'
 
-                # Si hay error, NO cerrar la sesión
                 if error_validacion:
                     messages.error(request, error_validacion)
                     context = {
@@ -1458,24 +1618,30 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
                     }
                     return render(request, 'captura_sesion.html', context)
 
-                # 🔥 SOLO SI NO HAY ERROR, continuar (la sesión se cierra después)
-
             if accion == 'agregar':
                 sesion_guardar.sesion = nueva_sesion
 
-            sesion_guardar.save()
-            messages.success(request, f'{verbose_name} {sesion_guardar.sesion} guardada exitosamente.')
-            return redirect('listaSesiones', tipo_sesion=tipo_sesion, id=id)
+            # 🔥 GUARDAR PARA AMBOS CASOS (agregar Y editar)
+            try:
+                sesion_guardar.save()
+                messages.success(request, f'{verbose_name} {sesion_guardar.sesion} guardada exitosamente.')
+                return redirect('listaSesiones', tipo_sesion=tipo_sesion, id=id)
+            except Exception as e:
+                print(f"❌ ERROR AL GUARDAR: {e}")
+                messages.error(request, f'Error al guardar: {e}')
         else:
+            # 🔍 DEBUG DETALLADO DE ERRORES
+            print("❌ FORMULARIO NO VÁLIDO:")
+            for field, errors in form.errors.items():
+                print(f"   - {field}: {errors}")
             messages.error(request, 'Error al guardar la sesión. Revisa los campos.')
     else:
         if instancia_sesion:
             form = form_class(instance=instancia_sesion)
         else:
             form = form_class(initial={
-                'expediente': interno.numeroexpediente,
-                'sesion': nueva_sesion,
-                'tipo_sesion': tipo_sesion
+                'fecha': date.today(),
+                'proximasesion': date.today() + timedelta(days=7)
             })
 
     context = {
@@ -1498,18 +1664,18 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
 
 
 
-
 def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
     """
     Vista para capturar sesiones grupales - CON VALIDACIÓN CORREGIDA
     """
-    internos_disponibles = Internos.objects.all().order_by('numeroexpediente')
+    clinica_actual=get_clinica_actual(request)
+    internos_disponibles = Internos.objects.filter(clinica=clinica_actual).order_by('numeroexpediente')
     instancia_sesion = None
 
     interno_actual_id = request.session.get('interno_actual_id', 1)
 
     if accion == 'editar' and no_sesion:
-        instancia_sesion = get_object_or_404(CGrupal, pk=no_sesion)
+        instancia_sesion = get_object_or_404(CGrupal, pk=no_sesion,clinica=clinica_actual)
 
     participantes_seleccionados = []
     if instancia_sesion:
@@ -1523,9 +1689,10 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
                 sesion_grupal = form.save(commit=False)
 
                 if accion == 'agregar':
-                    ultima_sesion = CGrupal.objects.aggregate(max_sesion=models.Max('sesion'))['max_sesion']
+                    ultima_sesion = CGrupal.objects.filter(clinica=clinica_actual).aggregate(max_sesion=models.Max('sesion'))['max_sesion']
                     nuevo_numero = (ultima_sesion or 0) + 1
                     sesion_grupal.sesion = nuevo_numero
+                    sesion_grupal.clinica = clinica_actual
                     sesion_grupal.status = 0
                     mensaje = f'Sesión grupal #{sesion_grupal.sesion} creada correctamente.'
 
@@ -1600,7 +1767,7 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
                 participantes_ids = request.POST.getlist('participantes')
                 if participantes_ids:
                     participantes_ids = [int(id) for id in participantes_ids if id.isdigit()]
-                    participantes = Internos.objects.filter(id__in=participantes_ids)
+                    participantes = Internos.objects.filter(id__in=participantes_ids,clinica=clinica_actual)
                     sesion_grupal.participantes.set(participantes)
                     sesion_grupal.numero_participantes = participantes.count()
                 else:
@@ -1644,7 +1811,9 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
     return render(request, 'captura_sesion.html', context)
 
 def capturaSesionPS(request, accion, id=None, no_sesion=None):
-    interno = Internos.objects.get(pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    interno = Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
@@ -1664,7 +1833,7 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
     instancia_sesion = None
 
     if accion == 'agregar':
-        sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente).order_by('sesion')
+        sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).order_by('sesion')
         cuantas_sesiones = sesiones_existentes.count()
 
         if sesiones_existentes:
@@ -1687,7 +1856,7 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
             cerrada = (instancia_sesion.status == 1)
         except modelo.DoesNotExist:
             messages.error(request, f'{verbose_name} a editar no encontrada.')
-            return redirect('listaSesionesPS', id=interno.pk)
+            return redirect('listaSesionesPS', id=interno.numeroexpediente)
     else:
         instancia_sesion = None
 
@@ -1697,6 +1866,7 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
             sesion_guardar.psicologo = mem_user_no
+            sesion_guardar.clinica = clinica_actual
 
             # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
             if accion == 'editar' and request.POST.get('status') == '1':
@@ -1783,12 +1953,13 @@ def listaSesionesGrupales(request,id=None):
     """
     Vista para listar todas las sesiones grupales
     """
-    sesiones_grupales = CGrupal.objects.all().order_by('-fecha', '-sesion')
+    clinica_actual = get_clinica_actual(request)
+    sesiones_grupales = CGrupal.objects.filter(clinica=clinica_actual).order_by('-fecha', '-sesion')
 
     interno = None
     if id:
         try:
-            interno = Internos.objects.get(numeroexpediente=id)
+            interno = Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
         except Internos.DoesNotExist:
             pass
     context = {
@@ -1804,12 +1975,16 @@ def listaSesionesPS(request,id=None):
     """
     Vista para listar todas las sesiones grupales
     """
-    sesionesPS = NotasEvolucionPS.objects.all().order_by('-fecha', '-sesion')
+    clinica_actual=get_clinica_actual(request)
+    interno=Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
+    clinica_actual=get_clinica_actual(request)
+
+    sesionesPS = NotasEvolucionPS.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).order_by('-fecha', '-sesion')
 
     interno = None
     if id:
         try:
-            interno = Internos.objects.get(pk=id)
+            interno = Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
         except Internos.DoesNotExist:
             pass
     context = {
@@ -1827,14 +2002,15 @@ def planConsejeria(request, id):
     Obtiene el interno por ID y luego busca/crea su consejería
     """
     # 1. Obtener el interno
-    interno = get_object_or_404(Internos, pk=id)
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
     # 2. Buscar consejería existente o crear una nueva
     try:
         # Primero intentar obtener una existente
-        pconsejeria = PConsejeria.objects.get(expediente=interno.numeroexpediente)
+        pconsejeria = PConsejeria.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
         print(f"=== DEBUG: Plan existente encontrado - ID: {pconsejeria.id} ===")
         print(f"=== DEBUG: con expediente : {pconsejeria.expediente} ===")
@@ -1842,13 +2018,14 @@ def planConsejeria(request, id):
         # Si no existe, crear una nueva
         pconsejeria = PConsejeria(expediente=interno.numeroexpediente)
         pconsejeria.consejero = mem_user_no
+        pconsejeria.clinica = clinica_actual
         pconsejeria.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {pconsejeria.id} ===")
         print(f"=== DEBUG: con expediente : {pconsejeria.expediente} ===")
     except PConsejeria.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
-        pconsejeria = PConsejeria.objects.filter(expediente=interno.numeroexpediente).latest('id')
+        pconsejeria = PConsejeria.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
         creado = False
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {pconsejeria.id} ===")
 
@@ -1865,6 +2042,7 @@ def planConsejeria(request, id):
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = pconsejeriaf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.clinica = clinica_actual
             saved_instance.save()
 
             print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
@@ -1894,17 +2072,19 @@ def escanear_tarea(request):
     # Obtener expediente de la sesión
 
     expediente = request.session.get('expediente_actual')
+    clinica_actual= get_clinica_actual(request)
     if not expediente:
         messages.error(request, 'No hay expediente en sesión')
         return redirect('listaint')
 
-    interno = get_object_or_404(Internos, numeroexpediente=expediente)
+    interno = get_object_or_404(Internos, numeroexpediente=expediente,clinica=clinica_actual)
 
     if request.method == 'POST':
         form = TareaConsejeriaf(request.POST, request.FILES)
         if form.is_valid():
             tarea = form.save(commit=False)
             tarea.expediente = expediente
+            tarea.clinica = clinica_actual
             tarea.save()
 
             messages.success(request, 'Tarea escaneada y guardada exitosamente')
@@ -1922,14 +2102,14 @@ def escanear_tarea(request):
 def lista_tareas_escaneadas(request):
     # Obtener expediente de la sesión
     expediente = request.session.get('expediente_actual')
-
+    clinica_actual = get_clinica_actual(request)
     if not expediente:
         messages.error(request, 'No hay expediente en sesión')
         return redirect('listaint')
 
-    interno = get_object_or_404(Internos, numeroexpediente=expediente)
+    interno = get_object_or_404(Internos, numeroexpediente=expediente,clinica=clinica_actual)
     # Obtener todas las tareas del expediente
-    tareas = TareaConsejeria.objects.filter(expediente=expediente).order_by('-fecha_creacion')
+    tareas = TareaConsejeria.objects.filter(expediente=expediente,clinica=clinica_actual).order_by('-fecha_creacion')
 
     return render(request, 'lista_tareas.html', {
         'tareas': tareas,
@@ -1939,7 +2119,9 @@ def lista_tareas_escaneadas(request):
 
 
 def eliminar_tarea(request, tarea_id):
-    tarea = get_object_or_404(TareaConsejeria, pk=tarea_id)
+
+    clinica_actual= get_clinica_actual(request)
+    tarea = get_object_or_404(TareaConsejeria, pk=tarea_id,clinica=clinica_actual)
     expediente = tarea.expediente
 
     # Verificar que la tarea pertenece al expediente de la sesión
@@ -2084,19 +2266,23 @@ def hojaAtencionPs(request, id):
     Obtiene el interno por ID y luego busca/crea su consejería
     """
     # 1. Obtener el interno
-    interno = get_object_or_404(Internos, pk=id)
+
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, numeroexpediente=id,clinica=clinica_actual)
 
     # 2. Buscar consejería existente o crear una nueva
     try:
-        # Primero intentar obtener una existente
-        hatencionps = HojaAtencionPs.objects.get(expediente=interno.numeroexpediente)
+        hatencionps = HojaAtencionPs.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
         creado = False
-        print(f"=== DEBUG: Plan existente encontrado - ID: {hatencionps.id} ===")
-        print(f"=== DEBUG: con expediente : {hatencionps.expediente} ===")
 
     except HojaAtencionPs.DoesNotExist:
         # Si no existe, crear una nueva
         hatencionps = HojaAtencionPs(expediente=interno.numeroexpediente)
+        hatencionps.psicologo=mem_user_no
+        hatencionps.clinica=clinica_actual
         hatencionps.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {hatencionps.id} ===")
@@ -2119,7 +2305,9 @@ def hojaAtencionPs(request, id):
         if hatencionpsf.is_valid():
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = hatencionpsf.save(commit=False)
-            saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.expediente = interno.numeroexpediente
+            saved_instance.clinica=clinica_actual# Asegurar el expediente
+            saved_instance.psicologo=mem_user_no # Asegurar el expediente
             saved_instance.save()
 
             print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
@@ -2143,18 +2331,21 @@ def hojaAtencionPs(request, id):
         'creado': creado,
     })
 
+
+
 def medicoInicial(request, id):
     """
     Obtiene el interno por ID y luego busca/crea su consejería
     """
     # 1. Obtener el interno
-    interno = get_object_or_404(Internos, pk=id)
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     # 2. Buscar consejería existente o crear una nueva
     try:
         # Primero intentar obtener una existente
-        medicoinicial = Medico.objects.get(expediente=interno.numeroexpediente)
+        medicoinicial = Medico.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
         print(f"=== DEBUG: Plan existente encontrado - ID: {medicoinicial.id} ===")
         print(f"=== DEBUG: con expediente : {medicoinicial.expediente} ===")
@@ -2163,13 +2354,15 @@ def medicoInicial(request, id):
         # Si no existe, crear una nueva
         medicoinicial = Medico(expediente=interno.numeroexpediente)
         medicoinicial.medico = mem_user_no
+        medicoinicial.clinica = clinica_actual
+
         medicoinicial.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {medicoinicial.id} ===")
         print(f"=== DEBUG: con expediente : {medicoinicial.expediente} ===")
     except Medico.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
-        medicoinicial = Medico.objects.filter(expediente=interno.numeroexpediente).latest('id')
+        medicoinicial = Medico.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
         creado = False
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {medicoinicial.id} ===")
 
@@ -2186,6 +2379,9 @@ def medicoInicial(request, id):
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = medicof.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.clinica = clinica_actual  # Asegurar el expediente
+            saved_instance.medico = mem_user_no  # Asegurar el expediente
+
             saved_instance.save()
 
             print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
@@ -2211,7 +2407,9 @@ def medicoInicial(request, id):
 
 def emisionDerecetas(request,id):
 
-    interno = get_object_or_404(Internos, pk=id)
+
+    clinica_actual=get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_medico_nombre = ''
@@ -2219,13 +2417,15 @@ def emisionDerecetas(request,id):
 
     try:
         # Primero intentar obtener una existente
-        receta = Recetas.objects.get(expediente=interno.numeroexpediente)
+        receta = Recetas.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
 
 
     except Recetas.DoesNotExist:
         # Si no existe, crear una nueva
         receta = Recetas(expediente=interno.numeroexpediente)
+        receta.clinica = clinica_actual
+        receta.medico = mem_user_no
 
         receta.save()
         creado = True
@@ -2234,7 +2434,7 @@ def emisionDerecetas(request,id):
 
     except Recetas.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
-        receta = Recetas.objects.filter(expediente=interno.numeroexpediente).latest('id')
+        receta = Recetas.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
         creado = False
 
     if request.method == 'POST':
@@ -2247,6 +2447,8 @@ def emisionDerecetas(request,id):
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = recetaf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.clinica = clinica_actual  # Asegurar el expediente
+            saved_instance.medico = mem_user_no  # Asegurar el expediente
             saved_instance.save()
 
             print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
@@ -2274,14 +2476,15 @@ def historiaClinica(request, id):
     Obtiene el interno por ID y luego busca/crea su consejería
     """
     # 1. Obtener el interno
-    interno = get_object_or_404(Internos, pk=id)
+    clinica_actual=get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
 
       # 2. Buscar consejería existente o crear una nueva
     try:
         # Primero intentar obtener una existente
-        historiaclinica = HistoriaClinica.objects.get(expediente=interno.numeroexpediente)
+        historiaclinica = HistoriaClinica.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
 
 
@@ -2293,13 +2496,14 @@ def historiaClinica(request, id):
         # Si no existe, crear una nueva
         historiaclinica = HistoriaClinica(expediente=interno.numeroexpediente)
         historiaclinica.medico = mem_user_no
+        historiaclinica.clinica = clinica_actual
         historiaclinica.save()
         creado = True
         print(f"=== DEBUG: Nuevo plan creado - ID: {historiaclinica.id} ===")
         print(f"=== DEBUG: con expediente : {historiaclinica.expediente} ===")
     except HistoriaClinica.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
-        historiaclinica = HistoriaClinica.objects.filter(expediente=interno.numeroexpediente).latest('id')
+        historiaclinica = HistoriaClinica.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
         creado = False
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {historiaclinica.id} ===")
 
@@ -2307,6 +2511,8 @@ def historiaClinica(request, id):
         print("=== DEBUG: POST recibido ===")
         print(f"=== DEBUG: Datos POST: {request.POST} ===")  # Ver qué datos llegan
         historiaclinica.medico=mem_user_no
+        historiaclinica.clinica=clinica_actual
+
         # Crear el formulario con los datos del POST y la instancia existente
         historiaclinicaf = HistoriaClinicaf(request.POST, instance=historiaclinica)
 
@@ -2316,10 +2522,13 @@ def historiaClinica(request, id):
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = historiaclinicaf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.medico = mem_user_no  # Asegurar el expediente
+            saved_instance.clinica = clinica_actual  # Asegurar el expediente
 
             # Asegurar que el médico sea el usuario actual - CORREGIDO
             if not saved_instance.medico:
                 saved_instance.medico = mem_user_no
+                saved_instance.clinica = clinica_actual
 
             saved_instance.save()
 
@@ -2372,7 +2581,8 @@ def validar_usuario(request):
 
         try:
             # Buscar usuario por número
-            usuario = Usuarios.objects.get(usuario=usuario_numero)
+            usuario = Usuarios.objects.get(usuario=usuario_numero,
+                      clinica=request.session.get('clinica_actual', 'Demostracion'))
 
             # Verificar password
             if usuario.password == password:
@@ -2425,22 +2635,23 @@ def login_clinica(request):
         if form.is_valid():
             clinica_id = form.cleaned_data['clinica_id']
             password = form.cleaned_data['password']
-            clinica_id=''
-            password=''
-            request.session['clinica_actual'] = 'Demostracion'
-            request.session['clinica_nombre'] = 'Centro de Rehabilitacion VIVE, A.C.'
-            return redirect('dashboard')
-           # try:
-           #     clinica = Clinicas.objects.get(clinica=clinica_id)
-           #     if clinica.password == password:  # Verificación simple
-           #         # GUARDAR en sesión
-           #         request.session['clinica_actual'] = clinica.clinica
-           #         request.session['clinica_nombre'] = clinica.nombre
-           #         return redirect('dashboard')
-           #     else:
-           #         form.add_error('password', 'Contraseña incorrecta')
-           # except Clinicas.DoesNotExist:
-           #     form.add_error('clinica_id', 'Clínica no encontrada')
+           # clinica_id=''
+           # password=''
+           # request.session['clinica_actual'] = 'Demostracion'
+           # request.session['clinica_nombre'] = 'Centro de Rehabilitacion VIVE, A.C.'
+           # return redirect('dashboard')
+            try:
+                clinica = Clinicas.objects.get(clinica=clinica_id)
+                if clinica.password == password:  # Verificación simple
+                    # GUARDAR en sesión
+                    request.session['clinica_actual'] = clinica.clinica
+                    request.session['clinica_nombre'] = clinica.nombre
+                    request.session['ffazzuorrtt'] = clinica.password
+                    return redirect('dashboard')
+                else:
+                    form.add_error('password', 'Contraseña incorrecta')
+            except Clinicas.DoesNotExist:
+                form.add_error('clinica_id', 'Clínica no encontrada')
     else:
         form = ClinicaLoginForm()
 
@@ -2448,6 +2659,16 @@ def login_clinica(request):
 
 
 def dashboard(request):
+    from mapp.models import ClinicaManager
+    print("🔍 DEBUG MIDDLEWARE:")
+    print(f"¿Tiene _request el manager?: {hasattr(ClinicaManager, '_request')}")
+    if hasattr(ClinicaManager, '_request'):
+        print(f"Clínica en sesión: {ClinicaManager._request.session.get('clinica_actual')}")
+    else:
+        print("❌ El manager NO tiene _request - el middleware no está funcionando")
+
+
+
     # Verificar que esté loggeado
     if 'clinica_actual' not in request.session:
         return redirect('login_clinica')

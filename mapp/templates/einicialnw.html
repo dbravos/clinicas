@@ -96,6 +96,14 @@
   <form action="{% url 'grabaeinicial' id=interno.pk %}" method="POST" >
     {% csrf_token %}
 
+    {{ einicialf.expediente.as_hidden }}
+    {{ situacionfamiliarf.expediente.as_hidden }}
+    {{ cfisicasf.expediente.as_hidden }}
+    {{ cmentalesf.expediente.as_hidden }}
+    {{ crelacionesf.expediente.as_hidden }}
+    {{ tratamientosf.expediente.as_hidden }}
+
+
     {% if messages %}
     <div class="alert-messages">
       {% for message in messages %}

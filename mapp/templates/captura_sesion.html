@@ -83,10 +83,10 @@
                 {% endif %}
               {% else %}
                 {% if accion == 'editar' and instancia_sesion %}
-                {% url 'capturaSesion_con_id' tipo_sesion=tipo_sesion id=interno.pk accion='editar' no_sesion=instancia_sesion.pk %}
+                {% url 'capturaSesion_con_id' tipo_sesion=tipo_sesion id=interno.numeroexpediente accion='editar' no_sesion=instancia_sesion.pk %}
                 {% else %}
                 {% if accion and tipo_sesion and id %}
-                {% url 'capturaSesion' tipo_sesion=tipo_sesion accion='agregar' id=interno.pk %}
+                {% url 'capturaSesion' tipo_sesion=tipo_sesion accion='agregar' id=interno.numeroexpediente %}
                 {% endif %}
                 {% endif %}
               {% endif %}"

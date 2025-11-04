@@ -48,7 +48,7 @@
   </div>
 
   <!-- Formulario principal -->
-  <form action="{% url 'planConsejeria' id=interno.numeroexpediente %}" method="POST">
+  <form action="{% url 'planConsejeria' id=interno.pk %}" method="POST">
     {% csrf_token %}
   <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
     <!-- MOSTRAR ERRORES DEL FORMULARIO -->
