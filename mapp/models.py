@@ -68,6 +68,9 @@ class DatosGrales(models.Model):
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
     password = models.CharField(max_length=128, verbose_name='Some data', null=True, blank=True, default='123456')
 
+    class Meta:
+        unique_together = ['clinica']  # ✅ Único por clínica
+
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Internos(models.Model):
