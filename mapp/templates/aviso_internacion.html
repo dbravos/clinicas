@@ -229,9 +229,13 @@
         </div>
 
         <div class="header">
-            <div class="logo-container">
-                <img src="/static/images/logo.jpg?v=2" alt="Logo" class="logo">
+             <div class="logo-container">
+            {% if datosgrales.logo_clinica %}
+                <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+            {% endif %}
             </div>
+
+
             <div class="clinic-info">
                 <div class="organization">{{datosgrales.nombre}}</div>
                 <div class="rfc">R.F.C. {{datosgrales.rfc}}</div>

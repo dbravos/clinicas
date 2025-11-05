@@ -17,9 +17,11 @@ class ClinicaManager(models.Manager):
 
 class Usuarios(models.Model):
 
+    opcionesCargo = [('Administrador', 'Administrador'), ('Oficina', 'Oficina'), ('Consejero', 'Consejero'),
+                     ('Psicologo(a)', 'Psicologo(a)'),('Medico','Medico'),('Psiquiatra','Psiquiatra'),('Otro','Otro')]
     usuario = models.BigIntegerField(verbose_name='No. Usuario',null=True,blank=True, default='',editable=False)
     nombre = models.CharField(max_length=30, verbose_name='Nombre',null=True,blank=True, default='')
-    cargo = models.CharField(max_length=20,verbose_name='Cargo', null=True,blank=True, default='')
+    cargo = models.CharField(max_length=20,verbose_name='Cargo',choices=opcionesCargo,null=True,blank=True, default='')
     permisos=models.CharField(max_length=5,verbose_name='Permisos',null=True,blank=True, default='')
     password=models.CharField(max_length=10,verbose_name='Password',null=True,blank=True, default='')
     cedula=models.CharField(max_length=20,verbose_name='Cedula',null=True,blank=True, default='')
@@ -44,6 +46,14 @@ class Estados(models.Model):
 
     objects = ClinicaManager()
 
+
+from django.utils.text import slugify
+
+def ruta_logo_clinica(instance, filename):
+    nombre_seguro = slugify(instance.nombre)
+    return f'logos_clinicas/{instance.id}_{nombre_seguro}/{filename}'
+
+
 class DatosGrales(models.Model):
 
 
@@ -67,6 +77,16 @@ class DatosGrales(models.Model):
     cargo = models.CharField(max_length=20, verbose_name='Cargo', null=True, blank=True, default='')
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
     password = models.CharField(max_length=128, verbose_name='Some data', null=True, blank=True, default='123456')
+    logo_clinica = models.ImageField(
+        upload_to=ruta_logo_clinica,
+        verbose_name="Logo de la Clínica",
+        blank=True,
+        null=True,
+        help_text="Suba el logo oficial de la clínica"
+    )
+
+    def __str__(self):
+        return f"{self.clinica} - {self.nombre}"
 
     class Meta:
         unique_together = ['clinica']  # ✅ Único por clínica

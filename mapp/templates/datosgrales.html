@@ -1,78 +1,185 @@
 {% extends "MenuPrincipal.html" %}
 {% block content %}
-{%load forms_tags%}
-<div class="container py-4">
-  <!-- Cabecera mejorada -->
-  <div class="d-flex align-items-center mb-4 border-bottom pb-3">
-    <i class="fas fa-hospital-alt fa-xl text-primary me-3"></i>
-    <h1 class="h4 mb-0 fw-bold text-gray-800">Datos Generales de la Clínica</h1>
+{% load forms_tags %}
+<div class="container-fluid py-4">
+  <!-- Header elegante -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex align-items-center">
+        <div class="bg-primary rounded-circle p-3 me-3">
+          <i class="fas fa-hospital-alt fa-lg text-white"></i>
+        </div>
+        <div>
+          <h1 class="h3 mb-1 fw-bold text-gray-800">Configuración de la Clínica</h1>
+          <p class="text-muted mb-0">Administre la información general y el logo de su clínica</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Formulario mejor estructurado -->
-  <div class="card border-0 shadow-sm rounded-lg">
-    <div class="card-body p-4">
-      <form method="post" action="{% url 'grabadatosgrales' %}">
-        {% csrf_token %}
-
-        <!-- Diseño de 1 columna con buen espaciado -->
-        <div class="row">
-          {% for field in datosgralesf %}
-          <div class="col-10 mb-4">
-            <div class="form-group">
-              <!-- Label claro -->
-              <label for="{{ field.id_for_label }}" class="form-label fw-semibold  text-gray-700 mx-2">
-                {{ field.label }}
-              </label>
-
-              <!-- Campo con espacio adecuado -->
-              {{ field|add_class:"form-control form-control-lg" }}
-
-              <!-- Mensaje de ayuda opcional -->
-              {% if field.help_text %}
-              <small class="form-text text-muted">{{ field.help_text }}</small>
-              {% endif %}
-            </div>
+  <div class="row justify-content-center">
+    <!-- 🔥 MÁS ANCHO: cambié col-lg-8 por col-lg-10 y quité mx-auto -->
+    <div class="col-12 col-lg-10 col-xl-9">
+      <!-- Tarjeta principal -->
+      <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+        <!-- Header de la tarjeta -->
+        <div class="card-header bg-gradient-primary text-white py-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-sliders-h fa-lg me-3"></i>
+            <h5 class="mb-0 fw-semibold">Datos Generales</h5>
           </div>
-          {% endfor %}
         </div>
 
-        <!-- Botón con mejor diseño -->
-        <div class="d-grid d-md-flex justify-content-md-end mt-4 pt-3 border-top">
-          <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
-            <i class="fas fa-save me-2"></i>
-            Guardar Información
-          </button>
+        <div class="card-body p-5">
+          <form method="post" action="{% url 'grabadatosgrales' %}" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <!-- Sección del Logo - Mejorada -->
+            <div class="row mb-5">
+              <div class="col-12">
+                <div class="logo-section border rounded-3 p-4 bg-light">
+                  <label class="form-label fw-bold text-gray-700 mb-3 d-block">
+                    <i class="fas fa-camera me-2 text-primary"></i>Logo de la Clínica
+                  </label>
+
+                  <div class="d-flex align-items-start gap-4">
+                    <!-- Preview del Logo -->
+                    <div class="logo-preview">
+                      {% if datosgralesf.instance.logo_clinica %}
+                        <img src="{{ datosgralesf.instance.logo_clinica.url }}"
+                             alt="Logo actual"
+                             class="img-fluid rounded-3 shadow-sm"
+                             style="max-width: 120px; max-height: 120px; object-fit: contain;">
+                        <small class="text-muted d-block mt-2 text-center">Logo actual</small>
+                      {% else %}
+                        <div class="bg-white border rounded-3 d-flex align-items-center justify-content-center"
+                             style="width: 120px; height: 120px;">
+                          <i class="fas fa-image fa-2x text-muted"></i>
+                        </div>
+                        <small class="text-muted d-block mt-2 text-center">Sin logo</small>
+                      {% endif %}
+                    </div>
+
+                    <!-- Campo de upload -->
+                    <div class="flex-grow-1">
+                      <div class="file-upload-area border-dashed rounded-3 p-4 text-center">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-3"></i>
+                        <h6 class="fw-semibold mb-2">Subir nuevo logo</h6>
+                        {{ datosgralesf.logo_clinica|add_class:"form-control" }}
+                        <small class="form-text text-muted d-block mt-2">
+                          Formatos: JPG, PNG, GIF • Máx. 2MB • Tamaño recomendado: 200x200px
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Separador -->
+            <div class="border-top pt-4 mb-4">
+              <h6 class="fw-bold text-gray-700 mb-3">
+                <i class="fas fa-info-circle me-2 text-primary"></i>Información General
+              </h6>
+            </div>
+
+            <!-- Campos del formulario - MÁS ANCHOS -->
+            <div class="row g-4">
+              {% for field in datosgralesf %}
+                {% if field.name != 'logo_clinica' %}
+                <!-- 🔥 MÁS ANCHO: cambié col-md-6 por col-md-12 para campos más anchos -->
+                <div class="col-12 col-md-12 col-lg-10">
+                  <div class="form-floating">
+                    {{ field|add_class:"form-control form-control-lg" }}
+                    <label for="{{ field.id_for_label }}" class="fw-medium">
+                      {{ field.label }}
+                    </label>
+                    {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón de guardar -->
+            <div class="text-center mt-5 pt-4 border-top">
+              <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fw-semibold">
+                <i class="fas fa-save me-2"></i>
+                Guardar Cambios
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Estilos optimizados -->
+<!-- Estilos mejorados -->
 <style>
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%) !important;
+  }
+
+  .border-dashed {
+    border: 2px dashed #dee2e6 !important;
+    transition: all 0.3s ease;
+  }
+
+  .border-dashed:hover {
+    border-color: #4a6cf7 !important;
+    background-color: #f8f9ff;
+  }
+
   .form-control-lg {
-    padding: 0.8rem 1rem;
-    border: 1px solid #e0e0e0;
-    transition: border-color 0.2s;
+    padding: 1rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
   }
 
   .form-control-lg:focus {
     border-color: #4a6cf7;
     box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #4a6cf7;
+    font-weight: 600;
+  }
+
+  .logo-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%);
+    border: none;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(74, 108, 247, 0.3);
   }
 
   .card {
-    border-radius: 12px;
-    background: #fff;
+    transition: transform 0.3s ease;
   }
 
-  .form-label {
-    font-size: 0.95rem;
-    letter-spacing: 0.2px;
+  .card:hover {
+    transform: translateY(-5px);
   }
 
   body {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
   }
 </style>
 {% endblock %}

@@ -84,18 +84,28 @@ class DatosGralesf(forms.ModelForm):
         fields='__all__'
         correoelectronico=forms.EmailField()
 
+
 class Usuariosf(forms.ModelForm):
+    # Define el ChoiceField AQUÍ, fuera del Meta
+    cargo = forms.ChoiceField(
+        choices=Usuarios.opcionesCargo,
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-md',
+            'maxlength': '20'
+        })
+    )
+
     class Meta:
-        model=Usuarios
-        fields='__all__'
+        model = Usuarios
+        fields = '__all__'
         widgets = {
             'nombre': forms.TextInput(attrs={'maxlength': 30}),
-            'cargo' : forms.TextInput(attrs={'maxlength': 20}),
             'permisos': forms.TextInput(attrs={'maxlength': 5}),
             'password': forms.PasswordInput(attrs={'maxlength': 10}),
             'cedula': forms.TextInput(attrs={'maxlength': 20}),
             'expedidapor': forms.TextInput(attrs={'maxlength': 30})
         }
+
     def clean(self):
         cleaned_data = super().clean()
         for field in self.fields:

@@ -281,17 +281,23 @@ def datosgrales(request):
 
     return render(request,'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
 
+
 def grabadatosgrales(request):
     clinica_actual = get_clinica_actual(request)
-    datosgrales=DatosGrales.objects.get(clinica=clinica_actual)
-    datosgralesf=DatosGralesf(request.POST,instance=datosgrales)
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
+
+    # 🔥 IMPORTANTE: Agregar request.FILES para subir archivos
+    datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
+
     if datosgralesf.is_valid():
         datosgralesf.save()
-        messages.success(request,'Actualizacion exitosa!!')
+        messages.success(request, 'Actualización exitosa!!')
     else:
-        messages.error(request,'Algo paso que no se pudo acualizar')
-    return render(request,'index.html')
+        # Debug para ver qué está fallando
+        print("❌ Errores del formulario:", datosgralesf.errors)
+        messages.error(request, 'Algo pasó que no se pudo actualizar')
 
+    return render(request, 'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
 
 
 def lusuarios(request):
