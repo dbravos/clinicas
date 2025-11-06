@@ -256,10 +256,6 @@ def datosgrales(request):
         'datosgralesf': datosgralesf
     })
 
-import cloudinary.uploader
-
-import cloudinary.uploader
-
 
 def grabadatosgrales(request):
     clinica_actual = get_clinica_actual(request)
@@ -273,25 +269,8 @@ def grabadatosgrales(request):
         datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
 
         if datosgralesf.is_valid():
-            # Guardar primero el formulario sin el logo
-            instance = datosgralesf.save(commit=False)
-
-            # Subir logo a Cloudinary manualmente si existe
-            if 'logo_clinica' in request.FILES and request.FILES['logo_clinica']:
-                try:
-                    result = cloudinary.uploader.upload(
-                        request.FILES['logo_clinica'],
-                        folder=f"clinicas/{clinica_actual}",
-                        public_id=f"logo_{clinica_actual}"
-                    )
-                    # Guardar la URL de Cloudinary en un campo (agrégalo a tu modelo)
-                    instance.logo_url = result['secure_url']
-                except Exception as e:
-                    print(f"Error subiendo a Cloudinary: {e}")
-                    # Si falla Cloudinary, guardar el archivo normalmente
-                    instance.logo_clinica = request.FILES['logo_clinica']
-
-            instance.save()
+            # ✅ GUARDAR DIRECTAMENTE - Sin Cloudinary, sin commit=False
+            datosgralesf.save()
             return redirect('datosgrales')
 
     return redirect('datosgrales')
