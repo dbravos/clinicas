@@ -257,6 +257,10 @@ def datosgrales(request):
     })
 
 
+import requests
+import json
+
+
 def grabadatosgrales(request):
     clinica_actual = get_clinica_actual(request)
 
@@ -269,11 +273,33 @@ def grabadatosgrales(request):
         datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
 
         if datosgralesf.is_valid():
-            # ✅ GUARDAR DIRECTAMENTE - Sin Cloudinary, sin commit=False
-            datosgralesf.save()
+            instance = datosgralesf.save(commit=False)
+
+            if 'logo_clinica' in request.FILES and request.FILES['logo_clinica']:
+                try:
+                    # Subir a ImgBB
+                    api_key = '8c061775423c7c7ffc99af2f3ed63c42'  # ← Consíguela en imgbb.com
+                    files = {'image': request.FILES['logo_clinica']}
+
+                    response = requests.post(
+                        f"https://api.imgbb.com/1/upload?key={api_key}",
+                        files=files
+                    )
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        instance.logo_url = result['data']['url']  # URL de la imagen
+                    else:
+                        print(f"Error ImgBB: {response.text}")
+
+                except Exception as e:
+                    print(f"Error subiendo imagen: {e}")
+
+            instance.save()
             return redirect('datosgrales')
 
     return redirect('datosgrales')
+
 
 def lusuarios(request):
     clinica_actual = get_clinica_actual(request)

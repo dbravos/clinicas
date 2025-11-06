@@ -68,8 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djmoney',
     'mapp',
-    'cloudinary',
-    'cloudinary_storage',
+
 ]
 
 # MIDDLEWARE - AÑADE WHITENOISE
@@ -108,20 +107,6 @@ TEMPLATES = [
         },
     },
 ]
-cloudinary.config(
-    cloud_name='dzsaeahiq',
-    api_key='642746649523995',
-    api_secret='vSFdj-r7HUpdKBEzlPG6GgEIchY'
-)
-
-
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dzsaeahiq',
-    'API_KEY': '642746649523995',
-    'API_SECRET': 'vSFdj-r7HUpdKBEzlPG6GgEIchY'
-}
-
 
 # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
