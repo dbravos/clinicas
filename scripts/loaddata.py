@@ -24,9 +24,9 @@ def cargar_datos():
         # 2. CREAR clínica principal
         print("🏥 Creando clínica VIVE...")
         clinica_vive = Clinicas.objects.create(
-            clinica="VIVE",
-            nombre="VIVE CONCIENTE, A.C.",
-            password="123456",
+            clinica="DEMO",
+            nombre="Clinica De Demostracion",
+            password="demo",
             numeroDeInternos=0
         )
         print("✅ Clínica VIVE creada")
@@ -34,12 +34,12 @@ def cargar_datos():
         # 3. CREAR datos generales
         print("📋 Creando datos generales...")
         DatosGrales.objects.create(
-            nombre="VIVE CONCIENTE, A.C.",
+            nombre="Clinica De Demostracion",
             responsable="",
             cedula="",
             cargo="",
-            clinica="VIVE",
-            password="123456",
+            clinica="DEMO",
+            password="demo",
             expediente=None,
             recibo=0,
             receta=0,
@@ -58,7 +58,7 @@ def cargar_datos():
             password="123456",
             cedula="",
             expedidapor="",
-            clinica="VIVE"
+            clinica="DEMO"
         )
         print("✅ Usuario superUser creado")
 

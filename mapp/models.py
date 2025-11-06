@@ -5,6 +5,7 @@ from datetime import date
 import calendar
 # Create your models here.
 from django.core.validators import MinValueValidator, MaxValueValidator
+from cloudinary.models import CloudinaryField
 
 # models.py - AGREGA esto al inicio del archivo
 from django.db import models
@@ -78,12 +79,17 @@ class DatosGrales(models.Model):
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
     password = models.CharField(max_length=128, verbose_name='Some data', null=True, blank=True, default='123456')
     logo_clinica = models.ImageField(
-        upload_to=ruta_logo_clinica,
         verbose_name="Logo de la Clínica",
         blank=True,
         null=True,
         help_text="Suba el logo oficial de la clínica"
     )
+    logo_url = models.URLField(
+        verbose_name="URL del Logo en Cloudinary",
+        blank=True,
+        null=True
+    )
+
 
     def __str__(self):
         return f"{self.clinica} - {self.nombre}"
@@ -91,7 +97,7 @@ class DatosGrales(models.Model):
     class Meta:
         unique_together = ['clinica']  # ✅ Único por clínica
 
-    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+ #   objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 class Internos(models.Model):
 

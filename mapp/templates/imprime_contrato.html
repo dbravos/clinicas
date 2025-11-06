@@ -382,12 +382,13 @@
         <!-- Página 3 -->
         <div class="page-break"></div>
         <div class="header">
-             <div class="logo-container">
-         {% if datosgrales.logo_clinica %}
-            <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-         {% endif %}
-         </div>
-
+  <div class="logo-container">
+    {% if datosgrales.logo_url %}
+        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    {% elif datosgrales.logo_clinica %}
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    {% endif %}
+</div>
             <div class="clinic-info">
             <div class="clinic-name">{{datosgrales.nombre}}</div>
             <div class="clinic-address">{{datosgrales.calleynumero}}</div>

@@ -8,4 +8,6 @@ django-money
 Pillow>=10.0.0
 pypdf==4.2
 reportlab==4.0.4
+cloudinary==1.25.0
+django-cloudinary-storage==0.3.0
 

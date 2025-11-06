@@ -78,11 +78,18 @@ class IntProvienef(forms.ModelForm):
 
                   }
 
+
+# forms.py - SOLO ESTO, nada más
+
 class DatosGralesf(forms.ModelForm):
     class Meta:
-        model=DatosGrales
-        fields='__all__'
-        correoelectronico=forms.EmailField()
+        model = DatosGrales
+        fields = '__all__'
+
+
+
+
+
 
 
 class Usuariosf(forms.ModelForm):

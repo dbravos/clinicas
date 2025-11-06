@@ -233,72 +233,68 @@ def grabainterno(request,id):
 def registro(request):
     return render(request,'registro.html')
 
+
 def datosgrales(request):
-
     clinica_actual = get_clinica_actual(request)
-    phazzourrtt = request.session.get('ffazzuorrtt')
-    datosgrales, created = DatosGrales.objects.get_or_create(
-        clinica=clinica_actual,
-        defaults={
-            'clinica': clinica_actual,
-            'nombre': clinica_actual,
-            'password':phazzourrtt,
 
-        }
-    )
+    try:
+        datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
+    except DatosGrales.DoesNotExist:
+        # Crear con MÍNIMOS campos requeridos
+        datosgrales = DatosGrales(
+            clinica=clinica_actual,
+            nombre=clinica_actual,
+        )
+        print("Antes de save")  # Debug
+        datosgrales.save()  # ← Si falla aquí, el problema está en el modelo
+        print("Después de save")  # Debug
 
 
+    datosgralesf = DatosGralesf(instance=datosgrales)
+    return render(request, 'datosgrales.html', {
+        'datosgrales': datosgrales,
+        'datosgralesf': datosgralesf
+    })
 
+import cloudinary.uploader
 
-    try :
-       datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
-       datosgralesf=DatosGralesf(instance=datosgrales)
-       return render(request, 'datosgrales.html', {'datosgrales': datosgrales, 'datosgralesf': datosgralesf})
-    except DatosGrales.DoesNotExists:
-        datosgrales=DatosGrales()
-        datosgrales.nombre='nombre'
-        datosgrales.calleynumero='calle y numero'
-        datosgrales.colonia='colonia'
-        datosgrales.ciudad='ciudad'
-        datosgrales.estado='BC'
-        datosgrales.telefono='telefono'
-        datosgrales.sitioweb='sitio web'
-        datosgrales.correoelectronico='correo electrinco'
-        datosgrales.rfc='rfc'
-        datosgrales.cp='cp'
-        datosgrales.expediente=1
-        datosgrales.recibo=1
-        datosgrales.receta=1
-        datosgrales.recibootros=1
-        datosgrales.sesiong=1
-        datosgrales.responsable='responsable'
-        datosgrales.cedula='cedula'
-        datosgrales.cargo='cargo'
-        datosgrales.clinica= clinica_actual
-
-        datosgrales.save()
-        datosgralesf = DatosGrales.objects.filter(clinica=clinica_actual)
-
-    return render(request,'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
+import cloudinary.uploader
 
 
 def grabadatosgrales(request):
     clinica_actual = get_clinica_actual(request)
-    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
 
-    # 🔥 IMPORTANTE: Agregar request.FILES para subir archivos
-    datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
+    try:
+        datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
+    except DatosGrales.DoesNotExist:
+        datosgrales = DatosGrales(clinica=clinica_actual)
 
-    if datosgralesf.is_valid():
-        datosgralesf.save()
-        messages.success(request, 'Actualización exitosa!!')
-    else:
-        # Debug para ver qué está fallando
-        print("❌ Errores del formulario:", datosgralesf.errors)
-        messages.error(request, 'Algo pasó que no se pudo actualizar')
+    if request.method == 'POST':
+        datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
 
-    return render(request, 'datosgrales.html',{'datosgrales':datosgrales,'datosgralesf':datosgralesf})
+        if datosgralesf.is_valid():
+            # Guardar primero el formulario sin el logo
+            instance = datosgralesf.save(commit=False)
 
+            # Subir logo a Cloudinary manualmente si existe
+            if 'logo_clinica' in request.FILES and request.FILES['logo_clinica']:
+                try:
+                    result = cloudinary.uploader.upload(
+                        request.FILES['logo_clinica'],
+                        folder=f"clinicas/{clinica_actual}",
+                        public_id=f"logo_{clinica_actual}"
+                    )
+                    # Guardar la URL de Cloudinary en un campo (agrégalo a tu modelo)
+                    instance.logo_url = result['secure_url']
+                except Exception as e:
+                    print(f"Error subiendo a Cloudinary: {e}")
+                    # Si falla Cloudinary, guardar el archivo normalmente
+                    instance.logo_clinica = request.FILES['logo_clinica']
+
+            instance.save()
+            return redirect('datosgrales')
+
+    return redirect('datosgrales')
 
 def lusuarios(request):
     clinica_actual = get_clinica_actual(request)

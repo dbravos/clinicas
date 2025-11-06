@@ -5,6 +5,9 @@ Django settings for ctrlinfo project.
 import os
 from pathlib import Path
 import dj_database_url  # Mover aquí para que esté disponible en todo el archivo
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,7 +68,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djmoney',
     'mapp',
-
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 # MIDDLEWARE - AÑADE WHITENOISE
@@ -83,6 +87,8 @@ MIDDLEWARE = [
 ]
 
 
+
+
 ROOT_URLCONF = 'ctrlinfo.urls'
 
 TEMPLATES = [
@@ -97,11 +103,28 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'mapp.context_processors.clinica_actual',
+
             ],
         },
     },
 ]
+cloudinary.config(
+    cloud_name='dzsaeahiq',
+    api_key='642746649523995',
+    api_secret='vSFdj-r7HUpdKBEzlPG6GgEIchY'
+)
 
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dzsaeahiq',
+    'API_KEY': '642746649523995',
+    'API_SECRET': 'vSFdj-r7HUpdKBEzlPG6GgEIchY'
+}
+
+
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 WSGI_APPLICATION = 'ctrlinfo.wsgi.application'
 
 # Password validation
@@ -158,22 +181,22 @@ LOGGING = {
 }
 
 # Crear superusuario automáticamente en producción
-if not DEBUG:
-    try:
-        from scripts.createsuperuser import *
-        print("✅ Script de superusuario cargado")
-    except Exception as e:
-        print(f"⚠️  Error cargando script de superusuario: {e}")
+#if not DEBUG:
+#    try:
+#        from scripts.createsuperuser import *
+#        print("✅ Script de superusuario cargado")
+#    except Exception as e:
+#        print(f"⚠️  Error cargando script de superusuario: {e}")
 
  # Cargar datos automáticamente en producción (solo una vez)
 #if not DEBUG:
-    try:
-        # Verificar si ya se cargaron los datos
-        from django.contrib.auth.models import User
-        if User.objects.count() < 2:  # Si no hay usuarios, cargar datos
-           from scripts.loaddata import cargar_datos
-           cargar_datos()
-        else:
-            print("✅ Los datos ya fueron cargados previamente")
-    except Exception as e:
-        print(f"⚠️  Error en carga de datos: {e}")
+#    try:
+#        # Verificar si ya se cargaron los datos
+#        from django.contrib.auth.models import User
+#        if User.objects.count() < 2:  # Si no hay usuarios, cargar datos
+#           from scripts.loaddata import cargar_datos
+#           cargar_datos()
+#        else:
+#            print("✅ Los datos ya fueron cargados previamente")
+#    except Exception as e:
+#        print(f"⚠️  Error en carga de datos: {e}")
