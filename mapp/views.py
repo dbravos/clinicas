@@ -14,6 +14,7 @@ from django.db import transaction,DatabaseError
 import logging
 import json
 import os
+import requests
 from reportlab.pdfgen import canvas  # ✅ AGREGAR ESTA IMPORTACIÓN
 from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
 from django.http import HttpResponse
