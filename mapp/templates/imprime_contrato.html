@@ -271,12 +271,18 @@
 
         <!-- Página 1 -->
         <div class="header">
-        <div class="logo-container">
-         {% if datosgrales.logo_clinica %}
-            <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-         {% endif %}
-         </div>
+<div class="logo-container">
+    {% if datosgrales.logo_url %}
+        <!-- ✅ MOSTRAR IMGBB -->
+        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
 
+    {% elif datosgrales.logo_clinica %}
+        <!-- ❌ Imagen local (no funciona en producción) -->
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    {% else %}
+        <p>❌ NO hay logo subido</p>
+    {% endif %}
+</div>
 
             <div class="clinic-info">
             <div class="clinic-name">{{datosgrales.nombre}}</div>
@@ -337,12 +343,18 @@
         <div class="page-break"></div>
 
         <div class="header">
+<div class="logo-container">
+    {% if datosgrales.logo_url %}
+        <!-- ✅ MOSTRAR IMGBB -->
+        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
 
-             <div class="logo-container">
-         {% if datosgrales.logo_clinica %}
-            <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-         {% endif %}
-         </div>
+    {% elif datosgrales.logo_clinica %}
+        <!-- ❌ Imagen local (no funciona en producción) -->
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    {% else %}
+        <p>❌ NO hay logo subido</p>
+    {% endif %}
+</div>
 
 
             <div class="clinic-info">
@@ -382,21 +394,19 @@
         <!-- Página 3 -->
         <div class="page-break"></div>
         <div class="header">
- <div class="logo-container">
-    <!-- DEBUG -->
-    <p style="background: yellow; padding: 10px;">
-        DEBUG: {{ datosgrales.logo_clinica }}<br>
-        URL: {{ datosgrales.logo_clinica.url }}<br>
-        Name: {{ datosgrales.logo_clinica.name }}
-    </p>
-
-    {% if datosgrales.logo_clinica %}
+<div class="logo-container">
+    {% if datosgrales.logo_url %}
+        <!-- ✅ MOSTRAR IMGBB -->
+        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    
+    {% elif datosgrales.logo_clinica %}
+        <!-- ❌ Imagen local (no funciona en producción) -->
         <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-        <p>✅ Logo cargado correctamente</p>
     {% else %}
-        <p style="color: red;">❌ NO hay logo subido</p>
+        <p>❌ NO hay logo subido</p>
     {% endif %}
 </div>
+
             <div class="clinic-info">
             <div class="clinic-name">{{datosgrales.nombre}}</div>
             <div class="clinic-address">{{datosgrales.calleynumero}}</div>

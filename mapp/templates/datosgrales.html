@@ -45,19 +45,16 @@
                   <div class="d-flex align-items-start gap-4">
                     <!-- Preview del Logo -->
                     <div class="logo-preview">
-                      {% if datosgralesf.instance.logo_clinica %}
-                        <img src="{{ datosgralesf.instance.logo_clinica.url }}"
-                             alt="Logo actual"
-                             class="img-fluid rounded-3 shadow-sm"
-                             style="max-width: 120px; max-height: 120px; object-fit: contain;">
-                        <small class="text-muted d-block mt-2 text-center">Logo actual</small>
-                      {% else %}
-                        <div class="bg-white border rounded-3 d-flex align-items-center justify-content-center"
-                             style="width: 120px; height: 120px;">
-                          <i class="fas fa-image fa-2x text-muted"></i>
-                        </div>
-                        <small class="text-muted d-block mt-2 text-center">Sin logo</small>
-                      {% endif %}
+                    {% if datosgrales.logo_url %}
+                     <!-- ✅ MOSTRAR IMGBB -->
+                      <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+                    {% elif datosgrales.logo_clinica %}
+                     <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+                     {% else %}
+                    <p>❌ NO hay logo subido</p>
+                    {% endif %}
+                    </div>
+
                     </div>
 
                     <!-- Campo de upload -->

@@ -270,12 +270,18 @@
 
 
         <!-- Encabezado -->
-        <div class="header">
-            <div class="logo-container">
-                 {% if datosgrales.logo_clinica %}
-                 <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-               {% endif %}
-             </div>
+   <div class="logo-container">
+    {% if datosgrales.logo_url %}
+        <!-- ✅ MOSTRAR IMGBB -->
+        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+
+    {% elif datosgrales.logo_clinica %}
+        <!-- ❌ Imagen local (no funciona en producción) -->
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+    {% else %}
+        <p>❌ NO hay logo subido</p>
+    {% endif %}
+</div>
 
             <div class="clinic-info">
             <div class="clinic-name">{{datosgrales.nombre}}</div>
