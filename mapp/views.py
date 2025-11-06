@@ -257,10 +257,6 @@ def datosgrales(request):
     })
 
 
-import requests
-import json
-
-
 def grabadatosgrales(request):
     clinica_actual = get_clinica_actual(request)
 
@@ -270,33 +266,46 @@ def grabadatosgrales(request):
         datosgrales = DatosGrales(clinica=clinica_actual)
 
     if request.method == 'POST':
+        # DEBUG: Ver qué llega en el request
+        print(f"📨 POST keys: {list(request.POST.keys())}")
+        print(f"📁 FILES keys: {list(request.FILES.keys())}")
+
         datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
 
         if datosgralesf.is_valid():
             instance = datosgralesf.save(commit=False)
 
+            # DEBUG: Verificar el campo específico
+            print(f"🔍 Buscando 'logo_clinica' en FILES: {'logo_clinica' in request.FILES}")
+
             if 'logo_clinica' in request.FILES and request.FILES['logo_clinica']:
+                print("🔄 EJECUTANDO ImgBB upload...")  # Este debe aparecer en logs
                 try:
-                    # Subir a ImgBB
-                    api_key = '8c061775423c7c7ffc99af2f3ed63c42'  # ← Consíguela en imgbb.com
+                    api_key = '8c061775423c7c7ffc99af2f3ed63c42'
                     files = {'image': request.FILES['logo_clinica']}
 
                     response = requests.post(
                         f"https://api.imgbb.com/1/upload?key={api_key}",
                         files=files
                     )
+                    print(f"📡 Status Code ImgBB: {response.status_code}")
 
                     if response.status_code == 200:
                         result = response.json()
-                        instance.logo_url = result['data']['url']  # URL de la imagen
+                        print(f"✅ URL ImgBB: {result['data']['url']}")
+                        instance.logo_url = result['data']['url']
                     else:
-                        print(f"Error ImgBB: {response.text}")
+                        print(f"❌ Error ImgBB: {response.text}")
 
                 except Exception as e:
-                    print(f"Error subiendo imagen: {e}")
+                    print(f"💥 Excepción: {e}")
+            else:
+                print("❌ No se encontró logo_clinica en FILES")
 
             instance.save()
             return redirect('datosgrales')
+        else:
+            print(f"❌ Formulario inválido: {datosgralesf.errors}")
 
     return redirect('datosgrales')
 
