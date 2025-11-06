@@ -5,9 +5,6 @@ Django settings for ctrlinfo project.
 import os
 from pathlib import Path
 import dj_database_url  # Mover aquí para que esté disponible en todo el archivo
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
