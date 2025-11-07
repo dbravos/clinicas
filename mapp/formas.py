@@ -84,12 +84,7 @@ class IntProvienef(forms.ModelForm):
 class DatosGralesf(forms.ModelForm):
     class Meta:
         model = DatosGrales
-        fields = '__all__'
-
-
-
-
-
+        exclude=['logo_url']
 
 
 class Usuariosf(forms.ModelForm):

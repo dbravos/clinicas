@@ -398,7 +398,7 @@
     {% if datosgrales.logo_url %}
         <!-- ✅ MOSTRAR IMGBB -->
         <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-    
+
     {% elif datosgrales.logo_clinica %}
         <!-- ❌ Imagen local (no funciona en producción) -->
         <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
