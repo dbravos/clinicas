@@ -78,14 +78,8 @@ class DatosGrales(models.Model):
     cargo = models.CharField(max_length=20, verbose_name='Cargo', null=True, blank=True, default='')
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
     password = models.CharField(max_length=128, verbose_name='Some data', null=True, blank=True, default='123456')
-    logo_clinica = models.ImageField(
-        verbose_name="Logo de la Clínica",
-        blank=True,
-        null=True,
-        help_text="Suba el logo oficial de la clínica"
-    )
     logo_url = models.URLField(
-        verbose_name="URL del Logo en Cloudinary",
+        verbose_name="URL del Logo ",
         blank=True,
         null=True
     )
@@ -1926,26 +1920,24 @@ class PConsejeria(models.Model):
 
 class TareaConsejeria(models.Model):
 
-
     expediente = models.CharField(max_length=10)
+    numero_tarea = models.SmallIntegerField('No de tarea',null=True,blank=True,default=1)
     fecha_creacion = models.DateTimeField(default=timezone.now)
-    descripcion = models.TextField(verbose_name="Descripción de la tarea")
+    descripcion = models.CharField(max_length=100,verbose_name="Descripción de la tarea")
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
-    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
-
-    imagen_tarea = models.ImageField(
-        upload_to='tareas_consejeria/%Y/%m/%d/',
-        verbose_name="Imagen escaneada de la tarea",
+    imagen_tarea_url = models.URLField(
+        verbose_name="URL de la Tarea ",
         blank=True,
         null=True
     )
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
 
     class Meta:
         verbose_name = "Tarea de Consejería"
         verbose_name_plural = "Tareas de Consejería"
         ordering = ['-fecha_creacion']
-        unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
+        unique_together = ['clinica','expediente', 'numero_tarea']  # ✅ Único por clínica
 
 
     def __str__(self):

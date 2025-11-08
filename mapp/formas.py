@@ -827,18 +827,22 @@ class PConsejeriaf(forms.ModelForm):
             'metasareasdevida': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3}),
             'prevencion': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3}),}
 
-
 class TareaConsejeriaf(forms.ModelForm):
     class Meta:
         model = TareaConsejeria
-        fields = ['imagen_tarea']
+        fields = ['descripcion']
         widgets = {
-             'imagen_tarea': forms.FileInput(attrs={
-             'accept': 'image/*,.pdf',
-             'class': 'form-control',
-             'capture': 'environment'
-              })
-             }
+            'descripcion': forms.Textarea(attrs={
+                'rows': 2,
+                'cols': 60,  # ← Aumenta de 40 a 60 (más ancho)
+                'class': 'form-control',
+                'placeholder': 'Describe la tarea escaneada...',
+                'style': 'width: 100%;'  # ← Ocupa todo el ancho disponible
+            })
+        }
+
+
+
 
 
 class HojaAtencionPsf(forms.ModelForm):

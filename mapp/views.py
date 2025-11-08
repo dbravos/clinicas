@@ -2095,36 +2095,89 @@ def planConsejeria(request, id):
     })
 
 
+import requests
+
 
 def escanear_tarea(request):
-    # Obtener expediente de la sesión
-
     expediente = request.session.get('expediente_actual')
-    clinica_actual= get_clinica_actual(request)
+    clinica_actual = get_clinica_actual(request)
+
     if not expediente:
         messages.error(request, 'No hay expediente en sesión')
         return redirect('listaint')
 
-    interno = get_object_or_404(Internos, numeroexpediente=expediente,clinica=clinica_actual)
+    interno = get_object_or_404(Internos, numeroexpediente=expediente, clinica=clinica_actual)
+    modelo = TareaConsejeria
+    form_class = TareaConsejeriaf
+
+    cuantas_tareas = 0
+    nueva_tarea = 1
+    ultima_sesion_obj = None
+    instancia_sesion = None
+
+    tareas_existentes = modelo.objects.filter(expediente=interno.numeroexpediente,
+                                                    clinica=clinica_actual).order_by('numero_tarea')
+    cuantas_tareas = tareas_existentes.count()
+
+    if tareas_existentes:
+       ultima_tarea_obj = tareas_existentes.last()
+       nueva_tarea = ultima_tarea_obj.numero_tarea + 1
 
     if request.method == 'POST':
-        form = TareaConsejeriaf(request.POST, request.FILES)
-        if form.is_valid():
-            tarea = form.save(commit=False)
-            tarea.expediente = expediente
-            tarea.clinica = clinica_actual
-            tarea.save()
+        # DEBUG: Ver qué llega en el request
+        print(f"📨 POST keys: {list(request.POST.keys())}")
+        print(f"📁 FILES keys: {list(request.FILES.keys())}")
 
+        form = TareaConsejeriaf(request.POST, request.FILES)
+
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.expediente = expediente
+            instance.clinica = clinica_actual
+            instance.numero_tarea = nueva_tarea
+
+            # DEBUG: Verificar el campo específico
+            print(f"🔍 Buscando 'imagen_tarea' en FILES: {'imagen_tarea' in request.FILES}")
+
+            if 'imagen_tarea' in request.FILES and request.FILES['imagen_tarea']:
+                print("🔄 EJECUTANDO ImgBB upload...")
+                try:
+                    api_key = '8c061775423c7c7ffc99af2f3ed63c42'
+                    files = {'image': request.FILES['imagen_tarea']}
+
+                    response = requests.post(
+                        f"https://api.imgbb.com/1/upload?key={api_key}",
+                        files=files
+                    )
+                    print(f"📡 Status Code ImgBB: {response.status_code}")
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        print(f"✅ URL ImgBB: {result['data']['url']}")
+                        instance.imagen_tarea_url = result['data']['url']
+                    else:
+                        print(f"❌ Error ImgBB: {response.text}")
+
+                except Exception as e:
+                    print(f"💥 Excepción: {e}")
+            else:
+                print("❌ No se encontró imagen_tarea en FILES")
+
+            instance.save()
             messages.success(request, 'Tarea escaneada y guardada exitosamente')
-            return redirect('escanear_tarea')  # Recargar para nuevo escaneo
+            return redirect('escanear_tarea')
+        else:
+            print(f"❌ Formulario inválido: {form.errors}")
+
     else:
         form = TareaConsejeriaf()
 
     return render(request, 'escanear_tarea.html', {
         'form': form,
         'expediente': expediente,
-        'interno':interno,
+        'interno': interno,
     })
+
 
 
 def lista_tareas_escaneadas(request):
@@ -2151,11 +2204,6 @@ def eliminar_tarea(request, tarea_id):
     clinica_actual= get_clinica_actual(request)
     tarea = get_object_or_404(TareaConsejeria, pk=tarea_id,clinica=clinica_actual)
     expediente = tarea.expediente
-
-    # Verificar que la tarea pertenece al expediente de la sesión
-    if request.session.get('expediente') != expediente:
-        messages.error(request, 'No tienes permisos para eliminar esta tarea')
-        return redirect('lista_tareas_escaneadas')
 
     tarea.delete()
     messages.success(request, 'Tarea eliminada exitosamente')

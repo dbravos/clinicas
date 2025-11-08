@@ -47,25 +47,25 @@
                                         <small class="text-muted">{{ tarea.fecha_creacion|date:"H:i" }}</small>
                                     </td>
                                     <td>
-                                        {% if tarea.imagen_tarea %}
-                                        <i class="bi bi-file-earmark-image text-primary me-1"></i>
-                                        {{ tarea.imagen_tarea.name|slice:"-20:" }}
+                                        {% if tarea.imagen_tarea_url %}
+                                        <i class="bi bi-file-earmark-image text-success me-1"></i>
+                                        {{tarea.descripcion}}
                                         <br>
-                                        <small class="text-muted">{{ tarea.imagen_tarea.size|filesizeformat }}</small>
+                                        <small class="text-success">✓ En la nube</small>
                                         {% else %}
                                         <span class="text-muted">Sin archivo</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            {% if tarea.imagen_tarea %}
-                                            <a href="{{ tarea.imagen_tarea.url }}"
+                                            {% if tarea.imagen_tarea_url %}
+                                            <a href="{{ tarea.imagen_tarea_url }}"
                                                target="_blank"
                                                class="btn btn-outline-primary"
                                                title="Ver tarea">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="{{ tarea.imagen_tarea.url }}"
+                                            <a href="{{ tarea.imagen_tarea_url }}"
                                                download
                                                class="btn btn-outline-success"
                                                title="Descargar">
