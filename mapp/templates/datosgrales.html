@@ -58,20 +58,25 @@
                     </div>
 
                     <!-- Campo de upload -->
-                    <div class="flex-grow-1">
-                      <div class="file-upload-area border-dashed rounded-3 p-4 text-center">
-                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-3"></i>
-                        <h6 class="fw-semibold mb-2">Subir nuevo logo</h6>
-                        {{ datosgralesf.logo_clinica|add_class:"form-control" }}
-                        <small class="form-text text-muted d-block mt-2">
-                          Formatos: JPG, PNG, GIF • Máx. 2MB • Tamaño recomendado: 200x200px
-                        </small>
-                      </div>
-                    </div>
+                   <!-- Campo de upload MANUAL (ya no está en el formulario) -->
+<div class="flex-grow-1">
+    <div class="file-upload-area border-dashed rounded-3 p-4 text-center">
+        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-3"></i>
+        <h6 class="fw-semibold mb-2">Subir nuevo logo</h6>
+        <!-- ✅ INPUT MANUAL EN LUGAR DE {{ datosgralesf.logo_clinica }} -->
+        <input type="file" class="form-control"
+               name="logo_clinica"
+               id="id_logo_clinica"
+               accept="image/*">
+        <small class="form-text text-muted d-block mt-2">
+            Formatos: JPG, PNG, GIF • Máx. 2MB • Tamaño recomendado: 200x200px
+        </small>
+    </div>
+</div>
                   </div>
                 </div>
               </div>
-            </div>
+
 
             <!-- Separador -->
             <div class="border-top pt-4 mb-4">
