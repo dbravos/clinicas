@@ -301,7 +301,8 @@
 
             <!-- Campo expediente oculto -->
             <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
-
+            <input type="hidden" id="medico" name="medico" value="{{ request.session.usuario_no|default:'0' }}">
+            <input type="hidden" id="nombremedico" name="nombremedico" value="{{ request.session.usuario_nombre|default:'Sin Firma' }}">
             <div class="form-group">
                 <label for="fecha">Fecha:</label>
                 <input type="date" id="fecha" name="fecha" required value="{{ today|date:'Y-m-d' }}">
@@ -452,7 +453,10 @@
                 imc: document.getElementById('imc').value,
                 alergias: document.getElementById('alergias').value,
                 diagnostico: document.getElementById('diagnostico').value,
-                receta: document.getElementById('receta').value
+                receta: document.getElementById('receta').value,
+                medico: document.getElementById('medico').value,
+                nombremedico: document.getElementById('nombremedico').value
+
             };
         }
 
@@ -474,6 +478,7 @@
             document.getElementById('alergias').value = '';
             document.getElementById('diagnostico').value = '';
             document.getElementById('receta').value = '';
+
 
             // Restablecer fecha actual
             fechaInput.value = today.toISOString().split('T')[0];
@@ -531,6 +536,8 @@
                     </div>
                     <div class="history-field"><strong>Diagnóstico:</strong> ${registro.diagnostico || 'No registrado'}</div>
                     <div class="history-field"><strong>Receta:</strong> ${registro.receta || 'No registrado'}</div>
+                    <div class="history-field"><strong>Medico:</strong> ${registro.medico || 'No registrado'}</div>
+                    <div class="history-field"><strong>Nombre del medico:</strong> ${registro.nombremedico || 'No registrado'}</div>
                     <div class="history-actions">
                         <button class="btn-history btn-print" onclick="imprimirRecetaDesdeHistorial(${index})">Imprimir</button>
                     </div>
@@ -596,6 +603,8 @@
 
                 <div class="prescription-footer">
                     <p>_________________________</p>
+                    <div class="prescription-field">${datos.nombremedico|| 'No registrado'}</div>
+
                     <p>Firma del Médico</p>
                 </div>
             `;

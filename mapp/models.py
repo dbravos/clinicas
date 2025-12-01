@@ -10,6 +10,44 @@ from cloudinary.models import CloudinaryField
 # models.py - AGREGA esto al inicio del archivo
 from django.db import models
 
+estados = [
+    ('AGS', 'Aguascalientes'),
+    ('BC', 'Baja California'),
+    ('BCS', 'Baja California Sur'),
+    ('CAM', 'Campeche'),
+    ('COA', 'Coahuila'),
+    ('COL', 'Colima'),
+    ('CHIS', 'Chiapas'),
+    ('CHIH', 'Chihuahua'),
+    ('CDMX', 'Ciudad de México'),
+    ('DGO', 'Durango'),
+    ('GTO', 'Guanajuato'),
+    ('GRO', 'Guerrero'),
+    ('HGO', 'Hidalgo'),
+    ('JAL', 'Jalisco'),
+    ('MEX', 'Estado de México'),
+    ('MICH', 'Michoacán'),
+    ('MOR', 'Morelos'),
+    ('NAY', 'Nayarit'),
+    ('NL', 'Nuevo León'),
+    ('OAX', 'Oaxaca'),
+    ('PUE', 'Puebla'),
+    ('QRO', 'Querétaro'),
+    ('QROO', 'Quintana Roo'),
+    ('SLP', 'San Luis Potosí'),
+    ('SIN', 'Sinaloa'),
+    ('SON', 'Sonora'),
+    ('TAB', 'Tabasco'),
+    ('TAM', 'Tamaulipas'),
+    ('TLAX', 'Tlaxcala'),
+    ('VER', 'Veracruz'),
+    ('YUC', 'Yucatán'),
+    ('ZAC', 'Zacatecas')
+]
+
+paises = [('MEX','Mexico'), ('USA','Estados Unidos De Norteamerica')]
+
+
 class ClinicaManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset()
@@ -62,7 +100,7 @@ class DatosGrales(models.Model):
     calleynumero = models.CharField(max_length=50,verbose_name='Calle y numero', null=True,blank=True, default='')
     colonia=models.CharField(max_length=50,verbose_name='Colonia',null=True,blank=True, default='')
     ciudad=models.CharField(max_length=50,verbose_name='Ciudad',null=True,blank=True, default='')
-    estado=models.CharField(max_length=2,verbose_name='Estado',null=True,blank=True, default='')
+    estado=models.CharField(max_length=4,choices=estados,verbose_name='Estado',null=True,blank=True, default='')
     telefono=models.CharField(max_length=50,verbose_name='Telefono',null=True,blank=True, default='')
     sitioweb = models.CharField(max_length=50, verbose_name='Sitio WEB', null=True, blank=True, default='')
     correoelectronico = models.EmailField(max_length=50, verbose_name='Correo electronico', null=True, blank=True, default='')
@@ -117,8 +155,8 @@ class Internos(models.Model):
     calleynumero = models.CharField(max_length=40,verbose_name='Domicilio actual', null=True, blank=True, default='')
     colonia = models.CharField(max_length=30,verbose_name='Colonia actual', null=True, blank=True, default='')
     ciudad = models.CharField(max_length=10,verbose_name='Ciudad actual', null=True, blank=True, default='')
-    estado = models.CharField(max_length=2,verbose_name='Estado actual', null=True, blank=True, default='')
-    pais = models.CharField(max_length=2,verbose_name='Pais actual', null=True, blank=True, default='')
+    estado = models.CharField(max_length=4,verbose_name='Estado actual', choices=estados,null=True, blank=True, default='')
+    pais = models.CharField(max_length=3,verbose_name='Pais actual',choices=paises, null=True, blank=True, default='')
     telefono = models.CharField(max_length=20,verbose_name='Telefono', null=True, blank=True, default='')
     escolaridad = models.CharField(max_length=20,verbose_name='Escolaridad', null=True, blank=True, default='')
     ocupacion = models.CharField(max_length=20,verbose_name='Ocupacion', null=True, blank=True, default='')
@@ -128,8 +166,8 @@ class Internos(models.Model):
     rcalle = models.CharField(max_length=40,verbose_name='Domicilio ', null=True, blank=True, default='')
     rcolonia = models.CharField(max_length=30,verbose_name='Colonia ', null=True, blank=True, default='')
     rciudad = models.CharField(max_length=10,verbose_name='Ciudad ', null=True, blank=True, default='')
-    restado = models.CharField(max_length=2,verbose_name='Estado ', null=True, blank=True, default='')
-    rpais = models.CharField(max_length=3,verbose_name='Pais', null=True, blank=True, default='')
+    restado = models.CharField(max_length=4,verbose_name='Estado ',choices=estados, null=True, blank=True, default='')
+    rpais = models.CharField(max_length=3,verbose_name='Pais', choices=paises,null=True, blank=True, default='')
     rtelefono = models.CharField(max_length=20,verbose_name='Telefono', null=True, blank=True, default='')
     dpadres = models.BooleanField(verbose_name='Padres', null=True, default=False)
     dhijos = models.BooleanField(verbose_name='Hijos', null=True, default=False)
@@ -172,8 +210,8 @@ class Internos(models.Model):
     aportacioninicial = models.DecimalField(max_digits=10,verbose_name='Aportacion  inicial', decimal_places=2, null=True,blank=True)
     aportaciontotal = models.DecimalField(max_digits=10,verbose_name='Aportacion  total', decimal_places=2, null=True,blank=True)
     lugarnac = models.CharField(max_length=20,verbose_name='Lugar de nacimiento', null=True, blank=True)
-    estadonac = models.CharField(max_length=3,verbose_name='Estado de nacimiento', null=True, blank=True)
-    paisnac = models.CharField(max_length=3,verbose_name='Pais de nacimiento', null=True, blank=True)
+    estadonac = models.CharField(max_length=4,choices=estados,verbose_name='Estado de nacimiento', null=True, blank=True)
+    paisnac = models.CharField(max_length=3,choices=paises,verbose_name='Pais de nacimiento', null=True, blank=True)
     Motivoegreso = models.TextField(verbose_name='Motivo de egreso', null=True, blank=True)
     resumenanexo = models.TextField(verbose_name='Resumen anexo', null=True, blank=True)
     estadodesalud = models.TextField(verbose_name='Estado de salud', null=True, blank=True)
@@ -220,6 +258,7 @@ class Einicial(models.Model):
 
     expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30,verbose_name='Nombre del consejero',null=True,blank=True)
     consumo1 = models.BooleanField(verbose_name='Alcohol',null=True,blank=True,default=False)
     forma1 = models.SmallIntegerField(verbose_name='Forma de consumo',choices=opcionesForma,null=True,blank=True,default=0)
     frecuencia1 = models.CharField(verbose_name='Frecuencia de consumo',null=True,blank=True,max_length=20)
@@ -386,6 +425,7 @@ class Assist(models.Model):
     opcionesRiesgo=[(0,'Bajo'),(1,'Moderado'),(2,'Alto')]
     expediente=models.CharField(max_length=10, verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     p1s1=models.SmallIntegerField(verbose_name='a) Tabaco (cigarrillos,tabaco de mascar,puro,etc)',choices=opcionesSioNo,null=True,default=0)
     p1s2=models.SmallIntegerField(verbose_name='b) Bebidas alcoholicas (cerveza,licores,vino,etc.)',choices=opcionesSioNo,null=True,default=0)
     p1s3=models.SmallIntegerField(verbose_name='c) Cannabis (marihuana,mota,hierba,hachis,etc.)',choices=opcionesSioNo,null=True,default=0)
@@ -623,6 +663,7 @@ class SituacionFamiliar(models.Model):
     opcionesConflicto =[(1,'Si'),(0,'No')]
     expediente=models.CharField(max_length=10,  verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     quienesintegran=models.TextField(verbose_name='Quienes integran su familia (con quienes mas contacto tenga)',null=True,blank=True)
     hacercosasjuntos=models.SmallIntegerField(verbose_name='',choices=opcionesAcuerdooNo,null=True,default=1)
     nadiesepreocupa=models.SmallIntegerField(verbose_name='',choices=opcionesAcuerdooNo,null=True,   default=1)
@@ -690,6 +731,7 @@ class Cfisicas(models.Model):
 
     expediente=models.CharField(max_length=10, verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     fp1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Alteraciones en el ritmo cardiaco', null=True, default=0)
     fp1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,   default=1)
     fp2 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Presion arterial (baja o alta)', null=True, default=0)
@@ -852,6 +894,7 @@ class Cmentales(models.Model):
 
     expediente=models.CharField(max_length=10, verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     p1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Alucinaciones (ver,oir,sentir,saborear,oler cosas que no existen)', null=True, default=0)
     p1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,  default=1)
     p2 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Insomnio', null=True, default=0)
@@ -1003,6 +1046,7 @@ class Crelaciones(models.Model):
 
     expediente=models.CharField(max_length=10, verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     rp1 = models.SmallIntegerField(choices=opcionesSioNo,verbose_name='Aislamiento', null=True, default=0)
     rp1a = models.SmallIntegerField(choices=opcionesAfectado, null=True,  blank=True, default=1)
     rp2 = models.SmallIntegerField(verbose_name='Correrle de la casa',choices=opcionesSioNo, null=True, default=0)
@@ -1218,6 +1262,7 @@ class Tratamientos(models.Model):
 
     expediente=models.CharField(max_length=10,verbose_name='No.Expediente')
     consejero = models.SmallIntegerField(verbose_name='Consejero', null=True, blank=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     recibio = models.SmallIntegerField(choices=opcionesSioNo,null=True, default=0)
     a1 = models.SmallIntegerField(verbose_name='Centro de desintoxicacion',choices=opcionesSioNo,null=True, default=0)
     d1 = models.SmallIntegerField(choices=opcionesSioNo,null=True, default=0)
@@ -1308,6 +1353,7 @@ class Psicosis(models.Model):
     pp17 = models.SmallIntegerField(choices=opcionesQuesiente,verbose_name='Pensar que en mi cabeza hay algo que no funciona bien', null=True, default=0)
     psfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     psconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    psnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     pspuntos = models.SmallIntegerField(verbose_name="Puntaje",null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
@@ -1385,6 +1431,7 @@ class Sdevida(models.Model):
     svp12=models.SmallIntegerField(choices=opcionesSatisfecho,verbose_name='Satisfaccion en general', null=True, default=0)
     svfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     svconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    svnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
     class Meta:
@@ -1448,10 +1495,6 @@ class Sdevida(models.Model):
 
         return datos_finales
 
-
-
-
-
 class Usodrogas(models.Model):
 
     opcionesSioNo = [(1, 'Si'), (0, 'No')]
@@ -1479,6 +1522,7 @@ class Usodrogas(models.Model):
     udp20 = models.SmallIntegerField(choices=opcionesSioNo, verbose_name='Ha estado en un tratamiento especificamente relacionado con el uso de drogas?', null=True, default=0)
     udfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     udconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    udnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
     class Meta:
@@ -1514,6 +1558,7 @@ class Ansiedad(models.Model):
     anp21 = models.SmallIntegerField(choices=opcionesAnsiedad, verbose_name='Sudoracion (no debido al calor)', null=True, default=0)
     anfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     anconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    annombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     anpuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
@@ -1619,6 +1664,7 @@ class Depresion(models.Model):
     perderpeso = models.SmallIntegerField(choices=[(1,'Si'),(0,'No')],null=True, default=0)
     depfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     depconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    depnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     deppuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
@@ -1696,6 +1742,7 @@ class Marcadores(models.Model):
 
     marfecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank="True")
     marconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    marnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -1722,6 +1769,7 @@ class Riesgos(models.Model):
     riesgosP9 = models.SmallIntegerField(choices=opcionesOtras,verbose_name='i).- Algun familiar o doctor se ha preocupado por la forma de beber o le ha sugerido que le baje ?', null=True, default=0)
     riesgofecha = models.DateField(verbose_name="Fecha de custionario",default=date.today,null=True,blank=True)
     riesgoconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
+    riesgonombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
     class Meta:
@@ -1743,6 +1791,7 @@ class Razones(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones y/o comentarios', null=True,blank=True, default='')
     razonesfecha = models.DateField(verbose_name="Fecha de custionario", default=date.today, null=True, blank=True)
     razonesconsejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    razonesnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
     class Meta:
@@ -1770,6 +1819,7 @@ class Valorizacion(models.Model):
     psicologica = models.TextField(verbose_name='Psicologica', null=True, blank=True)
     valorizacionfecha = models.DateField(verbose_name="Fecha de custionario", default=date.today, null=True, blank=True)
     valorizacionconsejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    valorizacionnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     ansiedad = models.CharField(verbose_name='Ansiedad', max_length=30, null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
@@ -1788,6 +1838,7 @@ class CIndividual(models.Model):
     fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True,blank=True)
     proximasesion = models.DateField(verbose_name="Proxima sesion", default=date.today, null=True,blank=True)
     consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     objetivo = models.TextField(verbose_name='Objetivo', null=True, blank=True)
     aspectos = models.TextField(verbose_name='Aspectos', null=True, blank=True)
     resultados = models.TextField(verbose_name='Resultados', null=True, blank=True)
@@ -1821,6 +1872,7 @@ class CFamiliar(models.Model):
     fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True, blank=True)
     proximasesion = models.DateField(verbose_name="Proxima sesion", default=date.today, null=True, blank=True)
     consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     objetivo = models.TextField(verbose_name='Objetivo', null=True, blank=True)
     aspectos = models.TextField(verbose_name='Aspectos', null=True, blank=True)
     resultados = models.TextField(verbose_name='Resultados', null=True, blank=True)
@@ -1853,7 +1905,7 @@ class CGrupal(models.Model):
     fecha = models.DateField(verbose_name="Fecha de sesión", default=date.today, null=True, blank=True)
     proximasesion = models.DateField(verbose_name="Próxima sesión", null=True, blank=True)
     consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
-
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     # NUEVOS CAMPOS ESPECÍFICOS PARA GRUPALES
     tema_sesion = models.CharField(max_length=200, verbose_name='Tema de la sesión', null=True, blank=True)
     dinamica_utilizada = models.CharField(max_length=100, verbose_name='Dinámica utilizada', null=True, blank=True)
@@ -1898,6 +1950,7 @@ class PConsejeria(models.Model):
     expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True, blank=True)
     consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     alcoholydrogas = models.TextField(verbose_name='Consumo de alcohol y drogas', null=True, blank=True)
     fisicaymental = models.TextField(verbose_name='Salud fisica y mental', null=True, blank=True)
     areasdelavida = models.TextField(verbose_name='Situacion en diferentes areas de la vida (familiar,social,laboral y economica', null=True, blank=True)
@@ -1950,6 +2003,7 @@ class HojaAtencionPs(models.Model):
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
     psicologo = models.SmallIntegerField(verbose_name="Psicologo", blank=True, null=True)
+    nombrepsicologo = models.CharField(max_length=30, verbose_name='Nombre del psicologo', null=True, blank=True)
     lateralidad = models.CharField(verbose_name='Lateralidad',choices=opcionesLateralidad,max_length=10, null=True, default='Derecha' )
     motivo = models.CharField(verbose_name='Motivo',max_length=50, null=True, blank=True)
     antecedentes = models.TextField(verbose_name='Antecedentes', null=True, blank=True)
@@ -1981,6 +2035,7 @@ class NotasEvolucionPS(models.Model):
     fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True,blank=True)
     proximasesion = models.DateField(verbose_name="Proxima sesion", default=date.today, null=True,blank=True)
     psicologo = models.SmallIntegerField(verbose_name="Psicologo", blank=True, null=True)
+    nombrepsicologo = models.CharField(max_length=30, verbose_name='Nombre del psicologo', null=True, blank=True)
     objetivo = models.TextField(verbose_name='Objetivo', null=True, blank=True)
     resumen = models.TextField(verbose_name='Resumen', null=True, blank=True)
     resultado = models.TextField(verbose_name='Resultado', null=True, blank=True)
@@ -2011,6 +2066,7 @@ class Medico(models.Model):
     expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
     medico = models.SmallIntegerField(verbose_name="Medico", blank=True, null=True)
+    nombremedico = models.CharField(max_length=30, verbose_name='Nombre del medico', null=True, blank=True)
     motivo = models.CharField(verbose_name='Motivo',max_length=50, null=True, blank=True)
     padecimiento = models.TextField(verbose_name='Padecimiento actual (inicio y evolucion de cosnumo de sustancias)', null=True, blank=True)
     sintomas = models.TextField(verbose_name='Sintomas generales (intoxicacion, abstinencia, efectos secundarios, etc.)', null=True, blank=True)
@@ -2044,6 +2100,8 @@ class Recetas(models.Model):
 
     expediente = models.CharField(max_length=10, null=True, blank=True, verbose_name='No.Expediente')
     historial = models.TextField(verbose_name='Historial de recetas', null=True, blank=True)
+    medico = models.SmallIntegerField(verbose_name="Medico", blank=True, null=True)
+    nombremedico = models.CharField(max_length=30, verbose_name='Nombre del medico', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -2060,6 +2118,7 @@ class HistoriaClinica(models.Model):
       expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
       fecha = models.DateField(verbose_name="Fecha de atencion", default=date.today, null=True, blank=True)
       medico = models.SmallIntegerField(verbose_name="Medico", blank=True, null=True)
+      nombremedico = models.CharField(max_length=30, verbose_name='Nombre del medico', null=True, blank=True)
       padresPadecimientosCronicos = models.BooleanField(verbose_name='Padecimientos cronicos ', null=True, default=False)
       padresInfectoContagiosos = models.BooleanField(verbose_name='Infecto-contagiosos ', null=True, default=False)
       padresAlergias = models.BooleanField(verbose_name='Alergias ', null=True, default=False)
@@ -2246,3 +2305,170 @@ class Clinicas(models.Model):
     def check_password(self, raw_password):
         # Verificación simple de contraseña
         return self.password == raw_password
+
+class Seguimiento(models.Model):
+
+    opcionesForma = [(0, 'Ingerida'), (1, 'Inhalada'), (2, 'Inyectada'), (3, 'Fumada'), (4,'Otro')]
+    opcionesSioNo=[(0,'No'),(1,'Si')]
+
+    expediente = models.CharField(max_length=10, verbose_name='expediente')
+    fecha = models.DateField(verbose_name='Fecha',default=date.today, null=True,blank=True)
+    periodo = models.SmallIntegerField(verbose_name='Periodo ',null=True,blank=True,choices=[(0,'Al mes'),(1,'A los 3 meses'),(2,'A los 6 meses'),(3,'A los 12 meses')])
+    tiposeguimiento = models.SmallIntegerField(verbose_name='Tipo de seguimiento ',null=True,blank=True,choices=[(0,'Presencial'),(1,'Por telefono'),(2,'Por correo electronico')])
+    conquienvive = models.SmallIntegerField(verbose_name='Vive con ',null=True,blank=True,choices=[(0,'Sus padres'),(1,'Su familia'),(2,'Parientes'),(3,'Solo'),(4,'Otros')])
+    viveotros = models.CharField(max_length=50,verbose_name='Otros',null=True,blank=True)
+    estadocivil = models.SmallIntegerField(verbose_name='Estado civil',null=True,blank=True,choices=[(0,'Soltero(a)'),(1,'Casado(a)'),(2,'Viudo(a)'),(3,'Divorciado(a)'),(4,'Union libreOtros')])
+    situacionlaboral = models.SmallIntegerField(verbose_name='Situacion laboral',null=True,blank=True,choices=[(0,'Estudiante'),(1,'Empleado(a)'),(2,'Por su cuenta'),(3,'Desempleado(a)'),(4,'Jubilado(a)'),(5,'Labores del hogar')])
+    calleynumero = models.CharField(max_length=40, verbose_name='Domicilio actual', null=True, blank=True, default='')
+    colonia = models.CharField(max_length=30, verbose_name='Colonia actual', null=True, blank=True, default='')
+    ciudad = models.CharField(max_length=10, verbose_name='Ciudad actual', null=True, blank=True, default='')
+    estado = models.CharField(max_length=2, verbose_name='Estado actual', null=True, blank=True, default='')
+    pais = models.CharField(max_length=2, verbose_name='Pais actual', null=True, blank=True, default='')
+    telefono = models.CharField(max_length=20, verbose_name='Telefono', null=True, blank=True, default='')
+    manifiesta = models.SmallIntegerField(verbose_name='El usuario manifiesta', null=True, blank=True,choices=[(0, 'Mantenerse en abstinencia'), (1, 'Haber tenido recaida'), (2, 'Estar consumiendo habitualmente')])
+    causanohaconsumido=models.CharField(max_length=100,verbose_name='Si no ha consumido, detalle que lo ha detenido para no consumir',blank=True,null=True)
+    usadosatisfactoriamente = models.SmallIntegerField(verbose_name='Ha utilizado satisfactoriamente algunas de las estrategias o tecnicas que aprendio durante su terapia?', null=True, blank=True,choices=[(0, 'Muy satisfecho(a)'), (1, 'Satisfecho(a)'), (2, 'Inseguro(a)'),(3,'Insatisfecho(a)'),(4,'Muy instisfecho(a)')])
+    sustancia1 = models.SmallIntegerField(verbose_name='Alcohol', null=True, blank=True,choices=opcionesSioNo)
+    cuandoydonde1=models.CharField(max_length=100,verbose_name='Cuando y donde',blank=True,null=True)
+    forma1=models.SmallIntegerField(verbose_name='Forma de cosumo',choices=opcionesForma,blank=True,null=True)
+    frecuencia1=models.CharField(max_length=50,verbose_name='Frencuencia de cosumo (semanal)',blank=True,null=True)
+    cantidad1=models.CharField(max_length=50,verbose_name='Cantidad de consumo (por ocasion)',blank=True,null=True)
+    consecuencias1=models.CharField(max_length=50,verbose_name='Consecuencias del consumo',blank=True,null=True)
+
+    sustancia2 = models.SmallIntegerField(verbose_name='Marihuana', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde2 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma2 = models.SmallIntegerField(verbose_name='Forma de cosumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia2 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True, null=True)
+    cantidad2 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias2 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+
+    sustancia3 = models.SmallIntegerField(verbose_name='Cocaina', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde3 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma3 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia3 = models.CharField(max_length=50, verbose_name='Frencuencia de cosumo (semanal)', blank=True, null=True)
+    cantidad3 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias3 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia4 = models.SmallIntegerField(verbose_name='Heroina', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde4 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma4 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia4 = models.CharField(max_length=50, verbose_name='Frencuencia de cosumo (semanal)', blank=True, null=True)
+    cantidad4 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias4 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia5 = models.SmallIntegerField(verbose_name='Metanfetaminas Anfetaminas', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde5 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma5 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia5 = models.CharField(max_length=50, verbose_name='Frencuencia de cosumo (semanal)', blank=True, null=True)
+    cantidad5 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias5 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia6 = models.SmallIntegerField(verbose_name='Inhalables', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde6 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma6 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia6 = models.CharField(max_length=50, verbose_name='Frencuencia de cosumo (semanal)', blank=True, null=True)
+    cantidad6 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias6 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia7 = models.SmallIntegerField(verbose_name='Alucinogenos', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde7 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma7 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia7 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True, null=True)
+    cantidad7 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias7 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia8 = models.SmallIntegerField(verbose_name='Drogas de diseño', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde8 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma8 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia8 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True, null=True)
+    cantidad8 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias8 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia9 = models.SmallIntegerField(verbose_name='Medicamentos estimulantes', null=True, blank=True, choices=opcionesSioNo)
+    cuandoydonde9 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma9 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia9 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True, null=True)
+    cantidad9 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias9 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia10 = models.SmallIntegerField(verbose_name='Medicamentos depresores', null=True, blank=True,choices=opcionesSioNo)
+    cuandoydonde10 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma10 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia10 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True,null=True)
+    cantidad10 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias10 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia11 = models.SmallIntegerField(verbose_name='Tabaco', null=True, blank=True,choices=opcionesSioNo)
+    cuandoydonde11 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma11 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia11 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True,null=True)
+    cantidad11 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias11 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    sustancia12 = models.CharField(max_length=50,verbose_name='Otra(s) sustancia(s)', null=True, blank=True)
+    cuandoydonde12 = models.CharField(max_length=100, verbose_name='Cuando y donde', blank=True, null=True)
+    forma12 = models.SmallIntegerField(verbose_name='Forma de consumo', choices=opcionesForma, blank=True, null=True)
+    frecuencia12 = models.CharField(max_length=50, verbose_name='Frencuencia de consumo (semanal)', blank=True,null=True)
+    cantidad12 = models.CharField(max_length=50, verbose_name='Cantidad de consumo (por ocasion)', blank=True, null=True)
+    consecuencias12 = models.CharField(max_length=50, verbose_name='Consecuencias del consumo', blank=True, null=True)
+    obstaculos = models.CharField(max_length=50,verbose_name='Cuales han sido los obstaculos para mantener la abstinencia',null=True,blank=True)
+    hasidoatendido =models.SmallIntegerField(verbose_name='En el ultimo mes ha sido atendido por problemas de salud',choices=opcionesSioNo,blank=True,null=True)
+    cualproblema =models.CharField(max_length=50,verbose_name='Cual?',blank=True,null=True)
+    tomandomedicamento = models.SmallIntegerField(verbose_name='Esta tomando algun medicamento por prescripcion medica o automedicandose',choices=opcionesSioNo,blank=True,null=True)
+    cualcadacuandoyporque = models.CharField(max_length=50, verbose_name='Cual? cada cuando? y por que?', blank=True, null=True)
+    diasenelhospital = models.SmallIntegerField(verbose_name='En el ultimo mes cuantos dias estuvo en el hospital por problemas relacionados con el consumo?,'
+                                                             , blank=True, null=True)
+    sehasentidotriste = models.SmallIntegerField(verbose_name='En el ultimo mes ha sentido triste con frecuencia?',
+                                              choices=opcionesSioNo, blank=True, null=True)
+    cualsonlascausas = models.CharField(max_length=50, verbose_name='Cuales son las causas?', blank=True, null=True)
+    sehaqueridoherir = models.SmallIntegerField(verbose_name='En el ultimo mes, ha pensado en dañarse a si mismo?',
+                                                 choices=opcionesSioNo, blank=True, null=True)
+    dequeforma = models.CharField(max_length=50, verbose_name='De que forma?', blank=True, null=True)
+    quitarselavida = models.SmallIntegerField(verbose_name='En el ultimo mes, ha pensado en quitarse la vida?',
+                                                choices=opcionesSioNo, blank=True, null=True)
+    sehaqueridosuicidar = models.SmallIntegerField(verbose_name='En el ultimo mes, ha intentado suicidarse?',
+                                                choices=opcionesSioNo, blank=True, null=True)
+    cuadoocurrio = models.CharField(max_length=50, verbose_name='Cuando ocurrio esto?', blank=True, null=True)
+    sentidoansioso = models.SmallIntegerField(verbose_name='Se ha sentido ansioso(a) con frecuencia?',
+                                                choices=opcionesSioNo, blank=True, null=True)
+    ansiosoporque = models.CharField(max_length=50, verbose_name='Por que?', blank=True, null=True)
+    haestadoentratamiento = models.SmallIntegerField(verbose_name='En el ultimo mes, ha estado en algun tratamiento ambulatorio?',
+                                                choices=opcionesSioNo, blank=True, null=True)
+    quetipo = models.CharField(max_length=50, verbose_name='Que tipo?', blank=True, null=True)
+    metasparelfuturo = models.CharField(max_length=50, verbose_name='Cuales son sus metas para el futuro?', blank=True, null=True)
+    quetansatisfecho = models.SmallIntegerField(verbose_name='Que tan satisfecho esta de su vida actualmente?', null=True, blank=True,choices=[(0, 'Muy satisfecho(a)'), (1, 'Satisfecho(a)'), (2, 'Inseguro(a)'),(3,'Insatisfecho(a)'),(4,'Muy instisfecho(a)')])
+    encomparacion = models.SmallIntegerField(verbose_name='En comparacion con las condiciones en que usted se encontraba antes de recibir el tratamiento, actualmente su consumo :', null=True, blank=True,choices=[(0, 'Ya no es un problema'), (1, 'EL problema es menor que antes'), (2, 'No ha cambiado'),(3,'El problema es mas grave que antes')])
+    resultadoantidoping = models.CharField(max_length=50, verbose_name='Si pudo realizar un estudio antidoping,anote aqui el resultado', blank=True, null=True)
+    observaciones =  models.CharField(max_length=100, verbose_name='OBSERVACIONES : (caracteristicas relevantes y actitudes del ususario durante la entrevista, comentarios finales', blank=True, null=True)
+    consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    class meta:
+          unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
+
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+class NotasSeguimiento(models.Model):
+
+
+    expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
+    sesion = models.SmallIntegerField(verbose_name='Numero de sesion', null=True, blank=True, default=1)
+    status = models.SmallIntegerField(verbose_name='Estatus de sesion', null=True, blank=True, default=0)
+    fecha = models.DateField(verbose_name="Fecha de sesion", default=date.today, null=True,blank=True)
+    proximasesion = models.DateField(verbose_name="Proxima sesion", default=date.today, null=True,blank=True)
+    consejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
+    nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
+    objetivo = models.CharField(max_length=100,verbose_name='Objetivo', null=True, blank=True)
+    consumodesustancias = models.TextField(verbose_name='Consumo de sustancias', null=True, blank=True)
+    plandeaccion = models.TextField(verbose_name='Plan de accion para situaciones de riesgo de consumo', null=True, blank=True)
+    tareas = models.TextField(verbose_name='Tareas', null=True, blank=True)
+    aspectosqueserevisaran = models.TextField(verbose_name='Aspectos que se revisaran en el proximo seguimiento', null=True, blank=True)
+    observaciones = models.TextField(verbose_name='Comentarios y/o Observaciones', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    def __str__(self):
+        # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
+        return f"Expediente: {self.expediente}, Sesión: {self.sesion}"
+
+    class Meta:
+        verbose_name = "Sesión Individual"
+        verbose_name_plural = "Sesiones Individuales"
+        # ¡IMPORTANTE! Aquí es donde aseguramos que un expediente no tenga dos veces la misma sesión.
+        unique_together = ('expediente', 'sesion', 'clinica')
+        ordering = ['expediente', 'sesion']  # Ordenar por expediente y luego por número de sesión2
+

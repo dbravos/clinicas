@@ -96,6 +96,8 @@
         id="sesionForm">
     {% csrf_token %}
 
+
+
     <!-- Campo oculto para el status -->
     <input type="hidden" name="status" id="statusField" value="0">
 
@@ -207,6 +209,11 @@
       </div>
 
       <div class="card-body">
+
+         {{instancia_sesion.expediente.as_hidden}}
+    {{instancia_sesion.consejero.as_hidden}}
+    {{instancia_sesion.nombreconsejero.as_hidden}}
+    {{instancia_sesion.clinica.as_hidden}}
         <!-- Campos específicos para sesiones grupales -->
         {% if tipo_sesion == "grupal" %}
         <div class="row">
@@ -332,6 +339,14 @@
         </div>
       </div>
     </div>
+   <footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ instancia_sesion.nombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
+
   </form>
 </div>
 

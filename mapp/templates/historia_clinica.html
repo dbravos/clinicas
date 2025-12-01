@@ -34,6 +34,8 @@
     <div id="contenedor-impresion">
         <form method="post" id="historiaClinicaForm">
             {% csrf_token %}
+        {{historiaclinicaf.medico.as_hidden}}
+        {{historiaclinicaf.nombremedico.as_hidden}}
 
             <!-- Encabezado para impresión -->
             <div class="d-print-block d-none">
@@ -61,10 +63,16 @@
                             <label class="form-label fw-bold">{{ historiaclinicaf.fecha.label }}:</label>
                             {{ historiaclinicaf.fecha }}
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">{{ historiaclinicaf.medico.label }}:</label>
-                            <span class="fw-bold">{{ mem_user_nombre }}</span>
-                        </div>
+                          <div class="col-md-4 mb-3 ">
+         <i class="bi bi-person-badge-fill me-1">  Medico:</i>
+
+        <div class="d-block w-200 px-3 py-2 rounded-3 bg-primary bg-opacity-10 text-primary fw-medium border border-primary border-opacity-10 text-truncate">
+            <span class="text-dark fw-bold">{{ historiaclinicaf.instance.nombremedico|default:"--" }}</span>
+        </div>
+
+
+        </div>
+
                     </div>
                 </div>
             </div>

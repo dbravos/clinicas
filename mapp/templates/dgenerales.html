@@ -94,8 +94,8 @@
               <i class="bi bi-brain me-2"></i>Seguimiento
             </a>
             <ul class="dropdown-menu p-2">
-              <li><a class="dropdown-item py-2" href="#"><i class="bi bi-file-earmark-medical me-2"></i>Entrevista </a></li>
-              <li><a class="dropdown-item py-2" href="#"><i class="bi bi-journal-medical me-2"></i>Reporte de seguimiento</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'seguimiento' id=interno.pk %}"><i class="bi bi-file-earmark-medical me-2"></i>Entrevista </a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'listaSesionesS'  id=interno.numeroexpediente %}"><i class="bi bi-journal-medical me-2"></i>Notas de seguimiento</a></li>
             </ul>
           </li>
 
@@ -103,6 +103,8 @@
       </div>
     </div>
   </nav>
+
+
 </body>
 
 <style>

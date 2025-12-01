@@ -51,6 +51,9 @@
   <form action="{% url 'planConsejeria' id=interno.pk %}" method="POST">
     {% csrf_token %}
   <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
+    {{pconsejeriaf.consejero.as_hidden}}
+    {{pconsejeriaf.nombreconsejero.as_hidden}}
+    {{pconsejeriaf.clinica.as_hidden}}
     <!-- MOSTRAR ERRORES DEL FORMULARIO -->
     {% if pconsejeriaf.errors %}
     <div class="alert alert-danger mt-3">
@@ -196,6 +199,14 @@
       </div>
     </div>
   </form>
+  <footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ pconsejeriaf.instance.nombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
+
 </div>
 
 <style>

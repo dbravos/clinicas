@@ -12,15 +12,12 @@
     <div class="header-title">
       <div class="d-flex justify-content-between align-items-start">
         <div>
-          <h3>Nota de Evolución Psicológica #
-           {{ numero_sesion_actual }}
-
-          </h3>
+          <h3>Sesión Individual #{{ numero_sesion_actual }}</h3>
         </div>
         <div>
           <!-- Botón Regresar -->
-          <a href="{% url 'listaSesionesPS' id=interno.numeroexpediente %}"
-                   class="btn btn-outline-secondary btn-sm">
+          <a href="{% url 'listaSesionesS' id=interno.numeroexpediente %}"
+             class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Regresar al Listado
           </a>
         </div>
@@ -43,7 +40,7 @@
         <div class="d-flex align-items-center gap-3">
           <div class="fecha-sesion">
             <span class="badge bg-primary">Fecha:</span>
-            <span>{{ instancia_sesion.fecha|default:form.fecha.value }}</span>
+            <span>{{ instancia_sesion.fecha|default:form.fecha.value|date:"d/m/Y" }}</span>
           </div>
         </div>
       </div>
@@ -52,9 +49,9 @@
 
   <!-- Formulario principal -->
   <form action="{% if accion == 'editar' and instancia_sesion %}
-                {% url 'capturaSesionPS_con_id' accion='editar' id=interno.numeroexpediente no_sesion=instancia_sesion.pk %}
+                {% url 'capturaSesionS_con_id' accion='editar' id=interno.numeroexpediente no_sesion=instancia_sesion.pk %}
                 {% else %}
-                {% url 'capturaSesionPS' accion='agregar' id=interno.numeroexpediente %}
+                {% url 'capturaSesionS' accion='agregar' id=interno.numeroexpediente %}
                 {% endif %}"
         method="POST"
         class="needs-validation"
@@ -62,21 +59,22 @@
         id="sesionForm">
     {% csrf_token %}
 
-    <!-- Campo oculto para el status -->
+    <!-- Campos ocultos -->
     <input type="hidden" name="status" id="statusField" value="0">
     <input type="hidden" name="expediente" value="{{ interno.numeroexpediente }}">
-    {{instancia_sesion.psicologo.as_hidden}}
-    {{instancia_sesion.nombrepsicologo.as_hidden}}
-{% if form.errors %}
-<div class="alert alert-danger">
-    <h5>Errores detallados:</h5>
-    <ul>
-        {% for field, errors in form.errors.items %}
-            <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
+    <input type="hidden" name="clinica" value="{{ form.clinica.value }}">
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <h5>Errores detallados:</h5>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <!-- Mensajes de alerta -->
     {% if messages %}
     <div class="alert-messages mt-3">
@@ -101,108 +99,105 @@
       </div>
 
       <div class="card-body">
-        <!-- Información básica de la sesión (SOLO FECHA) -->
+        <!-- Información básica de la sesión -->
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
             <label for="{{ form.fecha.id_for_label }}" class="form-label fw-bold">
               {{ form.fecha.label }} *
             </label>
             {{ form.fecha|add_class:"form-control form-control-sm" }}
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">¿Se lograron los objetivos?</label>
-            <div class="form-check form-switch mt-2">
-              {{ form.selograron }}
-              <label class="form-check-label" for="{{ form.selograron.id_for_label }}">
-                {{ form.selograron.label }}
-              </label>
-            </div>
+          <div class="col-md-4 mb-3">
+            <label for="{{ form.sesion.id_for_label }}" class="form-label fw-bold">
+              {{ form.sesion.label }}
+            </label>
+            {{ form.sesion|add_class:"form-control form-control-sm" }}
+            <div class="form-text small">Número automático</div>
           </div>
+
+         <div class="col-md-4 mb-3 ">
+         <i class="bi bi-person-badge-fill me-1">  Consejero:</i>
+
+        <div class="d-block w-200 px-3 py-2 rounded-3 bg-primary bg-opacity-10 text-primary fw-medium border border-primary border-opacity-10 text-truncate">
+            <span class="text-dark fw-bold">{{ form.instance.nombreconsejero|default:"--" }}</span>
         </div>
 
-        <!-- Contenido de la sesión -->
+  {{form.consejero.as_hidden}}
+  {{form.nombreconsejero.as_hidden}}
+
+        </div>
+
+
+        </div>
+
+        <!-- Objetivo -->
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-12 mb-3">
             <label for="{{ form.objetivo.id_for_label }}" class="form-label fw-bold">
               {{ form.objetivo.label }}
             </label>
-            <div class="form-text small">Objetivo principal de esta sesión</div>
+
             {{ form.objetivo|add_class:"form-control form-control-sm" }}
           </div>
-          <div class="col-md-6 mb-3">
-            <label for="{{ form.resumen.id_for_label }}" class="form-label fw-bold">
-              {{ form.resumen.label }}
+        </div>
+
+        <!-- Consumo de sustancias -->
+        <div class="row">
+          <div class="col-12 mb-3">
+            <label for="{{ form.consumodesustancias.id_for_label }}" class="form-label fw-bold">
+              {{ form.consumodesustancias.label }}
             </label>
-            <div class="form-text small">Resumen de lo tratado en la sesión</div>
-            {{ form.resumen|add_class:"form-control form-control-sm" }}
+            {{ form.consumodesustancias|add_class:"form-control form-control-sm" }}
           </div>
         </div>
 
+        <!-- Plan de acción -->
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="{{ form.objetivoyplan.id_for_label }}" class="form-label fw-bold">
-              {{ form.objetivoyplan.label }}
+          <div class="col-12 mb-3">
+            <label for="{{ form.plandeaccion.id_for_label }}" class="form-label fw-bold">
+              {{ form.plandeaccion.label }}
             </label>
-            <div class="form-text small">Objetivo y plan terapéutico</div>
-            {{ form.objetivoyplan|add_class:"form-control form-control-sm" }}
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="{{ form.actividades.id_for_label }}" class="form-label fw-bold">
-              {{ form.actividades.label }}
-            </label>
-            <div class="form-text small">Actividades realizadas</div>
-            {{ form.actividades|add_class:"form-control form-control-sm" }}
+            {{ form.plandeaccion|add_class:"form-control form-control-sm" }}
           </div>
         </div>
 
-        <!-- Resultados y Observaciones -->
+        <!-- Tareas -->
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="{{ form.resultado.id_for_label }}" class="form-label fw-bold">
-              {{ form.resultado.label }}
+          <div class="col-12 mb-3">
+            <label for="{{ form.tareas.id_for_label }}" class="form-label fw-bold">
+              {{ form.tareas.label }}
             </label>
-            <div class="form-text small">Resultados obtenidos</div>
-            {{ form.resultado|add_class:"form-control form-control-sm" }}
+            {{ form.tareas|add_class:"form-control form-control-sm" }}
           </div>
-          <div class="col-md-6 mb-3">
+        </div>
+
+        <!-- Aspectos a revisar -->
+        <div class="row">
+          <div class="col-12 mb-3">
+            <label for="{{ form.aspectosqueserevisaran.id_for_label }}" class="form-label fw-bold">
+              {{ form.aspectosqueserevisaran.label }}
+            </label>
+            {{ form.aspectosqueserevisaran|add_class:"form-control form-control-sm" }}
+          </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="row">
+          <div class="col-12 mb-3">
             <label for="{{ form.observaciones.id_for_label }}" class="form-label fw-bold">
               {{ form.observaciones.label }}
             </label>
-            <div class="form-text small">Observaciones adicionales</div>
             {{ form.observaciones|add_class:"form-control form-control-sm" }}
           </div>
         </div>
 
-        <!-- Campos al final: Tipo de sesión (select) y número de sesión/psicólogo (readonly) -->
-     <div class="row align-items-end">
-
-    <!-- Columna 1: Individual o Grupal -->
-    <div class="col-md-6 mb-3">
-        <label for="{{ form.individualogrupal.id_for_label }}" class="form-label fw-bold">
-            {{ form.individualogrupal.label }}
-        </label>
-        {{ form.individualogrupal|add_class:"form-select form-select-sm" }}
-    </div>
-
-
-
-    <!-- Columna 3: Psicólogo (Ahora envuelto en col-md-4) -->
-    <div class="col-md-6 mb-2 ">
-        <!-- Le quité el mb-3 interno para que use el de la columna -->
-        <div class="d-block w-200 px-3 py-2 rounded-3 bg-primary bg-opacity-10 text-primary fw-medium border border-primary border-opacity-10 text-truncate">
-            <i class="bi bi-person-badge-fill me-1"></i>
-            Psicólogo: <span class="text-dark fw-bold">{{ form.instance.nombrepsicologo|default:"--" }}</span>
-        </div>
-
-    </div>
-
-</div>
+        <!-- Próxima sesión -->
 
 
         <!-- Botones de acción -->
         <div class="d-flex justify-content-between mt-4">
           <div>
-            <a href="{% url 'listaSesionesPS' id=interno.numeroexpediente %}"
+            <a href="{% url 'listaSesionesS' id=interno.numeroexpediente %}"
                class="btn btn-outline-secondary me-2">
               <i class="bi bi-arrow-left me-1"></i> Regresar
             </a>
@@ -251,9 +246,9 @@
         <form id="cerrarSesionForm">
           <div class="mb-3">
             <label for="proximasesion" class="form-label fw-bold">
-              Fecha de la siguiente sesión  <span class="text-danger">*</span>
+              Fecha de la siguiente sesión <span class="text-danger">*</span>
             </label>
-           <input type="date" class="form-control" id="proxima_sesion_modal" name="proxima_sesion_modal">
+            <input type="date" class="form-control" id="proxima_sesion_modal" name="proxima_sesion_modal">
             <div class="form-text">Debe especificar la fecha para la próxima sesión.</div>
             <div id="fecha-error" class="alert alert-danger mt-2" style="display: none;"></div>
           </div>
@@ -297,20 +292,14 @@ document.addEventListener('DOMContentLoaded', function() {
     hoy.setHours(0, 0, 0, 0);
 
     let error = '';
-    if (proximaSesionInput.value) {
-       const hiddenInput = document.createElement('input');
-       hiddenInput.type = 'hidden';
-       hiddenInput.name = 'proximasesion';
-       hiddenInput.value = proximaSesionInput.value;
-      document.getElementById('sesionForm').appendChild(hiddenInput);
-      }
+
     // Validar que se ingrese una fecha
     if (!proximaSesionInput.value) {
         error = 'Error: Debe especificar una fecha para la próxima sesión al cerrar la sesión actual';
     }
     // Validar que sea posterior a la fecha de la sesión actual
     else if (proximaSesion <= fechaSesion) {
-        error = `Error: La próxima sesión debe ser posterior a la fecha de esta sesión ({{ instancia_sesion.fecha|date:"d/m/Y" }})`;
+        error = `Error: La próxima sesión debe ser posterior a la fecha de esta sesión ({{ instancia_sesion.fecha|date:"d/m/Y"|default:form.fecha.value|date:"d/m/Y" }})`;
     }
     // Validar que no sea una fecha pasada
     else if (proximaSesion < hoy) {
@@ -332,11 +321,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Si pasa validación, proceder con el cierre
     document.getElementById('statusField').value = '1';
+
+    // Agregar la fecha de próxima sesión al formulario principal
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'proximasesion';
+    hiddenInput.value = proximaSesionInput.value;
+    document.getElementById('sesionForm').appendChild(hiddenInput);
+
     document.getElementById('sesionForm').submit();
   });
 
   // Ocultar mensaje de error cuando el usuario modifique la fecha
-  const fechaInput = document.querySelector('#id_proximasesion');
+  const fechaInput = document.querySelector('#proxima_sesion_modal');
   if (fechaInput) {
     fechaInput.addEventListener('input', function() {
       const errorDiv = document.getElementById('fecha-error');
@@ -392,12 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
   .col-md-6 {
     width: 100%;
   }
-}
-
-/* Estilo para el switch del checkbox */
-.form-check-input:checked {
-  background-color: #198754;
-  border-color: #198754;
 }
 
 /* Estilo para campos readonly */

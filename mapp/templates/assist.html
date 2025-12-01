@@ -268,9 +268,13 @@ html {
 
             <!-- Columna de contenido -->
             <div class="col-md-8 col-lg-9 p-4">
-                <form action="{% url 'graba-assist' id=interno.pk %}" method="POST">
+                <form action="{% url 'assist' id=interno.pk %}" method="POST">
                     {% csrf_token %}
 
+                    {{assistf.nombreconsejero.as_hidden}}
+                    {{assistf.consejero.as_hidden}}
+                    {{assistf.expediente.as_hidden}}
+                    {{assistf.clinica.as_hidden}}
 
 
                     <div class="tab-content-container">
@@ -1141,6 +1145,16 @@ html {
             </div>
         </div>
     </div>
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ assistf.instance.nombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
+
+
+
 </body>
 
 <!-- Este es el lugar donde se mostrará el valor -->

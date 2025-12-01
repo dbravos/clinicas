@@ -46,8 +46,12 @@
 
 
   <!-- Contenido del formulario -->
-  <form action="{% url 'graba-riesgos' id=interno.pk %}" method="POST" >
+  <form action="{% url 'riesgos' id=interno.pk %}" method="POST" >
     {% csrf_token %}
+    {{riesgosf.riesgoconsejero.as_hidden}}
+    {{riesgosf.riesgonombreconsejero.as_hidden}}
+    {{riesgosf.expediente.as_hidden}}
+    {{riesgosf.clinica.as_hidden}}
 
     {% if messages %}
     <div class="alert-messages">
@@ -97,69 +101,27 @@
             {% endfor %}
 
 
-<div class="d-flex justify-content-between align-items-center mt-4">
-    <!-- Este es el nuevo bloque para la puntuación -->
-    <div class="card p-3 shadow-sm">
-        <h5>Puntuación Total: <span id="puntuacion-total" class="fw-bold text-primary">0</span></h5>
-    </div>
-
-    <div class="form-actions">
+    <div class="text-end mt-4 form-actions">
       <button type="submit" class="btn btn-primary btn-save">
         <i class="bi bi-save"></i> Guardar
       </button>
     </div>
-</div>
   </div>
    </div>
   </div>
   </form>
 </div>
-
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ riesgosf.instance.riesgonombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Esta es la función principal que calcula la suma
-    function calcularPuntuacionTotal() {
-        let puntuacionTotal = 0;
-
-
-        const radiosSeleccionados = document.querySelectorAll("input[name^='riesgosP'][type='radio']:checked");
-
-        // Recorremos cada radio button que está SELECCIONADO
-        radiosSeleccionados.forEach(function(radio) {
-            // Obtenemos el valor del radio button (ej: "0", "1", "2", "3", "4")
-            // Lo convertimos a un número entero y lo sumamos al total.
-            // Si el valor no es un número, parseInt devolverá NaN, y `|| 0` lo convertirá en 0.
-            puntuacionTotal += parseInt(radio.value, 10) || 0;
-        });
-
-        // Buscamos el elemento donde mostraremos el resultado
-        const elementoPuntuacion = document.getElementById('puntuacion-total');
-
-        // Actualizamos el texto del elemento con la nueva puntuación
-        if (elementoPuntuacion) {
-            elementoPuntuacion.textContent = puntuacionTotal;
-        }
-    }
-
-    // Ahora, necesitamos que la función se ejecute cada vez que el usuario cambie una opción.
-    // Seleccionamos TODOS los radio buttons de las preguntas (seleccionados o no).
-    const todosLosRadios = document.querySelectorAll("input[name^='riesgosP'][type='radio']");
-
-    // A cada uno de ellos le "adjuntamos" un escuchador de eventos.
-    // Cuando ocurra el evento 'change' (el usuario haga clic), se llamará a nuestra función.
-    todosLosRadios.forEach(function(radio) {
-        radio.addEventListener('change', calcularPuntuacionTotal);
-    });
-
-    // Opcional: Ejecutar la función una vez al cargar la página.
-    // Esto es útil si la página se carga con datos ya guardados.
-    calcularPuntuacionTotal();
-});
-</script>
 
 
 <!-- Estilos personalizados -->

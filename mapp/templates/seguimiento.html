@@ -1,0 +1,710 @@
+{% extends "dgenerales.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Barra de herramientas -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Formulario de Seguimiento</h4>
+                <div>
+                    <button type="button" class="btn btn-success me-2" onclick="imprimirSeguimiento()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a href="#" class="btn btn-secondary" onclick="history.back()">
+                        <i class="fas fa-arrow-left"></i> Regresar
+                    </a>
+                </div>
+            </div>
+            <hr>
+<div class="alert alert-info d-flex justify-content-between align-items-center py-2 w-100" role="alert">
+
+    <!-- LADO IZQUIERDO: Icono + Expediente + Nombre -->
+    <div class="d-flex align-items-center text-truncate">
+        <i class="fas fa-info-circle me-2"></i>
+        <span class="fw-bold text-nowrap">
+            Expediente: {{ form.expediente.value|default:"Nuevo" }} - {{ interno.nombrecompleto }}
+        </span>
+    </div>
+
+    <!-- LADO DERECHO: Consejero -->
+    <!-- Al ser texto plano dentro del alert, hereda automáticamente el color de fondo azulado -->
+    <div class="d-flex align-items-center ps-3">
+        <span class="me-1">Consejero:</span>
+        <span class="fw-bold text-uppercase">
+            {{ form.instance.nombreconsejero|default:"Sin asignar" }}
+        </span>
+    </div>
+
+</div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="seguimientoForm">
+        {% csrf_token %}
+        {{form.consejero.as_hidden}}
+        {{form.nombreconsejero.as_hidden}}
+
+        <!-- INFORMACIÓN GENERAL -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white py-2">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Información General</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.expediente.label }}</label>
+                        {{ form.expediente }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.fecha.label }}</label>
+                        {{ form.fecha }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.periodo.label }}</label>
+                        {{ form.periodo }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.tiposeguimiento.label }}</label>
+                        {{ form.tiposeguimiento }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.conquienvive.label }}</label>
+                        {{ form.conquienvive }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.estadocivil.label }}</label>
+                        {{ form.estadocivil }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.situacionlaboral.label }}</label>
+                        {{ form.situacionlaboral }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.viveotros.label }}</label>
+                        {{ form.viveotros }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.telefono.label }}</label>
+                        {{ form.telefono }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOMICILIO ACTUAL -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white py-2">
+                <h5 class="mb-0"><i class="fas fa-home me-2"></i>Domicilio Actual</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.calleynumero.label }}</label>
+                        {{ form.calleynumero }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.colonia.label }}</label>
+                        {{ form.colonia }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.ciudad.label }}</label>
+                        {{ form.ciudad }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.estado.label }}</label>
+                        {{ form.estado }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">{{ form.pais.label }}</label>
+                        {{ form.pais }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESTADO ACTUAL Y SATISFACCIÓN -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white py-2">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Estado Actual y Satisfacción</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.manifiesta.label }}</label>
+                        {{ form.manifiesta }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.usadosatisfactoriamente.label }}</label>
+                        {{ form.usadosatisfactoriamente }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold text-dark small">{{ form.causanohaconsumido.label }}</label>
+                        {{ form.causanohaconsumido }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.quetansatisfecho.label }}</label>
+                        {{ form.quetansatisfecho }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.encomparacion.label }}</label>
+                        {{ form.encomparacion }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold text-dark small">{{ form.obstaculos.label }}</label>
+                        {{ form.obstaculos }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONSUMO DE SUSTANCIAS -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark py-2">
+                <h5 class="mb-0"><i class="fas fa-flask me-2"></i>Consumo de Sustancias</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="15%" class="text-center align-middle small">Sustancia</th>
+                                <th width="10%" class="text-center align-middle small">{{ form.sustancia1.label }}</th>
+                                <th width="12%" class="text-center align-middle small">{{ form.forma1.label }}</th>
+                                <th width="15%" class="text-center align-middle small">{{ form.frecuencia1.label }}</th>
+                                <th width="15%" class="text-center align-middle small">{{ form.cantidad1.label }}</th>
+                                <th width="16%" class="text-center align-middle small">{{ form.cuandoydonde1.label }}</th>
+                                <th width="17%" class="text-center align-middle small">{{ form.consecuencias1.label }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Alcohol -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Alcohol</td>
+                                <td>{{ form.sustancia1 }}</td>
+                                <td>{{ form.forma1 }}</td>
+                                <td>{{ form.frecuencia1 }}</td>
+                                <td>{{ form.cantidad1 }}</td>
+                                <td>{{ form.cuandoydonde1 }}</td>
+                                <td>{{ form.consecuencias1 }}</td>
+                            </tr>
+                            <!-- Marihuana -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Marihuana</td>
+                                <td>{{ form.sustancia2 }}</td>
+                                <td>{{ form.forma2 }}</td>
+                                <td>{{ form.frecuencia2 }}</td>
+                                <td>{{ form.cantidad2 }}</td>
+                                <td>{{ form.cuandoydonde2 }}</td>
+                                <td>{{ form.consecuencias2 }}</td>
+                            </tr>
+                            <!-- Cocaína -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Cocaína</td>
+                                <td>{{ form.sustancia3 }}</td>
+                                <td>{{ form.forma3 }}</td>
+                                <td>{{ form.frecuencia3 }}</td>
+                                <td>{{ form.cantidad3 }}</td>
+                                <td>{{ form.cuandoydonde3 }}</td>
+                                <td>{{ form.consecuencias3 }}</td>
+                            </tr>
+                            <!-- Heroína -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Heroína</td>
+                                <td>{{ form.sustancia4 }}</td>
+                                <td>{{ form.forma4 }}</td>
+                                <td>{{ form.frecuencia4 }}</td>
+                                <td>{{ form.cantidad4 }}</td>
+                                <td>{{ form.cuandoydonde4 }}</td>
+                                <td>{{ form.consecuencias4 }}</td>
+                            </tr>
+                            <!-- Metanfetaminas -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Metanfetaminas/Anfetaminas</td>
+                                <td>{{ form.sustancia5 }}</td>
+                                <td>{{ form.forma5 }}</td>
+                                <td>{{ form.frecuencia5 }}</td>
+                                <td>{{ form.cantidad5 }}</td>
+                                <td>{{ form.cuandoydonde5 }}</td>
+                                <td>{{ form.consecuencias5 }}</td>
+                            </tr>
+                            <!-- Inhalables -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Inhalables</td>
+                                <td>{{ form.sustancia6 }}</td>
+                                <td>{{ form.forma6 }}</td>
+                                <td>{{ form.frecuencia6 }}</td>
+                                <td>{{ form.cantidad6 }}</td>
+                                <td>{{ form.cuandoydonde6 }}</td>
+                                <td>{{ form.consecuencias6 }}</td>
+                            </tr>
+                            <!-- Alucinógenos -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Alucinógenos</td>
+                                <td>{{ form.sustancia7 }}</td>
+                                <td>{{ form.forma7 }}</td>
+                                <td>{{ form.frecuencia7 }}</td>
+                                <td>{{ form.cantidad7 }}</td>
+                                <td>{{ form.cuandoydonde7 }}</td>
+                                <td>{{ form.consecuencias7 }}</td>
+                            </tr>
+                            <!-- Drogas de diseño -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Drogas de diseño</td>
+                                <td>{{ form.sustancia8 }}</td>
+                                <td>{{ form.forma8 }}</td>
+                                <td>{{ form.frecuencia8 }}</td>
+                                <td>{{ form.cantidad8 }}</td>
+                                <td>{{ form.cuandoydonde8 }}</td>
+                                <td>{{ form.consecuencias8 }}</td>
+                            </tr>
+                            <!-- Medicamentos estimulantes -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Medicamentos estimulantes</td>
+                                <td>{{ form.sustancia9 }}</td>
+                                <td>{{ form.forma9 }}</td>
+                                <td>{{ form.frecuencia9 }}</td>
+                                <td>{{ form.cantidad9 }}</td>
+                                <td>{{ form.cuandoydonde9 }}</td>
+                                <td>{{ form.consecuencias9 }}</td>
+                            </tr>
+                            <!-- Medicamentos depresores -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Medicamentos depresores</td>
+                                <td>{{ form.sustancia10 }}</td>
+                                <td>{{ form.forma10 }}</td>
+                                <td>{{ form.frecuencia10 }}</td>
+                                <td>{{ form.cantidad10 }}</td>
+                                <td>{{ form.cuandoydonde10 }}</td>
+                                <td>{{ form.consecuencias10 }}</td>
+                            </tr>
+                            <!-- Tabaco -->
+                            <tr>
+                                <td class="fw-semibold text-primary align-middle small">Tabaco</td>
+                                <td>{{ form.sustancia11 }}</td>
+                                <td>{{ form.forma11 }}</td>
+                                <td>{{ form.frecuencia11 }}</td>
+                                <td>{{ form.cantidad11 }}</td>
+                                <td>{{ form.cuandoydonde11 }}</td>
+                                <td>{{ form.consecuencias11 }}</td>
+                            </tr>
+                            <!-- Otras sustancias -->
+                            <!-- Otras sustancias - CORREGIDO -->
+<tr>
+    <td class="fw-semibold text-primary align-middle small">
+        <input type="text" name="{{ form.sustancia12.name }}"
+               id="{{ form.sustancia12.id_for_label }}"
+               value="{{ form.sustancia12.value|default:'' }}"
+               class="form-control"
+               placeholder="Nombre otra sustancia">
+    </td>
+    <td></td>
+    <td>{{ form.forma12 }}</td>
+    <td>{{ form.frecuencia12 }}</td>
+    <td>{{ form.cantidad12 }}</td>
+    <td>{{ form.cuandoydonde12 }}</td>
+    <td>{{ form.consecuencias12 }}</td>
+</tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 border-top">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold text-dark small">{{ form.resultadoantidoping.label }}</label>
+                            {{ form.resultadoantidoping }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+ <!-- SALUD FÍSICA - MEJORADA -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white py-2">
+        <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Salud Física</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Fila 1: Atención médica -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.hasidoatendido.label }}</label>
+                {{ form.hasidoatendido }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.cualproblema.label }}</label>
+                {{ form.cualproblema }}
+            </div>
+
+            <!-- Fila 2: Medicamentos -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.tomandomedicamento.label }}</label>
+                {{ form.tomandomedicamento }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.cualcadacuandoyporque.label }}</label>
+                {{ form.cualcadacuandoyporque }}
+            </div>
+
+            <!-- Fila 3: Hospitalización -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.diasenelhospital.label }}</label>
+                {{ form.diasenelhospital }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SALUD MENTAL - MEJORADA -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white py-2">
+        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Salud Mental</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Fila 1: Tristeza -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.sehasentidotriste.label }}</label>
+                {{ form.sehasentidotriste }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.cualsonlascausas.label }}</label>
+                {{ form.cualsonlascausas }}
+            </div>
+
+            <!-- Fila 2: Dañarse a sí mismo -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.sehaqueridoherir.label }}</label>
+                {{ form.sehaqueridoherir }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.dequeforma.label }}</label>
+                {{ form.dequeforma }}
+            </div>
+
+            <!-- Fila 3: Pensamientos suicidas - EN UNA SOLA FILA -->
+            <div class="col-md-12">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.quitarselavida.label }}</label>
+                        {{ form.quitarselavida }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark small">{{ form.sehaqueridosuicidar.label }}</label>
+                        {{ form.sehaqueridosuicidar }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark small">{{ form.cuadoocurrio.label }}</label>
+                        {{ form.cuadoocurrio }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila 4: Ansiedad -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.sentidoansioso.label }}</label>
+                {{ form.sentidoansioso }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.ansiosoporque.label }}</label>
+                {{ form.ansiosoporque }}
+            </div>
+
+            <!-- Fila 5: Tratamiento -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.haestadoentratamiento.label }}</label>
+                {{ form.haestadoentratamiento }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark small">{{ form.quetipo.label }}</label>
+                {{ form.quetipo }}
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- METAS Y OBSERVACIONES FINALES -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white py-2">
+                <h5 class="mb-0"><i class="fas fa-flag me-2"></i>Metas y Observaciones Finales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold text-dark small">{{ form.metasparelfuturo.label }}</label>
+                        {{ form.metasparelfuturo }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold text-dark small">{{ form.observaciones.label }}</label>
+                        {{ form.observaciones }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="row mb-4">
+            <div class="col-md-12 text-center">
+                <button type="submit" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-save me-2"></i>Guardar Seguimiento
+                </button>
+                <button type="button" class="btn btn-success btn-lg me-3" onclick="imprimirSeguimiento()">
+                    <i class="fas fa-print me-2"></i>Imprimir
+                </button>
+                <a href="#" class="btn btn-secondary btn-lg" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-2"></i>Regresar
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+
+function imprimirSeguimiento() {
+    window.print();
+}
+  document.addEventListener('DOMContentLoaded', function() {
+    // Agregar clases de Bootstrap a todos los campos
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.classList.add('form-control');
+    });
+
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        select.classList.add('form-select');
+    });
+
+    // Función para manejar campos condicionales
+    function setupConditionalField(mainFieldId, conditionalFieldId) {
+        const mainField = document.getElementById(mainFieldId);
+        const conditionalField = document.getElementById(conditionalFieldId);
+
+        if (mainField && conditionalField) {
+            const container = conditionalField.closest('.col-md-6') || conditionalField.closest('.col-md-12');
+
+            function toggleField() {
+                if (mainField.value === '1') { // Si = 1
+                    container.style.opacity = '1';
+                    conditionalField.disabled = false;
+                    conditionalField.required = true;
+                } else {
+                    container.style.opacity = '0.6';
+                    conditionalField.disabled = true;
+                    conditionalField.required = false;
+                    conditionalField.value = ''; // Limpiar campo cuando se deshabilita
+                }
+            }
+
+            mainField.addEventListener('change', toggleField);
+            toggleField(); // Estado inicial
+        }
+    }
+
+    // CAMPOS DE SALUD FÍSICA
+    const physicalHealthFields = {
+        'id_hasidoatendido': 'id_cualproblema',
+        'id_tomandomedicamento': 'id_cualcadacuandoyporque'
+    };
+
+    // CAMPOS DE SALUD MENTAL
+    const mentalHealthFields = {
+        'id_sehasentidotriste': 'id_cualsonlascausas',
+        'id_sehaqueridoherir': 'id_dequeforma',
+        'id_sentidoansioso': 'id_ansiosoporque',
+        'id_haestadoentratamiento': 'id_quetipo'
+    };
+
+    // Configurar todos los campos condicionales
+    Object.entries(physicalHealthFields).forEach(([mainField, conditionalField]) => {
+        setupConditionalField(mainField, conditionalField);
+    });
+
+    Object.entries(mentalHealthFields).forEach(([mainField, conditionalField]) => {
+        setupConditionalField(mainField, conditionalField);
+    });
+
+    // MANEJO ESPECIAL PARA CAMPOS SUICIDAS
+    const quitarselavida = document.getElementById('id_quitarselavida');
+    const sehaqueridosuicidar = document.getElementById('id_sehaqueridosuicidar');
+    const cuadoocurrio = document.getElementById('id_cuadoocurrio');
+
+    if (quitarselavida && sehaqueridosuicidar && cuadoocurrio) {
+        const suicidarContainer = sehaqueridosuicidar.closest('.col-md-3');
+        const ocurrioContainer = cuadoocurrio.closest('.col-md-6');
+
+        function toggleSuicideFields() {
+            if (quitarselavida.value === '1') {
+                // Si pensó en quitarse la vida, habilitar campo de intento
+                suicidarContainer.style.opacity = '1';
+                sehaqueridosuicidar.disabled = false;
+
+                // Actualizar campo de intento basado en el nuevo estado
+                toggleAttemptField();
+            } else {
+                // Si NO pensó en quitarse la vida, deshabilitar todo
+                suicidarContainer.style.opacity = '1';
+                sehaqueridosuicidar.disabled = false;
+                sehaqueridosuicidar.value = '0';
+                ocurrioContainer.style.opacity = '0.6';
+                cuadoocurrio.disabled = true;
+                cuadoocurrio.required = false;
+                cuadoocurrio.value = '';
+            }
+        }
+
+        function toggleAttemptField() {
+            if (sehaqueridosuicidar.value === '1') {
+                ocurrioContainer.style.opacity = '1';
+                cuadoocurrio.disabled = false;
+                cuadoocurrio.required = true;
+            } else {
+                ocurrioContainer.style.opacity = '0.6';
+                cuadoocurrio.disabled = true;
+                cuadoocurrio.required = false;
+                cuadoocurrio.value = '';
+            }
+        }
+
+        quitarselavida.addEventListener('change', toggleSuicideFields);
+        sehaqueridosuicidar.addEventListener('change', toggleAttemptField);
+        toggleSuicideFields(); // Estado inicial
+    }
+
+    // Campo "Vive con otros" (de información general)
+    setupConditionalField('id_conquienvive', 'id_viveotros');
+});
+</script>
+
+<style>
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: #495057;
+        font-size: 0.875rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    .table input,
+    .table select,
+    .table textarea {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .card-header {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    @media print {
+        .btn, .alert {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #000 !important;
+            margin-bottom: 10px !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+        }
+        .table {
+            font-size: 10pt;
+        }
+    }
+    <style>
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: #495057;
+        font-size: 0.875rem;
+    }
+
+    /* Estilos para campos deshabilitados */
+    .form-control:disabled,
+    .form-select:disabled {
+        background-color: #f8f9fa;
+        border-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .table th {
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    .table input,
+    .table select,
+    .table textarea {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .card-header {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    @media print {
+        .btn, .alert {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #000 !important;
+            margin-bottom: 10px !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+        }
+        .table {
+            font-size: 10pt;
+        }
+    }
+</style>
+
+</style>
+{% endblock %}

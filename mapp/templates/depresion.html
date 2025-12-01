@@ -46,9 +46,14 @@
 
 
   <!-- Contenido del formulario -->
-  <form action="{% url 'graba-depresion' id=interno.pk %}" method="POST" >
+  <form action="{% url 'depresion' id=interno.pk %}" method="POST" >
     {% csrf_token %}
     {{depresionf.deppuntos}}
+    {{depresionf.depconsejero.as_hidden}}
+    {{depresionf.depnombreconsejero.as_hidden}}
+    {{depresionf.expediente.as_hidden}}
+    {{depresionf.clinica.as_hidden}}
+
     {% if messages %}
     <div class="alert-messages">
       {% for message in messages %}
@@ -112,7 +117,13 @@ Asegúrese de leer todas las oraciones en cada grupo antes de hacer su elección
   </div>
   </form>
 </div>
-
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ depresionf.instance.depnombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

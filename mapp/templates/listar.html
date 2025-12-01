@@ -12,11 +12,7 @@
                             <i class="bi bi-plus-circle me-1"></i>Agregar Interno
                         </a>
                     </li>
-                    <li class="nav-item me-2">
-                        <a class="nav-link btn btn-outline-secondary" href="#responsable">
-                            <i class="bi bi-box-arrow-right me-1"></i>Registrar Salida
-                        </a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link btn btn-outline-info" href="#responsable">
                             <i class="bi bi-file-earmark-text me-1"></i>Reporte de Internos
@@ -62,10 +58,10 @@
                                            class="btn btn-sm btn-primary">
                                             <i class="bi bi-pencil"></i> Editar
                                         </a>
-                                        <a href="{% url 'listaint' %}"
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('¿Está seguro que desea eliminar este registro?');">
-                                            <i class="bi bi-trash"></i> Eliminar
+                                        <a href="{% url 'salidas' id=interno.pk %}"
+                                           class="btn btn-sm btn-danger">
+
+                                            <i class="bi bi-trash"></i> Registrar salida
                                         </a>
                                     </div>
                                 </td>

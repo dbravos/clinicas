@@ -10,8 +10,11 @@
 
   <div class="header-content">
   <div class="header-title">
-      <h3>Sintomas de Ansiedad : <span class="badge bg-primary rounded-pill">{{ ansiedadf.instance.anpuntos|default:"0" }}  Puntos</span></h3>
-  <!-- CÓDIGO CORREGIDO Y RECOMENDADO -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+      <h3>Sintomas de Ansiedad: <span class="badge bg-primary rounded-pill">{{ ansiedadf.instance.anpuntos|default:"0" }}  Puntos</span></h3>
+
+    </div>
+
 <div class="patient-info d-flex align-items-center">
     <!-- Información del paciente (se queda igual) -->
     <div>
@@ -46,9 +49,15 @@
 
 
   <!-- Contenido del formulario -->
-  <form action="{% url 'graba-ansiedad' id=interno.pk %}" method="POST" >
+  <form action="{% url 'ansiedad' id=interno.pk %}" method="POST" >
     {% csrf_token %}
+
+    {{ansiedadf.expediente.as_hidden}}
+    {{ansiedadf.anconsejero.as_hidden}}
+    {{ansiedadf.annombreconsejero.as_hidden}}
+    {{ansiedadf.clinica.as_hidden}}
     {{ansiedadf.anpuntos}}
+
     {% if messages %}
     <div class="alert-messages">
       {% for message in messages %}
@@ -118,6 +127,14 @@
   </form>
 </div>
 
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ ansiedadf.instance.annombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
+
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -135,9 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. El campo OCULTO del formulario donde se GUARDA la puntuación.
     // Buscamos el <input type="hidden"> por el ID que definimos en forms.py.
-    const campoOcultoPuntuacion = document.getElementById('id_anpuntos');
+    const campoOcultoPuntuacion = document.getElementById('id_ansiedadf_anpuntos');
 
-    // 3. TODOS los radio buttons de las preguntas de psicosis (cuyo 'name' empieza con 'pp').
+    // 3. TODOS los radio buttons de las preguntas de ansiedad (cuyo 'name' empieza con 'anp').
     const todosLosRadios = document.querySelectorAll("input[name^='anp'][type='radio']");
 
 
@@ -167,6 +184,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // ESTO ES CRUCIAL PARA QUE EL DATO SE GUARDE.
         if (campoOcultoPuntuacion) {
             campoOcultoPuntuacion.value = puntuacionTotal;
+        }
+
+        // 👇 NUEVO: Actualizar el badge del encabezado
+        const badgeEncabezado = document.querySelector('h3 .badge');
+        if (badgeEncabezado) {
+            badgeEncabezado.textContent = puntuacionTotal + ' Puntos';
         }
     }
 

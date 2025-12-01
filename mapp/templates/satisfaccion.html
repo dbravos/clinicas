@@ -46,8 +46,12 @@
 
 
   <!-- Contenido del formulario -->
-  <form action="{% url 'graba-sdevida' id=interno.pk %}" method="POST" >
+  <form action="{% url 'sdevida' id=interno.pk %}" method="POST" >
     {% csrf_token %}
+    {{sdevidaf.expediente.as_hidden}}
+    {{sdevidaf.svconsejero.as_hidden}}
+    {{sdevidaf.svnombreconsejero.as_hidden}}
+    {{sdevidaf.clinica.as_hidden}}
 
     {% if messages %}
     <div class="alert-messages">
@@ -122,23 +126,27 @@ en cuenta que el numero uno indica completamente insatisfecha y el numero diez c
             {% endfor %}
 
 
-<div class="d-flex justify-content-between align-items-center mt-4">
-    <!-- Este es el nuevo bloque para la puntuación -->
-    <div class="card p-3 shadow-sm">
-        <h5>Puntuación Total: <span id="puntuacion-total" class="fw-bold text-primary">0</span></h5>
-    </div>
 
-    <div class="form-actions">
+
+
+    <div class="text-end mt-4 ">
       <button type="submit" class="btn btn-primary btn-save">
         <i class="bi bi-save"></i> Guardar
       </button>
     </div>
-</div>
+
   </div>
    </div>
   </div>
   </form>
 </div>
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ sdevidaf.instance.svnombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
 
 </body>
 

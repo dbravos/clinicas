@@ -1,8 +1,10 @@
 from django import forms
+import datetime
 from mapp.models import Internos,DatosGrales,Usuarios,Einicial,Assist,Cfisicas,Cmentales,Crelaciones,\
                         Tratamientos,SituacionFamiliar,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,\
                         Riesgos,Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,\
-                        HojaAtencionPs,NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas
+                        HojaAtencionPs,NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas,Seguimiento,Estados,\
+                        NotasSeguimiento
 
 from django.utils import timezone
 from django.forms import widgets,NumberInput
@@ -32,6 +34,26 @@ class IntResponsablef(forms.ModelForm):
         model=Internos
         fields=['responsable','rcalle','rcolonia','rciudad',
                 'restado','rpais','rtelefono']
+
+class IntSalidasf(forms.ModelForm):
+    fsalidareal = forms.DateField(
+        initial=datetime.date.today,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control form-control-sm',
+            'type': 'date',  # ✅ Input nativo de fecha
+        }),
+        input_formats=['%Y-%m-%d'],  # ✅ Formato internacional estándar
+        label='Fecha de salida'
+    )
+    class Meta:
+        model=Internos
+        fields=['fsalidareal','Motivoegreso','resumenanexo','estadodesalud','prevencionrecaidas']
+        widgets={'Motivoegreso': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3}),
+                 'resumenanexo': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3}),
+                 'estadodesalud': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3}),
+                 'prevencionrecaidas': forms.Textarea(attrs={'class': 'form-control form-control-sm', 'rows': 3})}
+
+
 
 class IntDependientesf(forms.ModelForm):
 
@@ -84,7 +106,7 @@ class IntProvienef(forms.ModelForm):
 class DatosGralesf(forms.ModelForm):
     class Meta:
         model = DatosGrales
-        exclude=['logo_url']
+        exclude=['logo_url','recibo','receta','recibootros','sesiong','expediente']
 
 
 class Usuariosf(forms.ModelForm):
@@ -157,6 +179,15 @@ class Einicialf(forms.ModelForm):
             'dispuesto':forms.RadioSelect(choices=Einicial.opcionesImportante,attrs={'class': 'form-check-input'})
             }
 
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Hacer readonly los campos de default
+            campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+            for campo in campos_readonly:
+                if campo in self.fields:
+                    self.fields[campo].widget.attrs['readonly'] = True
+                    self.fields[campo].widget.attrs['class'] = 'form-control bg-light'
+
 
 
 class SituacionFamiliarf(forms.ModelForm):
@@ -196,7 +227,14 @@ class SituacionFamiliarf(forms.ModelForm):
                    'algunavez':forms.RadioSelect(choices=SituacionFamiliar.opcionesConflicto, attrs={'class': 'form-check-input'})
                    }
 
-
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Hacer readonly los campos de default
+            campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+            for campo in campos_readonly:
+                if campo in self.fields:
+                    self.fields[campo].widget.attrs['readonly'] = True
+                    self.fields[campo].widget.attrs['class'] = 'form-control bg-light'
 
 class Cfisicasf(forms.ModelForm):
 
@@ -249,7 +287,12 @@ class Cfisicasf(forms.ModelForm):
             self.fields['papa'].widget=forms.CheckboxInput(attrs={'class':'form-check-input','role':'switch'})
             self.fields['mama'].widget=forms.CheckboxInput(attrs={'class':'form-check-input','role':'switch'})
 
-
+            campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+            for campo in campos_readonly:
+                if campo in self.fields:
+                    self.fields[campo].widget.attrs['readonly'] = True
+                    self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                                   '') + ' bg-light'
 
 
 class Cmentalesf(forms.ModelForm):
@@ -285,6 +328,12 @@ class Cmentalesf(forms.ModelForm):
         # Campo expediente como hidden
         self.fields['expediente'].widget = forms.HiddenInput()
 
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
 
 class Crelacionesf(forms.ModelForm):
 
@@ -323,6 +372,12 @@ class Crelacionesf(forms.ModelForm):
                 'size': '50',             # Atributo HTML 'size': ancho aproximado en caracteres
                  'maxlength' : '50'})
 
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
 
 class Tratamientosf(forms.ModelForm):
 
@@ -331,6 +386,12 @@ class Tratamientosf(forms.ModelForm):
         for field in self.fields.values():  # 👈 Esta línea lo resuelve
             field.required = False  # Desactiva todos los campos requeridos
 
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
     class Meta:
         model=Tratamientos
         fields ='__all__'
@@ -432,39 +493,41 @@ class Assistf(forms.ModelForm):
 
 
 class Psicosisf(forms.ModelForm):
-
     class Meta:
         model = Psicosis
         fields = '__all__'
-
         widgets = {
            'pspuntos': forms.HiddenInput(attrs={
            'id': 'id_psicosisf_pspuntos',
-            })
+
+        })
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for field in self.fields.values():  # 👈 Esta línea lo resuelve
-            field.required = False  # Desactiva todos los campos requeridos
+        # 1. Primero hacer todos los campos no requeridos
+        for field in self.fields.values():
+            field.required = False
 
-          # Generación dinámica de campos p1s1 a p9s10
+        # 2. Configurar campos readonly
 
-
+        # 3. Configurar campos dinámicos - CORREGIDO
         for j in range(1, 18):
             field_name = f'pp{j}'
-            model_field = self._meta.model._meta.get_field(field_name)
-            self.fields[field_name] = forms.ChoiceField(
-            choices=Psicosis.opcionesQuesiente,
-            widget=forms.RadioSelect(
-            attrs={'class': 'form-check-input',
+            if field_name in self.fields:  # ✅ VERIFICAR si existe primero
+                model_field = self._meta.model._meta.get_field(field_name)
+                # ✅ Actualizar el campo EXISTENTE en lugar de reemplazarlo
+                self.fields[field_name].widget = forms.RadioSelect(
+                    attrs={
+                        'class': 'form-check-input',
                         'id': f'id_{field_name}',
-                       }
-                ),
-            required=False,  # Cambia a True si es obligatorio
-            label = model_field.verbose_name
-            )
+                    }
+                )
+                self.fields[field_name].choices = Psicosis.opcionesQuesiente
+                self.fields[field_name].label = model_field.verbose_name
+
+
 
 class Usodrogasf(forms.ModelForm):
 
@@ -480,7 +543,12 @@ class Usodrogasf(forms.ModelForm):
             field.required = False  # Desactiva todos los campos requeridos
 
           # Generación dinámica de campos p1s1 a p9s10
-
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
 
         for j in range(1, 21):
             field_name = f'udp{j}'
@@ -511,7 +579,12 @@ class Sdevidaf(forms.ModelForm):
 
           # Generación dinámica de campos p1s1 a p9s10
 
-
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
         for j in range(1, 13):
             field_name = f'svp{j}'
             model_field = self._meta.model._meta.get_field(field_name)
@@ -545,7 +618,12 @@ class Ansiedadf(forms.ModelForm):
             field.required = False  # Desactiva todos los campos requeridos
 
           # Generación dinámica de campos p1s1 a p9s10
-
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
 
         for j in range(1, 22):
             field_name = f'anp{j}'
@@ -580,7 +658,12 @@ class Depresionf(forms.ModelForm):
 
           # Generación dinámica de campos p1s1 a p9s10
 
-
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
         for j in range(1, 22):
             field_name = f'dep{j}'
             opciones = getattr(Depresion, f'opcionesP{j}', [])
@@ -609,7 +692,12 @@ class Marcadoresf(forms.ModelForm):
         for field in self.fields.values():  # 👈 Esta línea lo resuelve
             field.required = False  # Desactiva todos los campos requeridos
 
-
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
         nombre_sustancia = None
         # Nos aseguramos de que el formulario esté asociado a un objeto guardado
         # y que el campo 'quedroga' tenga un valor.
@@ -664,6 +752,12 @@ class Riesgosf(forms.ModelForm):
         for field in self.fields.values():  # 👈 Esta línea lo resuelve
             field.required = False  # Desactiva todos los campos requeridos
 
+        campos_readonly = ['consejero', 'nombreconsejero', 'expediente', 'clinica']
+        for campo in campos_readonly:
+            if campo in self.fields:
+                self.fields[campo].widget.attrs['readonly'] = True
+                self.fields[campo].widget.attrs['class'] = self.fields[campo].widget.attrs.get('class',
+                                                                                               '') + ' bg-light'
 
         for j in range(1, 10):
             field_name = f'riesgosP{j}'
@@ -1440,3 +1534,49 @@ class ClinicaLoginForm(forms.Form):
         clinica_id = self.cleaned_data['clinica_id']
         return clinica_id.strip().upper()  # ← QUITA ESPACIOS Y CONVIERTE A MAYÚSCULAS
 
+
+
+class Seguimientof(forms.ModelForm):
+    class Meta:
+        model = Seguimiento
+        fields = '__all__'
+        widgets = {
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'expediente': forms.TextInput(attrs={'placeholder': 'Número de expediente'}),
+            'viveotros': forms.TextInput(attrs={'placeholder': 'Especifique con quién vive'}),
+            'causanohaconsumido': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describa los factores que han evitado el consumo'}),
+            'obstaculos': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describa los obstáculos para mantener la abstinencia'}),
+            'metasparelfuturo': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describa sus metas y objetivos futuros'}),
+            'observaciones': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Observaciones relevantes sobre el usuario'}),
+        }
+
+
+class NotasSeguimientof(forms.ModelForm):
+    class Meta:
+        model = NotasSeguimiento
+        fields = '__all__'
+        widgets = {
+                'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+                'proximasesion': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+                'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de expediente'}),
+                'sesion': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+                'status': forms.Select(attrs={'class': 'form-select'}),
+                'consejero': forms.Select(attrs={'class': 'form-select'}),
+                'objetivo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Objetivo de la sesión'}),
+                'consumodesustancias': forms.Textarea(
+                    attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Describa el consumo de sustancias'}),
+                'plandeaccion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
+                                                      'placeholder': 'Plan de acción para situaciones de riesgo'}),
+                'tareas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Tareas asignadas'}),
+                'aspectosqueserevisaran': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
+                                                                'placeholder': 'Aspectos a revisar en la próxima sesión'}),
+                'observaciones': forms.Textarea(
+                    attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Comentarios y observaciones'}),
+                'clinica': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            }
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Establecer valor por defecto para clínica si no existe
+            if not self.instance.pk and not self.data.get('clinica'):
+                self.initial['clinica'] = "Demostracion"

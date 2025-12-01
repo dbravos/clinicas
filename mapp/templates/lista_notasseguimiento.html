@@ -13,14 +13,14 @@
         <!-- Contenedor para el título, siempre a la izquierda -->
         <div class="d-flex align-items-center">
             <h4 class="m-0 text-primary flex-grow-1"> <!-- flex-grow-1 para que el título ocupe espacio -->
-                <i class="bi bi-journal-text me-2"></i>Notas de evolucion Psicologica para Expediente {{ interno.numeroexpediente }} - {{ interno.nombrecompleto }}
+                <i class="bi bi-journal-text me-2"></i>Sesiones {{verbose_name}} para Expediente {{ interno.numeroexpediente }} - {{ interno.nombrecompleto }}
             </h4>
         </div>
         </div>
         <!-- Contenedor para los botones, alineado a la derecha y colapsable -->
         <div class="card-body">
 
-         <a  class="btn btn-sm btn-primary" href="{% url 'capturaSesionPS'  accion='agregar' id=interno.numeroexpediente %}">
+         <a  class="btn btn-sm btn-primary" href="{% url 'capturaSesionS'  accion='agregar' id=interno.numeroexpediente %}">
              <i class="bi bi-plus-circle me-1"></i>Agregar Nueva Sesión
          </a>
          <a class="btn btn-sm btn-secondary float-end" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar">
@@ -41,8 +41,7 @@
                         <tr>
                             <th class="py-3">No. Sesión</th>
                             <th class="py-3">Fecha</th>
-                            <th class="py-3">Objetivo</th>
-                            <th class="py-3">Psicologo</th>
+                            <th class="py-3">Consejero</th>
                             <th class="py-3">Estatus</th>
                             {% if tipo_sesion_actual == 'todas' %}
                                 <th class="py-3">Tipo</th>
@@ -51,13 +50,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if sesionesPS %}
-                            {% for s in sesionesPS %}
+                        {% if sesiones %}
+                            {% for s in sesiones %}
                             <tr>
                                 <td class="align-middle">{{ s.sesion }}</td>
                                 <td class="align-middle">{{ s.fecha|date:"d M Y" }}</td>
-                                <td class="align-middle">{{ s.objetivo }}</td>
-                                <td class="align-middle">{{ s.nombrepsicologo }}</td>
+                                <td class="align-middle">{{ s.nombreconsejero }}</td>
                                 <td class="align-middle">
                                     {% if s.status == 0 %}
                                         <span class="badge bg-warning text-dark">Abierta</span>
@@ -68,20 +66,16 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                             <a href="{% url 'capturaSesionPS_con_id'   accion='editar' id=interno.numeroexpediente no_sesion=s.pk %}"
+                             <a href="{% url 'capturaSesionS_con_id'  accion='editar' id=interno.numeroexpediente no_sesion=s.pk %}"
                                            class="btn btn-sm btn-primary">
-                                           {% if s.status == 0 %}
                                             <i class="bi bi-pencil"></i> Editar
-                                           {% else %}
-                                            <i class="bi bi-eye"  title="Consultar"></i> Consultar
-                                           {% endif %}
                                         </a>
                                 </td>
                             </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="5"
+                                <td colspan="{% if tipo_sesion_actual == 'todas' %}6{% else %}5{% endif %}"
                                     class="text-center py-4 text-muted">No hay sesiones de este tipo para el expediente {{ expediente_actual }}.</td>
                             </tr>
                         {% endif %}
@@ -94,7 +88,6 @@
     <!-- Mensajes mejorados (sin cambios) -->
     <div class="messages-container mt-3">
         {% if messages %}
-
             {% for message in messages %}
             <div class="alert alert-dismissible fade show
                         {% if message.tags == 'error' %}alert-danger

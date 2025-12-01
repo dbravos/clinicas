@@ -1,0 +1,113 @@
+{% extends "MenuPrincipal.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+      <div class="card border-0 shadow-lg rounded-3">
+        <!-- Header con botón cerrar -->
+  <div class="card-header bg-gradient-primary text-white py-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <!-- Información del interno -->
+        <div class="d-flex align-items-center">
+            <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                <i class="fas fa-sign-out-alt fa-lg"></i>
+            </div>
+            <div>
+                <h4 class="mb-2 fw-bold">Registro de Salida</h4>
+                <div class="d-flex flex-column">
+                    <span class="fw-medium mb-1">
+                        <i class="fas fa-file-medical me-1"></i>
+                        Expediente: <strong>{{ interno.numeroexpediente }}</strong>
+                    </span>
+                    <span class="fw-medium">
+                        <i class="fas fa-user me-1"></i>
+                        {{ interno.nombrecompleto }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Botón cerrar -->
+        <a href="{% url 'listaint' %}" class="btn btn-light btn-sm px-3">
+            <i class="fas fa-times me-1"></i>Cerrar
+        </a>
+    </div>
+</div>
+        <div class="card-body p-4">
+          <form method="POST" action="{% url 'salidas' interno.id %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <!-- Fecha de Salida -->
+              <div class="col-12">
+                <label class="form-label fw-bold">{{ form.fsalidareal.label }}</label>
+                {{ form.fsalidareal }}
+              </div>
+
+              <!-- Motivo de Egreso -->
+              <div class="col-12">
+                <label class="form-label fw-bold">{{ form.Motivoegreso.label }}</label>
+                {{ form.Motivoegreso }}
+              </div>
+
+              <!-- Resumen Anexo -->
+              <div class="col-12">
+                <label class="form-label fw-bold">{{ form.resumenanexo.label }}</label>
+                {{ form.resumenanexo }}
+              </div>
+
+              <!-- Estado de Salud -->
+              <div class="col-12">
+                <label class="form-label fw-bold">{{ form.estadodesalud.label }}</label>
+                {{ form.estadodesalud }}
+              </div>
+
+              <!-- Prevención de Recaídas -->
+              <div class="col-12">
+                <label class="form-label fw-bold">{{ form.prevencionrecaidas.label }}</label>
+                {{ form.prevencionrecaidas }}
+              </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+              <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save me-2"></i>Guardar Salida
+              </button>
+              <a href="{% url 'Menu principal' %}" class="btn btn-outline-secondary px-4">
+                <i class="fas fa-times me-2"></i>Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form-control-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+  }
+
+  .form-control-sm:focus {
+    border-color: #4a6cf7;
+    box-shadow: 0 0 0 0.2rem rgba(74, 108, 247, 0.25);
+  }
+
+  textarea.form-control-sm {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .card {
+    background: #fff;
+  }
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%) !important;
+}
+
+</style>
+{% endblock %}

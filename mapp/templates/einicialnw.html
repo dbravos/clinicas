@@ -10,7 +10,15 @@
   <div class="sticky-top interview-header">
   <div class="header-content">
   <div class="header-title">
-    <h3>Entrevista Inicial</h3>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="mb-0">Entrevista Inicial</h3>
+    <div class="d-flex align-items-center gap-2">
+        <label class="mb-0 text-muted">Consejero:</label>
+        <span class="badge bg-secondary rounded-pill fs-5">{{ einicialf.instance.nombreconsejero|default:"Sin asignar" }}</span>
+    </div>
+</div>
+
     <div class="patient-info d-flex align-items-center">
       <!-- Información del paciente a la izquierda -->
       <div>
@@ -22,6 +30,8 @@
           <label>Nombre:</label>
           <span>{{ interno.nombrecompleto }}</span>
         </div>
+
+
       </div>
 
       <!-- El botón "Regresar" con margen automático a la izquierda -->
@@ -102,6 +112,28 @@
     {{ cmentalesf.expediente.as_hidden }}
     {{ crelacionesf.expediente.as_hidden }}
     {{ tratamientosf.expediente.as_hidden }}
+    {{ einicialf.consejero.as_hidden }}
+    {{ situacionfamiliarf.consejero.as_hidden }}
+    {{ cfisicasf.consejero.as_hidden }}
+    {{ cmentalesf.consejero.as_hidden }}
+    {{ crelacionesf.consejero.as_hidden }}
+    {{ tratamientosf.consejero.as_hidden }}
+    {{ einicialf.nombreconsejero.as_hidden }}
+    {{ situacionfamiliarf.nombreconsejero.as_hidden }}
+    {{ cfisicasf.nombreconsejero.as_hidden }}
+    {{ cmentalesf.nombreconsejero.as_hidden }}
+    {{ crelacionesf.nombreconsejero.as_hidden }}
+    {{ tratamientosf.nombreconsejero.as_hidden }}
+    {{ einicialf.clinica.as_hidden }}
+    {{ situacionfamiliarf.clinica.as_hidden }}
+    {{ cfisicasf.clinica.as_hidden }}
+    {{ cmentalesf.clinica.as_hidden }}
+    {{ crelacionesf.clinica.as_hidden }}
+    {{ tratamientosf.clinica.as_hidden }}
+
+
+
+
 
 
     {% if messages %}

@@ -20,6 +20,9 @@ from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
 from django.http import HttpResponse
 from django.conf import settings
 from datetime import date, timedelta
+from django.views import View
+
+
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -42,13 +45,13 @@ except ImportError:
 from mapp.models import Internos,Usuarios,DatosGrales,Einicial,Assist,SituacionFamiliar,Cfisicas,Cmentales,\
                         Crelaciones,Tratamientos,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,Riesgos,\
                         Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,HojaAtencionPs,\
-                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas
+                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas,Seguimiento,NotasSeguimiento
 
 from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependientesf,IntProvienef,Einicialf,\
                     Assistf,SituacionFamiliarf,Cfisicasf,Cmentalesf,Crelacionesf,Tratamientosf,Psicosisf,Sdevidaf,\
                     Usodrogasf,Ansiedadf,Depresionf,Marcadoresf,Riesgosf,Razonesf,Valorizacionf,\
                     CIndividualf,CFamiliarf,CGrupalf,PConsejeriaf,TareaConsejeriaf,HojaAtencionPsf,NotasEvolucionPSf,\
-                    Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm
+                    Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm,IntSalidasf,Seguimientof,NotasSeguimientof
 
 
 
@@ -498,74 +501,98 @@ def consentimientoold(request,id):
 
 
 def einicial(request, id):
-    clinica_actual=get_clinica_actual(request)
+    clinica_actual = get_clinica_actual(request)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
     # Obtener el interno
     interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
 
+    # Diccionario con los valores por defecto
+    defaults = {
+        'expediente': interno.numeroexpediente,
+        'consejero': mem_user_no,
+        'nombreconsejero': mem_user_nombre,
+        'clinica': clinica_actual
+    }
 
-    # Obtener o crear registros
-    try:
-        einicial = get_object_or_404(Einicial, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        # Crear registros si no existen
-        einicial = Einicial.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        situacionfamiliar = get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        situacionfamiliar = SituacionFamiliar.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        cfisicas = get_object_or_404(Cfisicas, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        cfisicas = Cfisicas.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        cmentales = get_object_or_404(Cmentales, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        cmentales = Cmentales.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        crelaciones = get_object_or_404(Crelaciones, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        crelaciones = Crelaciones.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        tratamientos = get_object_or_404(Tratamientos, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        tratamientos = Tratamientos.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
-    try:
-        valorizacion = get_object_or_404(Valorizacion, expediente=interno.numeroexpediente,clinica=clinica_actual)
-    except Http404:
-        valorizacion = Valorizacion.objects.create(expediente=interno.numeroexpediente,clinica=clinica_actual)
+    # Crear registros con get_or_create (esto SÍ aplica defaults al crear)
+    einicial, created = Einicial.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    situacionfamiliar, created = SituacionFamiliar.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    cfisicas, created = Cfisicas.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    cmentales, created = Cmentales.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    crelaciones, created = Crelaciones.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    tratamientos, created = Tratamientos.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+        defaults=defaults
+    )
+
+    valorizacion, created = Valorizacion.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual,
+
+    )
+
+    # CREAR FORMULARIOS UNA SOLA VEZ (fuera del if POST)
+    einicialf = Einicialf(request.POST or None, instance=einicial)
+    situacionfamiliarf = SituacionFamiliarf(request.POST or None, instance=situacionfamiliar)
+    cfisicasf = Cfisicasf(request.POST or None, instance=cfisicas)
+    cmentalesf = Cmentalesf(request.POST or None, instance=cmentales)
+    crelacionesf = Crelacionesf(request.POST or None, instance=crelaciones)
+    tratamientosf = Tratamientosf(request.POST or None, instance=tratamientos)
+    valorizacionf = Valorizacionf(request.POST or None, instance=valorizacion)
 
     # Manejo de POST
     if request.method == "POST":
-        einicialf = Einicialf(request.POST, instance=einicial)
-        situacionfamiliarf = SituacionFamiliarf(request.POST, instance=situacionfamiliar)
-        cfisicasf = Cfisicasf(request.POST, instance=cfisicas)
-        cmentalesf = Cmentalesf(request.POST, instance=cmentales)
-        crelacionesf = Crelacionesf(request.POST, instance=crelaciones)
-        tratamientosf = Tratamientosf(request.POST, instance=tratamientos)
-        valorizacionf = Valorizacionf(request.POST, instance=valorizacion)
-
         if all(form.is_valid() for form in
                [einicialf, situacionfamiliarf, cfisicasf, cmentalesf, crelacionesf, tratamientosf, valorizacionf]):
-            with transaction.atomic():
-                einicialf.save()
-                situacionfamiliarf.save()
-                cfisicasf.save()
-                cmentalesf.save()
-                crelacionesf.save()
-                tratamientosf.save()
-                valorizacionf.save()
+            try:
+                with transaction.atomic():
+                    einicialf.save()
+                    situacionfamiliarf.save()
+                    cfisicasf.save()
+                    cmentalesf.save()
+                    crelacionesf.save()
+                    tratamientosf.save()
+                    valorizacionf.save()
 
-            messages.success(request, 'Datos actualizados correctamente')
-            return redirect('einicial', id=id,clinica=clinica_actual)  # Redirige a otra vista diferente
-    else:
-         # Manejo de GET (o POST con errores)
-         einicialf = Einicialf(instance=einicial)
-         situacionfamiliarf = SituacionFamiliarf(instance=situacionfamiliar)
-         cfisicasf = Cfisicasf(instance=cfisicas)
-         cmentalesf = Cmentalesf(instance=cmentales)
-         crelacionesf = Crelacionesf(instance=crelaciones)
-         tratamientosf = Tratamientosf(instance=tratamientos)
-         valorizacionf = Valorizacionf(instance=valorizacion)
+                messages.success(request, 'Datos actualizados correctamente')
+                return redirect('einicial', id=id)
+            except Exception as e:
+                messages.error(request, f"Error al guardar: {str(e)}")
+        else:
+            for form in [einicialf, situacionfamiliarf, cfisicasf, cmentalesf, crelacionesf, tratamientosf,
+                         valorizacionf]:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error en {form.__class__.__name__} - {field}: {error}")
 
     situaciones = [
         ('edesagradables', 'Emociones desagradables (triste, ansioso, etc.)'),
@@ -577,6 +604,7 @@ def einicial(request, id):
         ('agradablesotros', 'Momentos agradables con otros'),
         ('presion', 'Presión social')
     ]
+
     context = {
         'interno': interno,
         'einicialf': einicialf,
@@ -585,51 +613,37 @@ def einicial(request, id):
         'cmentalesf': cmentalesf,
         'crelacionesf': crelacionesf,
         'tratamientosf': tratamientosf,
+        'valorizacionf': valorizacionf,
         'situaciones': situaciones
     }
-    return render(request, 'einicialnw.html',context)
+    return render(request, 'einicialnw.html', context)
+
+
 
 def grabaeinicial(request, id):
-
-    clinica_actual=get_clinica_actual(request)
+    """Vista simplificada solo para ACTUALIZAR registros existentes"""
+    clinica_actual = get_clinica_actual(request)
 
     try:
-        interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
+        interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
 
         if not interno.numeroexpediente:
             messages.error(request, "El interno no tiene número de expediente asignado")
             return redirect('selecciona')
 
-        modelos = {
-            'einicial': Einicial,
-            'situacionfamiliar': SituacionFamiliar,
-            'cfisicas': Cfisicas,
-            'cmentales': Cmentales,
-            'crelaciones': Crelaciones,
-            'tratamientos': Tratamientos,
-
+        # OBTENER instancias existentes (NO crear)
+        instancias = {
+            'einicial': get_object_or_404(Einicial, expediente=interno.numeroexpediente, clinica=clinica_actual),
+            'situacionfamiliar': get_object_or_404(SituacionFamiliar, expediente=interno.numeroexpediente,
+                                                   clinica=clinica_actual),
+            'cfisicas': get_object_or_404(Cfisicas, expediente=interno.numeroexpediente, clinica=clinica_actual),
+            'cmentales': get_object_or_404(Cmentales, expediente=interno.numeroexpediente, clinica=clinica_actual),
+            'crelaciones': get_object_or_404(Crelaciones, expediente=interno.numeroexpediente, clinica=clinica_actual),
+            'tratamientos': get_object_or_404(Tratamientos, expediente=interno.numeroexpediente,
+                                              clinica=clinica_actual),
         }
-        mem_user_no = request.session.get('usuario_no')
-        mem_user_nombre = request.session.get('usuario_nombre')
-        mem_user_permisos = request.session.get('usuario_permisos')
 
-        with transaction.atomic():
-            instancias = {}
-            for nombre_modelo, modelo in modelos.items():
-                try:
-                    instancia, created = modelo.objects.get_or_create(
-                        expediente=interno.numeroexpediente,
-                        clinica=clinica_actual,
-                        defaults={'expediente': interno.numeroexpediente, 'consejero':mem_user_no,}
-                    )
-                    if created:
-                        instancia.full_clean()
-                        instancia.save()
-                    instancias[nombre_modelo] = instancia
-                except Exception as e:
-                    logger.error(f"Error creando {nombre_modelo}: {str(e)}")
-                    raise
-
+        # Crear formularios con las instancias
         forms = {
             'einicialf': Einicialf(request.POST or None, instance=instancias['einicial']),
             'situacionfamiliarf': SituacionFamiliarf(request.POST or None, instance=instancias['situacionfamiliar']),
@@ -639,18 +653,16 @@ def grabaeinicial(request, id):
             'tratamientosf': Tratamientosf(request.POST or None, instance=instancias['tratamientos'])
         }
 
-
         if request.method == "POST":
             if all(form.is_valid() for form in forms.values()):
                 try:
                     with transaction.atomic():
                         for form in forms.values():
-                            instance = form.save(commit=False)  # ← Objeto en memoria
-                            form.instance.expediente=interno.numeroexpediente
-                            form.instance.clinica=clinica_actual
-                            form.save()
-                    messages.success(request, 'Datos guardados correctamente')
+                            form.save()  # Solo guardar, los campos ya están en la instancia
+
+                    messages.success(request, 'Datos actualizados correctamente')
                     return redirect('einicial', id=id)
+
                 except Exception as e:
                     messages.error(request, f"Error al guardar: {str(e)}")
                     logger.exception("Error al guardar formularios")
@@ -660,35 +672,16 @@ def grabaeinicial(request, id):
                         for error in errors:
                             messages.error(request, f"Error en {form_name} - {field}: {error}")
 
-
-
         context = {
             'interno': interno,
-            **forms,
-            **instancias
-
+            **forms
         }
         return render(request, 'einicialnw.html', context)
 
-    except DatabaseError as e:
-        messages.error(request, "Error de base de datos. Contacte al administrador.")
-        logger.error(f"DatabaseError: {str(e)}")
-        return redirect('einicial', id=id)
-    except ValidationError as e:
-        messages.error(request, f"Error de validación: {str(e)}")
-        logger.error(f"ValidationError: {e.message_dict}")
-        return redirect('einicial', id=id)
     except Exception as e:
-         error_details = {
-              'exception_type': type(e).__name__,
-              'error_message': str(e),
-              'form_errors': {name: form.errors.as_json() for name, form in forms.items() if hasattr(form, 'errors')},
-              'post_data': request.POST.dict()
-               }
-         logger.exception(f"ERROR DETALLADO: {json.dumps(error_details, indent=2)}")
-         messages.error(request, f"Error crítico en el formulario. Ver logs para detalles.")
-         return redirect('einicial', id=id)
-
+        messages.error(request, "Error: Los registros iniciales no existen. Debe crearlos primero.")
+        logger.error(f"Error en grabaeinicial: {str(e)}")
+        return redirect('einicial', id=id)
 
 def assist(request,id):
 
@@ -706,6 +699,7 @@ def assist(request,id):
         assist = Assist(expediente=interno.numeroexpediente)
         assist.consejero = mem_user_no
         assist.clinica = clinica_actual
+        assist.nombreconsejero = mem_user_nombre
         assist.save()
         assistf = Assistf(instance=assist)
     try:
@@ -714,14 +708,29 @@ def assist(request,id):
     except Valorizacion.DoesNotExist:
         valorizacion = Valorizacion(expediente=interno.numeroexpediente)
         valorizacion.clinica=clinica_actual
+        valorizacion.valorizacionnombreconsejero=mem_user_nombre
+        valorizacion.valorizacionconsejero=mem_user_no
         valorizacion.save()
         valorizacionf = Valorizacionf(instance=valorizacion)
+
+    if request.method == "POST":
+        assistf = Assistf(request.POST, instance=assist)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if assistf.is_valid():
+            assistf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
 
     return render(request, 'assist.html', {'assist': assist, 'assistf':assistf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
 
 def grabalo(request, id):
 
     clinica_actual = get_clinica_actual(request)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     try:
         interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
 
@@ -741,7 +750,10 @@ def grabalo(request, id):
                     instancia, created = modelo.objects.get_or_create(
                         expediente=interno.numeroexpediente,
                         clinica=clinica_actual,
-                        defaults={'expediente': interno.numeroexpediente}
+                        defaults={'expediente': interno.numeroexpediente,
+                                  'clinica':clinica_actual,
+                                  'consejero':mem_user_no,
+                                  'nombreconsejero':mem_user_nombre}
                     )
                     if created:
                         instancia.full_clean()
@@ -807,32 +819,57 @@ def grabalo(request, id):
          messages.error(request, f"Error crítico en el formulario. Ver logs para detalles.")
          return redirect('assist', id=id)
 
-def psicosis(request,id):
 
-    clinica_actual=get_clinica_actual(request)
-    interno = Internos.objects.get(pk=id,clinica=clinica_actual)
-    internof= Internosf(request.POST,instance=interno)
+def psicosis(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     try:
-        psicosis = Psicosis.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
-        psicosisf = Psicosisf(instance=psicosis)
+        psicosis_obj = Psicosis.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
     except Psicosis.DoesNotExist:
-        psicosis = Psicosis(expediente=interno.numeroexpediente)
-        psicosis.psconsejero = mem_user_no
-        psicosis.clinica = clinica_actual
-        psicosis.save()
-        psicosisf = Psicosisf(instance=psicosis)
-    try:
-        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
-        valorizacionf = Valorizacionf(instance=valorizacion)
-    except Valorizacion.DoesNotExist:
-        valorizacion = Valorizacion(expediente=interno.numeroexpediente)
-        valorizacion.clinica=clinica_actual
-        valorizacion.save()
-        valorizacionf = Valorizacionf(instance=valorizacion)
+        psicosis_obj = Psicosis(
+            expediente=interno.numeroexpediente,
+            psconsejero=mem_user_no,
+            psnombreconsejero=mem_user_nombre,
+            clinica=clinica_actual
+        )
+        psicosis_obj.save()
 
-    return render(request, 'psicosis.html', {'psicosis': psicosis, 'psicosisf':psicosisf,'interno':interno,'valorizacion':valorizacion,'valorizacionf':valorizacionf} )
+
+    try:
+        valorizacion = Valorizacion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
+    except Valorizacion.DoesNotExist:
+        valorizacion = Valorizacion(
+            expediente=interno.numeroexpediente,
+            clinica=clinica_actual,
+            valorizacionconsejero=mem_user_no,
+            valorizacionnombreconsejero=mem_user_nombre
+        )
+        valorizacion.save()
+
+    psicosisf = Psicosisf(instance=psicosis_obj)
+    valorizacionf = Valorizacionf(instance=valorizacion)
+    # 👇 MANEJAR POST EN LA MISMA VISTA
+    if request.method == "POST":
+        psicosisf = Psicosisf(request.POST, instance=psicosis_obj)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if psicosisf.is_valid():
+            psicosisf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
+
+
+    return render(request, 'psicosis.html', {
+        'psicosis': psicosis_obj,
+        'psicosisf': psicosisf,
+        'interno': interno,
+        'valorizacion': valorizacion,
+        'valorizacionf': valorizacionf
+    })
 
 def sdevida(request, id):
     clinica_actual = get_clinica_actual(request)
@@ -847,7 +884,8 @@ def sdevida(request, id):
         sdevida = Sdevida.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            svconsejero=mem_user_no
+            svconsejero=mem_user_no,
+            svnombreconsejero=mem_user_nombre
         )
     sdevidaf = Sdevidaf(instance=sdevida)
 
@@ -858,9 +896,22 @@ def sdevida(request, id):
         valorizacion = Valorizacion.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            valorizacionconsejero=mem_user_no
+            valorizacionconsejero=mem_user_no,
+            valorizacionnombreconsejero=mem_user_nombre
         )
     valorizacionf = Valorizacionf(instance=valorizacion)
+
+    if request.method == "POST":
+        sdevidaf = Sdevidaf(request.POST, instance=sdevida)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if sdevidaf.is_valid():
+            sdevidaf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
+
 
     return render(request, 'satisfaccion.html', {
         'sdevida': sdevida,
@@ -883,7 +934,9 @@ def usodrogas(request, id):
         usodrogas = Usodrogas.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            udconsejero=mem_user_no
+            udconsejero=mem_user_no,
+            udnombreconsejero=mem_user_nombre
+
         )
     usodrogasf = Usodrogasf(instance=usodrogas)
 
@@ -894,9 +947,21 @@ def usodrogas(request, id):
         valorizacion = Valorizacion.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            valorizacionconsejero=mem_user_no
+            valorizacionconsejero=mem_user_no,
+            valorizacionnombreconsejero=mem_user_nombre
         )
     valorizacionf = Valorizacionf(instance=valorizacion)
+
+    if request.method == "POST":
+        usodrogasf = Usodrogasf(request.POST, instance=usodrogas)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if usodrogasf.is_valid():
+            usodrogasf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
 
     return render(request, 'usodrogas.html', {
         'usodrogas': usodrogas,
@@ -921,7 +986,8 @@ def ansiedad(request, id):
         ansiedad = Ansiedad.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            anconsejero=mem_user_no
+            anconsejero=mem_user_no,
+            annombreconsejero=mem_user_nombre
         )
     ansiedadf = Ansiedadf(instance=ansiedad)
 
@@ -932,9 +998,21 @@ def ansiedad(request, id):
         valorizacion = Valorizacion.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            valorizacionconsejero=mem_user_no
+            valorizacionconsejero=mem_user_no,
+            valorizacionnombreconsejero=mem_user_nombre
         )
     valorizacionf = Valorizacionf(instance=valorizacion)
+
+    if request.method == "POST":
+        ansiedadf = Ansiedadf(request.POST, instance=ansiedad)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if ansiedadf.is_valid():
+            ansiedadf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
 
     return render(request, 'ansiedad.html', {
         'ansiedad': ansiedad,
@@ -958,7 +1036,8 @@ def depresion(request, id):
         depresion = Depresion.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            depconsejero=mem_user_no
+            depconsejero=mem_user_no,
+            depnombreconsejero=mem_user_nombre
         )
     depresionf = Depresionf(instance=depresion)
 
@@ -969,9 +1048,21 @@ def depresion(request, id):
         valorizacion = Valorizacion.objects.create(
             expediente=interno.numeroexpediente,
             clinica=clinica_actual,
-            valorizacionconsejero=mem_user_no
+            valorizacionconsejero=mem_user_no,
+            valorizacionnombreconsejero=mem_user_nombre
         )
     valorizacionf = Valorizacionf(instance=valorizacion)
+
+    if request.method == "POST":
+        depresionf = Depresionf(request.POST, instance=depresion)
+        valorizacionf = Valorizacionf(instance=valorizacion)  # Solo para mostrar
+
+        if depresionf.is_valid():
+            depresionf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
 
     return render(request, 'depresion.html', {
         'depresion': depresion,
@@ -997,10 +1088,20 @@ def marcadores(request,id):
     except Marcadores.DoesNotExist:
         marcadores=Marcadores(expediente=interno.numeroexpediente)
         marcadores.marconsejero = mem_user_no
+        marcadores.marnombreconsejero = mem_user_nombre
         marcadores.clinica = clinica_actual
         marcadores.save()
         marcadoresf=Marcadoresf(instance=marcadores)
 
+    if request.method == "POST":
+        marcadoresf = Marcadoresf(request.POST, instance=marcadores)
+
+        if marcadoresf.is_valid():
+            marcadoresf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
     return render(request, 'marcadores.html', {'marcadores': marcadores, 'marcadoresf':marcadoresf,'interno':interno} )
 
 def riesgos(request,id):
@@ -1017,9 +1118,21 @@ def riesgos(request,id):
     except Riesgos.DoesNotExist:
         riesgos=Riesgos(expediente=interno.numeroexpediente)
         riesgos.riesgoconsejero = mem_user_no
+        riesgos.riesgonombreconsejero = mem_user_nombre
         riesgos.clinica = clinica_actual
         riesgos.save()
         riesgosf=Riesgosf(instance=riesgos)
+
+    if request.method == "POST":
+        riesgosf = Riesgosf(request.POST, instance=riesgos)
+
+        if riesgosf.is_valid():
+            riesgosf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
+
 
     return render(request, 'riesgos.html', {'riesgos': riesgos, 'riesgosf':riesgosf,'interno':interno} )
 
@@ -1037,11 +1150,42 @@ def razones(request,id):
     except Razones.DoesNotExist:
         razones=Razones(expediente=interno.numeroexpediente)
         razones.razonesconsejero = mem_user_no
+        razones.razonesnombreconsejero = mem_user_nombre
         razones.clinica = clinica_actual
         razones.save()
         razonesf=Razonesf(instance=razones)
 
+    if request.method == "POST":
+        razonesf = Razonesf(request.POST, instance=razones)
+
+        if razonesf.is_valid():
+            razonesf.save()
+            messages.success(request, 'Datos guardados correctamente')
+            return redirect('seleccionainterno', id=id)
+        else:
+            messages.error(request, 'Error al guardar los datos')
+
     return render(request, 'razones.html', {'razones': razones, 'razonesf':razonesf,'interno':interno} )
+
+
+def salidas(request, id):
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
+
+    if request.method == 'POST':
+        form = IntSalidasf(request.POST, instance=interno)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Salida del interno registrada exitosamente')
+            # Recarga la misma página para ver los datos actualizados
+            return redirect('salidas', id=id)
+    else:
+        form = IntSalidasf(instance=interno)
+
+    return render(request, 'salidas.html', {
+        'form': form,
+        'interno': interno
+    })
 
 
 def valorizacion(request,id):
@@ -1151,325 +1295,6 @@ def valorizacion(request,id):
 # en tu archivo de vistas
 
 
-def grabanew(request, id, modelos_config, forms_config, template_name, redirect_view, modelo_principal=Internos):
-    clinica_actual = get_clinica_actual(request)
-    principal = get_object_or_404(modelo_principal, pk=id, clinica=clinica_actual)
-    forms = {}
-    mem_user_no = request.session.get('usuario_no')
-    mem_user_nombre = request.session.get('usuario_nombre')
-
-    try:
-        # 1. Obtener o crear instancias
-        instancias = {}
-        with transaction.atomic():
-            for nombre_modelo, (modelo, principal_lookup, related_lookup) in modelos_config.items():
-                lookup_value = getattr(principal, principal_lookup)
-                lookup_kwargs = {related_lookup: lookup_value, 'clinica': clinica_actual}
-                instancia, created = modelo.objects.get_or_create(
-                    **lookup_kwargs,
-                    defaults={**lookup_kwargs, 'consejero': mem_user_no}
-                )
-                instancias[nombre_modelo] = instancia
-
-        # 2. Inicializar formularios
-        for form_name, (form_class, related_name) in forms_config.items():
-            instance = instancias.get(related_name)
-            forms[form_name] = form_class(request.POST or None, instance=instance)
-
-        # 3. Manejar POST
-        if request.method == "POST":
-            if all(form.is_valid() for form in forms.values()):
-                try:
-                    with transaction.atomic():
-                        for form_name, form in forms.items():
-                            if form.has_changed():
-                                related_name = [rn for fn, (_, rn) in forms_config.items() if fn == form_name][0]
-                                _, principal_lookup, related_lookup = modelos_config[related_name]
-
-                                # Asignar valores antes de guardar
-                                valor_principal = getattr(principal, principal_lookup)
-                                setattr(form.instance, related_lookup, valor_principal)
-                                setattr(form.instance, 'clinica', clinica_actual)
-                                setattr(form.instance, 'consejero', mem_user_no)
-
-                                form.save()
-                                logger.info(f"Formulario '{form_name}' guardado")
-
-                    messages.success(request, 'Datos guardados correctamente')
-                    return redirect('seleccionainterno', id=id)  # ← REDIRIGE A UNA VISTA DIFERENTE
-
-                except Exception as e:
-                    messages.error(request, f"Error al guardar: {str(e)}")
-                    logger.exception("Error al guardar formularios")
-            else:
-                messages.error(request, 'No se pudo guardar. Por favor, corrija los errores.')
-                for form_name, form in forms.items():
-                    if form.errors:
-                        for field, errors in form.errors.items():
-                            for error in errors:
-                                messages.error(request, f"Error en {form_name} - {field}: {error}")
-
-        # 4. Renderizar template (SIEMPRE)
-        context = {
-            'interno': principal,
-            **forms,
-            **instancias
-        }
-        return render(request, template_name, context)
-
-    except Exception as e:
-        logger.exception(f"ERROR en grabanew: {str(e)}")
-        messages.error(request, "Error crítico en el formulario.")
-        return redirect('seleccionainterno',id=id)  # ← REDIRIGE A UNA VISTA DIFERENTE
-
-
-def assist_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'assist': (Assist, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'assistf': (Assistf, 'assist')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'assist.html',
-        'graba-assist', # El nombre de la URL para la redirección
-        Internos
-    )
-def psicosis_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'psicosis': (Psicosis, 'numeroexpediente', 'expediente'),
-
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'psicosisf': (Psicosisf, 'psicosis'),
-
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'psicosis.html',
-        'graba-psicosis', # El nombre de la URL para la redirección
-        Internos,
-
-    )
-def sdevida_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'sdevida': (Sdevida, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'sdevidaf': (Sdevidaf, 'sdevida')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'satisfaccion.html',
-        'graba-sdevida', # El nombre de la URL para la redirección
-        Internos
-    )
-
-def usodrogas_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'usodrogas': (Usodrogas, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'usodrogasf': (Usodrogasf, 'usodrogas')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'usodrogas.html',
-        'graba-usodrogas', # El nombre de la URL para la redirección
-        Internos
-    )
-def ansiedad_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'ansiedad': (Ansiedad, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'ansiedadf': (Ansiedadf, 'ansiedad')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'ansiedad.html',
-        'graba-ansiedad', # El nombre de la URL para la redirección
-        Internos
-    )
-def depresion_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'depresion': (Depresion, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'depresionf': (Depresionf, 'depresion')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'depresion.html',
-        'graba-depresion', # El nombre de la URL para la redirección
-        Internos
-    )
-
-def marcadores_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'marcadores': (Marcadores, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'marcadoresf': (Marcadoresf, 'marcadores')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'marcadores.html',
-        'graba-marcadores', # El nombre de la URL para la redirección
-        Internos
-    )
-def riesgos_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'riesgos': (Riesgos, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'riesgosf': (Riesgosf, 'riesgos')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'riesgos.html',
-        'graba-riesgos', # El nombre de la URL para la redirección
-        Internos
-    )
-
-
-def razones_cfg(request, id):
-    """
-    Configuración para la vista de Assist.
-    """
-    # <-- CAMBIO: La tupla ahora tiene 3 elementos
-    # (ModeloRelacionado, 'campo_en_Internos', 'campo_en_Assist')
-    modelos_config = {
-        'razones': (Razones, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'razonesf': (Razonesf, 'razones')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'razones.html',
-        'graba-razones', # El nombre de la URL para la redirección
-        Internos
-    )
-def valorizacion_cfg(request, id):
-
-    modelos_config = {
-        'valorizacion': (Valorizacion, 'numeroexpediente', 'expediente')
-    }
-
-    # Esta configuración no cambia
-    forms_config = {
-        'valorizacionf': (Valorizacionf, 'valorizacion')
-    }
-
-    return grabanew(
-        request,
-        id,
-        modelos_config,
-        forms_config,
-        'dgenerales.html',
-        'graba-valorizacion', # El nombre de la URL para la redirección
-        Internos,
-    )
-
-
-
-
 MODEL_FORM_MAP = {
     'individual': {'model': CIndividual, 'form_class':CIndividualf,'verbose_name': 'Individuales'},
     'familiar': {'model': CFamiliar, 'form_class':CFamiliarf,'verbose_name': 'Familiares'},
@@ -1493,6 +1318,7 @@ def listaSesiones(request, tipo_sesion, id):
     modelo = mapping['model']
     verbose_name = mapping['verbose_name']
     form_class = mapping['form_class']
+    form = form_class
 
     sesiones = modelo.objects.filter(expediente=id, clinica=clinica_actual).order_by('sesion')
     cuantas_sesiones = sesiones.count()
@@ -1512,6 +1338,7 @@ def listaSesiones(request, tipo_sesion, id):
         'cuantas_sesiones': cuantas_sesiones,
         'cerrada': cerrada,
         'modelo': modelo,
+        'form':form_class,
         'interno':interno,
     }
     return render(request, 'lista_sesiones.html', context)
@@ -1523,8 +1350,6 @@ from datetime import date
 def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
     clinica_actual = get_clinica_actual(request)
     interno = Internos.objects.get(numeroexpediente=id, clinica=clinica_actual)
-
-    print(f'sesion={tipo_sesion}, id_interno_pk={id}, numero_expediente={interno.numeroexpediente}, accion={accion}, no_sesion={no_sesion}')
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
@@ -1547,27 +1372,6 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
     instancia_sesion = None
 
     if accion == 'agregar':
-       print(f"🔍 DEBUG CRÍTICO:")
-       print(f"   interno.numeroexpediente: '{interno.numeroexpediente}'")
-       print(f"   clinica_actual: '{clinica_actual}'")
-       print(f"   Tipo de expediente: {type(interno.numeroexpediente)}")
-       print(f"   Tipo de clinica: {type(clinica_actual)}")
-
-            # Verificar con valores directos
-       existe_con_valores_directos = modelo.objects.filter(
-             expediente='000002',
-                sesion=1,
-                clinica=clinica_actual
-            ).exists()
-       print(f"   ¿Existe con valores directos?: {existe_con_valores_directos}")
-
-       # Verificar solo por expediente
-       existe_solo_expediente = modelo.objects.filter(expediente='000002', sesion=1).exists()
-       print(f"   ¿Existe solo por expediente?: {existe_solo_expediente}")
-
-
-
-
        sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente,
                                                     clinica=clinica_actual).order_by('sesion')
        cuantas_sesiones = sesiones_existentes.count()
@@ -1609,6 +1413,7 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
             sesion_guardar.consejero = mem_user_no
+            sesion_guardar.nombreconsejero = mem_user_nombre
             sesion_guardar.clinica = clinica_actual
 
             # VALIDACIÓN DE FECHAS
@@ -1649,7 +1454,6 @@ def capturaSesion(request, tipo_sesion, accion, id=None, no_sesion=None):
             if accion == 'agregar':
                 sesion_guardar.sesion = nueva_sesion
 
-            # 🔥 GUARDAR PARA AMBOS CASOS (agregar Y editar)
             try:
                 sesion_guardar.save()
                 messages.success(request, f'{verbose_name} {sesion_guardar.sesion} guardada exitosamente.')
@@ -1697,6 +1501,8 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
     Vista para capturar sesiones grupales - CON VALIDACIÓN CORREGIDA
     """
     clinica_actual=get_clinica_actual(request)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
     internos_disponibles = Internos.objects.filter(clinica=clinica_actual).order_by('numeroexpediente')
     instancia_sesion = None
 
@@ -1721,6 +1527,9 @@ def capturaSesionGrupal(request, tipo_sesion, accion, id=None, no_sesion=None):
                     nuevo_numero = (ultima_sesion or 0) + 1
                     sesion_grupal.sesion = nuevo_numero
                     sesion_grupal.clinica = clinica_actual
+                    sesion_grupal.consejero=mem_user_no
+                    sesion_grupal.nombreconsejero=mem_user_nombre
+
                     sesion_grupal.status = 0
                     mensaje = f'Sesión grupal #{sesion_grupal.sesion} creada correctamente.'
 
@@ -1886,15 +1695,18 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
             messages.error(request, f'{verbose_name} a editar no encontrada.')
             return redirect('listaSesionesPS', id=interno.numeroexpediente)
     else:
-        instancia_sesion = None
+        instancia_sesion = modelo()
 
     if request.method == 'POST':
         form = form_class(request.POST, instance=instancia_sesion)
         if form.is_valid():
             sesion_guardar = form.save(commit=False)
             sesion_guardar.expediente = interno.numeroexpediente
-            sesion_guardar.psicologo = mem_user_no
             sesion_guardar.clinica = clinica_actual
+            if not sesion_guardar.psicologo or sesion_guardar.psicologo==0:
+               sesion_guardar.psicologo=mem_user_no
+               sesion_guardar.nombrepsicologo=mem_user_nombre
+
 
             # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
             if accion == 'editar' and request.POST.get('status') == '1':
@@ -1973,6 +1785,141 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
     return render(request, 'captura_sesionps.html', context)
 
 
+def capturaSesionS(request, accion, id=None, no_sesion=None):
+
+    clinica_actual=get_clinica_actual(request)
+    interno = Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
+
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+
+    if id is None and 'interno_actual_id' in request.session:
+        id = request.session['interno_actual_id']
+
+
+    modelo = NotasSeguimiento
+    verbose_name = 'Notas de seguimiento'
+    form_class = NotasSeguimientof
+
+    cuantas_sesiones = 0
+    nueva_sesion = 1
+    cerrada = True
+    ultima_sesion_obj = None
+    instancia_sesion = None
+
+    if accion == 'agregar':
+        sesiones_existentes = modelo.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).order_by('sesion')
+        cuantas_sesiones = sesiones_existentes.count()
+
+        if sesiones_existentes:
+            ultima_sesion_obj = sesiones_existentes.last()
+            nueva_sesion = ultima_sesion_obj.sesion + 1
+
+            if ultima_sesion_obj.status == 1:
+                cerrada = True
+            else:
+                cerrada = False
+
+            if not cerrada:
+                messages.error(request, 'La sesión anterior no está cerrada por lo tanto no puede crear una nueva.')
+                return redirect('listaSesionesS',  id=id)
+
+    if accion == 'editar' and no_sesion is not None:
+        try:
+            instancia_sesion = modelo.objects.get(pk=no_sesion)
+            nueva_sesion = instancia_sesion.sesion
+            cerrada = (instancia_sesion.status == 1)
+        except modelo.DoesNotExist:
+            messages.error(request, f'{verbose_name} a editar no encontrada.')
+            return redirect('listaSesionesS', id=interno.numeroexpediente)
+    else:
+        instancia_sesion = None
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=instancia_sesion)
+        if form.is_valid():
+            sesion_guardar = form.save(commit=False)
+            sesion_guardar.expediente = interno.numeroexpediente
+            sesion_guardar.consejero = mem_user_no
+            sesion_guardar.nombreconsejero = mem_user_nombre
+            sesion_guardar.clinica = clinica_actual
+
+            # 🔥 VALIDACIÓN CORREGIDA - Validar ANTES de cerrar
+            if accion == 'editar' and request.POST.get('status') == '1':
+                proximasesion_str = request.POST.get('proximasesion')
+
+                # Validar primero
+                error_validacion = None
+                if not proximasesion_str:
+                    error_validacion = 'Error: Debe especificar una fecha para la próxima sesión al cerrar la sesión actual'
+                elif proximasesion_str:
+                    from datetime import datetime
+                    try:
+                        # Convertir de YYYY-MM-DD (formato input) a date
+                        proximasesion = datetime.strptime(proximasesion_str, '%Y-%m-%d').date()
+
+                        if proximasesion <= sesion_guardar.fecha:
+                            error_validacion = f'Error: La próxima sesión debe ser posterior a la fecha de esta sesión ({sesion_guardar.fecha.strftime("%d/%m/%Y")})'
+                        elif proximasesion < date.today():
+                            error_validacion = 'Error: La próxima sesión no puede ser una fecha pasada'
+
+                    except ValueError:
+                        error_validacion = 'Error: Formato de fecha inválido'
+
+                # Si hay error, NO cerrar la sesión
+                if error_validacion:
+                    messages.error(request, error_validacion)
+                    context = {
+                        'form': form,
+                        'id_expediente': id,
+                        'numero_expediente': interno.numeroexpediente,
+                        'numero_sesion_actual': nueva_sesion,
+                        'verbose_name': verbose_name,
+                        'interno': interno,
+                        'cuantas_sesiones': cuantas_sesiones,
+                        'cerrada': cerrada,
+                        'ultima_sesion': ultima_sesion_obj,
+                        'accion': accion,
+                        'instancia_sesion': instancia_sesion,
+                    }
+                    return render(request, 'captura_sesions.html', context)
+
+                # 🔥 SOLO SI NO HAY ERROR, continuar (la sesión se cierra después)
+
+            if accion == 'agregar':
+                sesion_guardar.sesion = nueva_sesion
+
+            sesion_guardar.save()
+            messages.success(request, f'{verbose_name} {sesion_guardar.sesion} guardada exitosamente.')
+            return redirect('listaSesionesS',  id=id)
+        else:
+            messages.error(request, 'Error al guardar la sesión. Revisa los campos.')
+    else:
+        if instancia_sesion:
+            form = form_class(instance=instancia_sesion)
+        else:
+            form = form_class(initial={
+                'expediente': interno.numeroexpediente,
+                'sesion': nueva_sesion,
+
+            })
+
+    context = {
+        'form': form,
+        'id_expediente': id,
+        'numero_expediente': interno.numeroexpediente,
+        'numero_sesion_actual': nueva_sesion,
+        'verbose_name': verbose_name,
+        'interno': interno,
+        'cuantas_sesiones': cuantas_sesiones,
+        'cerrada': cerrada,
+        'ultima_sesion': ultima_sesion_obj,
+        'accion': accion,
+        'instancia_sesion': instancia_sesion,
+    }
+
+    return render(request, 'captura_sesions.html', context)
+
 
 
 
@@ -2023,6 +1970,29 @@ def listaSesionesPS(request,id=None):
     }
     return render(request, 'lista_notasevolucionps.html', context)
 
+def listaSesionesS(request,id=None):
+    """
+    Vista para listar todas las sesiones grupales
+    """
+    clinica_actual=get_clinica_actual(request)
+    interno=Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
+    clinica_actual=get_clinica_actual(request)
+
+    sesiones = NotasSeguimiento.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).order_by('-fecha', '-sesion')
+
+    interno = None
+    if id:
+        try:
+            interno = Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
+        except Internos.DoesNotExist:
+            pass
+    context = {
+        'sesiones': sesiones,
+        'id':id,
+        'interno': interno,
+
+    }
+    return render(request, 'lista_notasseguimiento.html', context)
 
 
 def planConsejeria(request, id):
@@ -2046,6 +2016,7 @@ def planConsejeria(request, id):
         # Si no existe, crear una nueva
         pconsejeria = PConsejeria(expediente=interno.numeroexpediente)
         pconsejeria.consejero = mem_user_no
+        pconsejeria.nombreconsejero = mem_user_nombre
         pconsejeria.clinica = clinica_actual
         pconsejeria.save()
         creado = True
@@ -2358,6 +2329,7 @@ def hojaAtencionPs(request, id):
         # Si no existe, crear una nueva
         hatencionps = HojaAtencionPs(expediente=interno.numeroexpediente)
         hatencionps.psicologo=mem_user_no
+        hatencionps.nombrepsicologo=mem_user_nombre
         hatencionps.clinica=clinica_actual
         hatencionps.save()
         creado = True
@@ -2370,9 +2342,6 @@ def hojaAtencionPs(request, id):
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {hatencionps.id} ===")
 
     if request.method == 'POST':
-        print("=== DEBUG: POST recibido ===")
-        print(f"=== DEBUG: Datos POST: {request.POST} ===")  # Ver qué datos llegan
-
         # Crear el formulario con los datos del POST y la instancia existente
         hatencionpsf = HojaAtencionPsf(request.POST, instance=hatencionps)
 
@@ -2383,11 +2352,12 @@ def hojaAtencionPs(request, id):
             saved_instance = hatencionpsf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente
             saved_instance.clinica=clinica_actual# Asegurar el expediente
-            saved_instance.psicologo=mem_user_no # Asegurar el expediente
+            if not saved_instance.psicologo or saved_instance.psicologo==0:
+               saved_instance.psicologo=mem_user_no # Asegurar el expediente
+               saved_instance.nombrepsicologo=mem_user_nombre
+
             saved_instance.save()
 
-            print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
-            print(f"=== DEBUG: Expediente guardado: {saved_instance.expediente} ===")
             messages.success(request, 'Hoja de atencion psicologica guardada exitosamente.')
 
             # Recargar el formulario con los datos guardados
@@ -2423,19 +2393,16 @@ def medicoInicial(request, id):
         # Primero intentar obtener una existente
         medicoinicial = Medico.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
-        print(f"=== DEBUG: Plan existente encontrado - ID: {medicoinicial.id} ===")
-        print(f"=== DEBUG: con expediente : {medicoinicial.expediente} ===")
 
     except Medico.DoesNotExist:
         # Si no existe, crear una nueva
         medicoinicial = Medico(expediente=interno.numeroexpediente)
         medicoinicial.medico = mem_user_no
+        medicoinicial.nombremedico = mem_user_nombre
         medicoinicial.clinica = clinica_actual
 
         medicoinicial.save()
         creado = True
-        print(f"=== DEBUG: Nuevo plan creado - ID: {medicoinicial.id} ===")
-        print(f"=== DEBUG: con expediente : {medicoinicial.expediente} ===")
     except Medico.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
         medicoinicial = Medico.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
@@ -2443,25 +2410,20 @@ def medicoInicial(request, id):
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {medicoinicial.id} ===")
 
     if request.method == 'POST':
-        print("=== DEBUG: POST recibido ===")
-        print(f"=== DEBUG: Datos POST: {request.POST} ===")  # Ver qué datos llegan
+
 
         # Crear el formulario con los datos del POST y la instancia existente
         medicof = Medicof(request.POST, instance=medicoinicial)
-
-        print(f"Formulario válido: {medicof.is_valid()}")
 
         if medicof.is_valid():
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = medicof.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
             saved_instance.clinica = clinica_actual  # Asegurar el expediente
-            saved_instance.medico = mem_user_no  # Asegurar el expediente
+
 
             saved_instance.save()
 
-            print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
-            print(f"=== DEBUG: Expediente guardado: {saved_instance.expediente} ===")
             messages.success(request, 'Examen medico inicial guardado exitosamente.')
 
             # Recargar el formulario con los datos guardados
@@ -2488,7 +2450,7 @@ def emisionDerecetas(request,id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_medico_nombre = ''
+
 
 
     try:
@@ -2502,6 +2464,7 @@ def emisionDerecetas(request,id):
         receta = Recetas(expediente=interno.numeroexpediente)
         receta.clinica = clinica_actual
         receta.medico = mem_user_no
+        receta.nombremedico = mem_user_nombre
 
         receta.save()
         creado = True
@@ -2524,7 +2487,10 @@ def emisionDerecetas(request,id):
             saved_instance = recetaf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
             saved_instance.clinica = clinica_actual  # Asegurar el expediente
-            saved_instance.medico = mem_user_no  # Asegurar el expediente
+            if not saved_instance.medico or saved_instance.medico==0:
+                saved_instance.medico=mem_user_no
+                saved_instance.nombremedico=mem_user_nombre
+
             saved_instance.save()
 
             print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
@@ -2563,20 +2529,15 @@ def historiaClinica(request, id):
         historiaclinica = HistoriaClinica.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         creado = False
 
-
-
-        print(f"=== DEBUG: Plan existente encontrado - ID: {historiaclinica.id} ===")
-        print(f"=== DEBUG: con expediente : {historiaclinica.expediente} ===")
-
     except HistoriaClinica.DoesNotExist:
         # Si no existe, crear una nueva
         historiaclinica = HistoriaClinica(expediente=interno.numeroexpediente)
         historiaclinica.medico = mem_user_no
+        historiaclinica.nombremedico = mem_user_nombre
         historiaclinica.clinica = clinica_actual
         historiaclinica.save()
         creado = True
-        print(f"=== DEBUG: Nuevo plan creado - ID: {historiaclinica.id} ===")
-        print(f"=== DEBUG: con expediente : {historiaclinica.expediente} ===")
+
     except HistoriaClinica.MultipleObjectsReturned:
         # Si hay múltiples, tomar el más reciente
         historiaclinica = HistoriaClinica.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
@@ -2584,9 +2545,8 @@ def historiaClinica(request, id):
         print(f"=== DEBUG: Múltiples planes, tomando el más reciente - ID: {historiaclinica.id} ===")
 
     if request.method == 'POST':
-        print("=== DEBUG: POST recibido ===")
-        print(f"=== DEBUG: Datos POST: {request.POST} ===")  # Ver qué datos llegan
-        historiaclinica.medico=mem_user_no
+
+
         historiaclinica.clinica=clinica_actual
 
         # Crear el formulario con los datos del POST y la instancia existente
@@ -2598,7 +2558,7 @@ def historiaClinica(request, id):
             # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
             saved_instance = historiaclinicaf.save(commit=False)
             saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
-            saved_instance.medico = mem_user_no  # Asegurar el expediente
+
             saved_instance.clinica = clinica_actual  # Asegurar el expediente
 
             # Asegurar que el médico sea el usuario actual - CORREGIDO
@@ -2608,8 +2568,6 @@ def historiaClinica(request, id):
 
             saved_instance.save()
 
-            print(f"=== DEBUG: Guardado exitoso - ID: {saved_instance.id} ===")
-            print(f"=== DEBUG: Expediente guardado: {saved_instance.expediente} ===")
             messages.success(request, 'Examen medico inicial guardado exitosamente.')
 
             # Recargar el formulario con los datos guardados
@@ -2751,3 +2709,69 @@ def dashboard(request):
 
     # Aquí van tus vistas normales
     return render(request, 'MenuPrincipal.html')
+
+
+def seguimiento(request, id):
+    """
+    Obtiene el interno por ID y luego busca/crea su consejería
+    """
+    # 1. Obtener el interno
+    clinica_actual = get_clinica_actual(request)
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    # 2. Buscar consejería existente o crear una nueva
+    try:
+        # Primero intentar obtener una existente
+        seguimiento = Seguimiento.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
+        creado = False
+
+    except Seguimiento.DoesNotExist:
+        # Si no existe, crear una nueva
+        seguimiento = Seguimiento(expediente=interno.numeroexpediente)
+        seguimiento.consejero = mem_user_no
+        seguimiento.nombreconsejero = mem_user_nombre
+        seguimiento.clinica = clinica_actual
+
+        seguimiento.save()
+        creado = True
+    except Seguimiento.MultipleObjectsReturned:
+        # Si hay múltiples, tomar el más reciente
+        seguimiento = Seguimiento.objects.filter(expediente=interno.numeroexpediente,clinica=clinica_actual).latest('id')
+        creado = False
+
+    if request.method == 'POST':
+        # Crear el formulario con los datos del POST y la instancia existente
+        seguimientof = Seguimientof(request.POST, instance=seguimiento)
+
+
+        if seguimientof.is_valid():
+            # FORZAR EL EXPEDIENTE ANTES DE GUARDAR
+            saved_instance = seguimientof.save(commit=False)
+            saved_instance.expediente = interno.numeroexpediente  # Asegurar el expediente
+            saved_instance.clinica = clinica_actual  # Asegurar el expediente
+
+
+            saved_instance.save()
+
+            messages.success(request, 'Entrevista de seguimiento guardada exitosamente.')
+
+            # Recargar el formulario con los datos guardados
+            seguimientof = Seguimientof(instance=saved_instance)
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        # GET request - mostrar formulario con datos existentes
+        seguimientof = Seguimientof(instance=seguimiento)
+    form=seguimientof
+    return render(request, 'seguimiento.html', {
+        'seguimiento': seguimiento,
+        'interno': interno,
+        'form': form,
+        'creado': creado,
+    })
+
+
+
+
+

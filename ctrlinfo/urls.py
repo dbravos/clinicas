@@ -23,13 +23,14 @@ from django.conf.urls.static import static
 
 from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgrales,lusuarios,\
                         agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,seleccionainterno,\
-                        grabainterno,probar,consentimiento,einicial,assist,grabaeinicial,grabalo,psicosis,assist_cfg,\
-                        psicosis_cfg,sdevida_cfg,sdevida,usodrogas,usodrogas_cfg,ansiedad,ansiedad_cfg,depresion,depresion_cfg,\
-                        marcadores_cfg,marcadores,riesgos,riesgos_cfg,razones,razones_cfg,valorizacion,valorizacion_cfg,\
+                        grabainterno,probar,consentimiento,einicial,assist,grabaeinicial,psicosis,sdevida,usodrogas,ansiedad,depresion,\
+                        marcadores,riesgos,razones,valorizacion,\
                         listaSesiones,capturaSesion,capturaSesionGrupal,listaSesionesGrupales,planConsejeria,escanear_tarea,\
                         lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
-                        cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard
+                        cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard,salidas,\
+                        seguimiento,listaSesionesS,capturaSesionS
+
 
 
 
@@ -56,31 +57,24 @@ urlpatterns = [
     path('einicial/<int:id>/',einicial,name='einicial'),
     path('grabaeinicial/<int:id>/',grabaeinicial,name='grabaeinicial'),
     path('assist/<int:id>/', assist, name='assist'),
-    path('graba-assist/<int:id>/', assist_cfg, name='graba-assist'),
-    path('graba-psicosis/<int:id>/', psicosis_cfg, name='graba-psicosis'),
     path('psicosis/<int:id>/', psicosis, name='psicosis'),
     path('sdevida/<int:id>/', sdevida, name='sdevida'),
-    path('graba-sdevida/<int:id>/', sdevida_cfg, name='graba-sdevida'),
     path('usodrogas/<int:id>/', usodrogas, name='usodrogas'),
-    path('graba-usodrogas/<int:id>/', usodrogas_cfg, name='graba-usodrogas'),
     path('ansiedad/<int:id>/', ansiedad, name='ansiedad'),
-    path('graba-ansiedad/<int:id>/', ansiedad_cfg, name='graba-ansiedad'),
     path('depresion/<int:id>/', depresion, name='depresion'),
-    path('graba-depresion/<int:id>/', depresion_cfg, name='graba-depresion'),
     path('marcadores/<int:id>/', marcadores, name='marcadores'),
-    path('graba-marcadores/<int:id>/', marcadores_cfg, name='graba-marcadores'),
     path('riesgos/<int:id>/', riesgos, name='riesgos'),
-    path('graba-riesgos/<int:id>/', riesgos_cfg, name='graba-riesgos'),
     path('razones/<int:id>/', razones, name='razones'),
-    path('graba-razones/<int:id>/', razones_cfg, name='graba-razones'),
     path('valorizacion/<int:id>/', valorizacion, name='valorizacion'),
-    path('graba-valorizacion/<int:id>/', valorizacion_cfg, name='graba-valorizacion'),
     path('listaSesiones/<str:tipo_sesion>/<str:id>/', listaSesiones, name='listaSesiones'),
     path('listaSesionesPS/<str:id>/', listaSesionesPS, name='listaSesionesPS'),
+    path('listaSesionesS/<str:id>/', listaSesionesS, name='listaSesionesS'),
     path('capturaSesion/<str:tipo_sesion>/<str:accion>/<str:id>/', capturaSesion, name='capturaSesion'),
     path('capturaSesionPS/<str:accion>/<str:id>/', capturaSesionPS, name='capturaSesionPS'),
+    path('capturaSesionS/<str:accion>/<str:id>/', capturaSesionS, name='capturaSesionS'),
     path('capturaSesion/<str:tipo_sesion>/<str:accion>/<str:id>/<int:no_sesion>/', capturaSesion, name='capturaSesion_con_id'),
     path('capturaSesionPS/<str:accion>/<str:id>/<int:no_sesion>/', capturaSesionPS, name='capturaSesionPS_con_id'),
+    path('capturaSesionS/<str:accion>/<str:id>/<int:no_sesion>/', capturaSesionS, name='capturaSesionS_con_id'),
     path('sesiones-grupales/', listaSesionesGrupales, name='listaSesionesGrupales'),
     path('sesion-grupal/<str:tipo_sesion>/<str:accion>/', capturaSesionGrupal, name='capturaSesionGrupal'),
     path('sesion-grupal/<str:tipo_sesion>/<str:accion>/<int:no_sesion>/', capturaSesionGrupal, name='capturaSesionGrupal_con_id'),
@@ -99,6 +93,8 @@ urlpatterns = [
     path('contrato-completo/<int:id>', imprime_contrato, name='imprime_contrato'),
     path('imprime_solicitud/<int:id>', imprime_solicitud, name='imprime_solicitud'),
     path('imprime_aviso/<int:id>', imprime_aviso, name='imprime_aviso'),
+    path('salidas/<int:id>', salidas, name='salidas'),
+    path('seguimiento/<int:id>', seguimiento, name='seguimiento'),
 
 ]
 

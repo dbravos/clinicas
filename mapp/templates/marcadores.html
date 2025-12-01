@@ -46,7 +46,7 @@
 
 
   <!-- Contenido del formulario -->
-  <form action="{% url 'graba-marcadores' id=interno.pk %}" method="POST" >
+  <form action="{% url 'marcadores' id=interno.pk %}" method="POST" >
     {% csrf_token %}
 
     {% if messages %}
@@ -60,6 +60,10 @@
     </div>
     {% endif %}
 
+    {{marcadoresf.marconsejero.as_hidden}}
+    {{marcadoresf.marnombreconsejero.as_hidden}}
+    {{marcadoresf.expediente.as_hidden}}
+    {{marcadoresf.clinica.as_hidden}}
 
   <!-- Sección 2: Escala de valoración familiar -->
   <div class="card shadow-sm" style="background-color:white;">
@@ -219,24 +223,25 @@
 </div><!-- Fin de la fila principal -->
 
 
-<div class="d-flex justify-content-between align-items-center mt-4">
-    <!-- Este es el nuevo bloque para la puntuación -->
-    <div class="card p-3 shadow-sm">
-        <h5>Puntuación Total: <span id="puntuacion-total" class="fw-bold text-primary">0</span></h5>
-    </div>
 
-    <div class="form-actions">
+    <div class="text-end mt-4 form-actions">
       <button type="submit" class="btn btn-primary btn-save">
         <i class="bi bi-save"></i> Guardar
       </button>
     </div>
-</div>
+
   </div>
    </div>
   </div>
   </form>
 </div>
-
+<footer class="footer mt-4 py-2 bg-light">
+    <div class="container-fluid text-center">
+        <small class="text-muted">
+            Consejero: <strong>{{ marcadoresf.instance.marnombreconsejero}}</strong>
+        </small>
+    </div>
+</footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
