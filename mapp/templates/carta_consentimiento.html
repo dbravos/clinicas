@@ -136,7 +136,8 @@
             }
 
             .logo {
-                max-width: 70px;
+                max-width: 150px;
+                max-heigth:150px;
             }
         }
 
@@ -190,9 +191,6 @@
         <!-- ✅ MOSTRAR IMGBB -->
         <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
 
-    {% elif datosgrales.logo_clinica %}
-        <!-- ❌ Imagen local (no funciona en producción) -->
-        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
     {% else %}
         <p>❌ NO hay logo subido</p>
     {% endif %}

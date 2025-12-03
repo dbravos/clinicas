@@ -72,20 +72,25 @@ def primermenu(request):
     return render(request,'MenuPrincipal.html', {'interno': interno})
 
 def imprime_contrato(request,id):
+    clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.first()
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
 
     return render(request,'imprime_contrato.html', {'interno': interno,'datosgrales':datosgrales})
 
 def imprime_solicitud(request,id):
+
+    clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.first()
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
 
     return render(request,'solicitud_internacion.html', {'interno': interno,'datosgrales':datosgrales})
 
 def imprime_aviso(request,id):
+
+    clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.first()
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
     # En tu vista
 
 
@@ -113,8 +118,9 @@ def imprime_aviso(request,id):
 
 # En tu vista de consentimiento
 def consentimiento(request, id):
+    clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.first()  # O como obtengas estos datos
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)  # O como obtengas estos datos
 
     # Formatear fecha actual
     from django.utils import timezone
@@ -252,7 +258,6 @@ def datosgrales(request):
         print("Antes de save")  # Debug
         datosgrales.save()  # ← Si falla aquí, el problema está en el modelo
         print("Después de save")  # Debug
-
 
     datosgralesf = DatosGralesf(instance=datosgrales)
     return render(request, 'datosgrales.html', {
@@ -2681,6 +2686,7 @@ def login_clinica(request):
                     request.session['clinica_actual'] = clinica.clinica
                     request.session['clinica_nombre'] = clinica.nombre
                     request.session['ffazzuorrtt'] = clinica.password
+
                     return redirect('dashboard')
                 else:
                     form.add_error('password', 'Contraseña incorrecta')

@@ -229,8 +229,8 @@
                }
 
             .logo {
-                max-width: 200px; /* Ajusta el tamaño según necesites */
-                max-height: 200px;
+                max-width: 150px; /* Ajusta el tamaño según necesites */
+                max-height: 150px;
                }
 
 
@@ -278,7 +278,7 @@
 
     {% elif datosgrales.logo_clinica %}
         <!-- ❌ Imagen local (no funciona en producción) -->
-        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo"  style="width: 150px; height: 150px;">
     {% else %}
         <p>❌ NO hay logo subido</p>
     {% endif %}
@@ -350,7 +350,7 @@
 
     {% elif datosgrales.logo_clinica %}
         <!-- ❌ Imagen local (no funciona en producción) -->
-        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}"   style="width: 150px; height: 150px;" class="logo">
     {% else %}
         <p>❌ NO hay logo subido</p>
     {% endif %}
@@ -401,7 +401,7 @@
 
     {% elif datosgrales.logo_clinica %}
         <!-- ❌ Imagen local (no funciona en producción) -->
-        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}"  style="width: 150px; height: 150px;" class="logo">
     {% else %}
         <p>❌ NO hay logo subido</p>
     {% endif %}
