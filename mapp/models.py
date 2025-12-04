@@ -47,6 +47,9 @@ estados = [
 
 paises = [('MEX','Mexico'), ('USA','Estados Unidos De Norteamerica')]
 
+tipoMovs=[('C','Cargo'),('A','Abono')]
+conceptos=[(0,'Aportacion total'),(1,'Cuota por pagar'),(2,'Pago'),(3,'Pago parcial'),(4,'Cancelacion de movimiento')]
+
 
 class ClinicaManager(models.Manager):
     def get_queryset(self):
@@ -2472,3 +2475,92 @@ class NotasSeguimiento(models.Model):
         unique_together = ('expediente', 'sesion', 'clinica')
         ordering = ['expediente', 'sesion']  # Ordenar por expediente y luego por número de sesión2
 
+class Edocuenta(models.Model):
+
+    expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
+    fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
+    tipo=models.CharField(max_length=1,verbose_name="Tipo de movimiento",choices=tipoMovs)
+    concepto=models.SmallIntegerField(verbose_name='Concepto',choices=conceptos,default=2,blank=True)
+    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
+    operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
+    nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
+    comentarios = models.TextField(verbose_name='Comentarios ', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    def __str__(self):
+        # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
+        return f"Expediente: {self.expediente}"
+
+    class Meta:
+        unique_together = ('expediente',  'clinica')
+        ordering = ['expediente', 'fecha', 'tipo']  # Ordenar por expediente y luego por fecha y tipo
+
+
+class Otros(models.Model):
+
+    expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
+    fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
+    tipo=models.CharField(max_length=1,verbose_name="Tipo de movimiento",choices=tipoMovs)
+    concepto=models.SmallIntegerField(verbose_name='Concepto',choices=conceptos,default=2,blank=True)
+    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
+    operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
+    nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
+    comentarios = models.TextField(verbose_name='Comentarios ', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    def __str__(self):
+        # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
+        return f"Expediente: {self.expediente}"
+
+    class Meta:
+        unique_together = ('expediente',  'clinica')
+        ordering = ['expediente', 'fecha', 'tipo']  # Ordenar por expediente y luego por fecha y tipo
+
+
+class Recibos(models.Model):
+
+    recibo= models.SmallIntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
+    expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
+    fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
+    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
+    operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
+    nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    def __str__(self):
+        # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
+        return f"Expediente: {self.expediente}"
+
+    class Meta:
+        unique_together = ('expediente', 'recibo', 'clinica')
+        ordering = ['expediente', 'fecha']  # Ordenar por expediente y luego por fecha
+
+class ROtros(models.Model):
+
+    recibo= models.SmallIntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
+    expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
+    fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
+    pertenencias = models.TextField(verbose_name='Pertenencias', null=True, blank=True)
+    operador = models.SmallIntegerField(verbose_name="Recibio", blank=True, null=True)
+    testigo = models.SmallIntegerField(verbose_name="Testigo", blank=True, null=True)
+    nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
+    clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+
+    objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    def __str__(self):
+        # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
+        return f"Expediente: {self.expediente}"
+
+    class Meta:
+        unique_together = ('expediente', 'recibo', 'clinica')
+        ordering = ['expediente', 'fecha']  # Ordenar por expediente y luego por fecha
