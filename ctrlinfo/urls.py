@@ -29,7 +29,7 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
                         cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard,salidas,\
-                        seguimiento,listaSesionesS,capturaSesionS
+                        seguimiento,listaSesionesS,capturaSesionS,reporte_internos
 
 
 
@@ -95,6 +95,7 @@ urlpatterns = [
     path('imprime_aviso/<int:id>', imprime_aviso, name='imprime_aviso'),
     path('salidas/<int:id>', salidas, name='salidas'),
     path('seguimiento/<int:id>', seguimiento, name='seguimiento'),
+    path('reporte_internos/', reporte_internos, name='reporte_internos'),
 
 ]
 

@@ -51,7 +51,8 @@ from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependie
                     Assistf,SituacionFamiliarf,Cfisicasf,Cmentalesf,Crelacionesf,Tratamientosf,Psicosisf,Sdevidaf,\
                     Usodrogasf,Ansiedadf,Depresionf,Marcadoresf,Riesgosf,Razonesf,Valorizacionf,\
                     CIndividualf,CFamiliarf,CGrupalf,PConsejeriaf,TareaConsejeriaf,HojaAtencionPsf,NotasEvolucionPSf,\
-                    Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm,IntSalidasf,Seguimientof,NotasSeguimientof
+                    Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm,IntSalidasf,Seguimientof,NotasSeguimientof,\
+                    ReporteFechaForm
 
 
 
@@ -67,9 +68,11 @@ def get_clinica_actual(request):
     return request.session.get('clinica_actual', 'Demostracion')
 
 def primermenu(request):
-
     interno = Internos.objects.first()
     return render(request,'MenuPrincipal.html', {'interno': interno})
+
+def reporte_internos(request):
+    return render(request,'reporte_internos.html')
 
 def imprime_contrato(request,id):
     clinica_actual = get_clinica_actual(request)
@@ -246,7 +249,7 @@ def registro(request):
 
 def datosgrales(request):
     clinica_actual = get_clinica_actual(request)
-
+    rol_usuario = request.session.get('usuario_permisos', None)
     try:
         datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
     except DatosGrales.DoesNotExist:
@@ -259,7 +262,7 @@ def datosgrales(request):
         datosgrales.save()  # ← Si falla aquí, el problema está en el modelo
         print("Después de save")  # Debug
 
-    datosgralesf = DatosGralesf(instance=datosgrales)
+    datosgralesf = DatosGralesf(instance=datosgrales,permisos=rol_usuario)
     return render(request, 'datosgrales.html', {
         'datosgrales': datosgrales,
         'datosgralesf': datosgralesf
@@ -274,15 +277,35 @@ def grabadatosgrales(request):
     except DatosGrales.DoesNotExist:
         datosgrales = DatosGrales(clinica=clinica_actual)
 
+    try:
+        clinica = Clinicas.objects.get(clinica=clinica_actual)
+    except Clinicas.DoesNotExist:
+        clinica = Clinicas(clinica=clinica_actual)
+
+
+
     if request.method == 'POST':
         # DEBUG: Ver qué llega en el request
-        print(f"📨 POST keys: {list(request.POST.keys())}")
-        print(f"📁 FILES keys: {list(request.FILES.keys())}")
 
-        datosgralesf = DatosGralesf(request.POST, request.FILES, instance=datosgrales)
+        rol_usuario = request.session.get('usuario_permisos', None)
+        print(f"🔍 este es el rol del usuario {rol_usuario}")
+        datosgralesf = DatosGralesf(request.POST,
+                                    request.FILES,
+                                    instance=datosgrales,
+                                    permisos=rol_usuario,
+                                    )
 
         if datosgralesf.is_valid():
             instance = datosgralesf.save(commit=False)
+            nuevo_password = datosgralesf.cleaned_data.get('password')
+
+            # Verificamos si existe (recuerda que si no es admin, el campo no existe)
+            # y si el usuario escribió algo (para no borrarlo si lo deja en blanco)
+            if nuevo_password:
+                print(f"🔄 Sincronizando password en tabla Clinicas...")
+                clinica.password = nuevo_password
+                clinica.save()  # <-- IMPORTANTE: Guardar el cambio en la tabla Clinicas
+                print("✅ Password de Clínica actualizado correctamente")
 
             # DEBUG: Verificar el campo específico
             print(f"🔍 Buscando 'logo_clinica' en FILES: {'logo_clinica' in request.FILES}")
@@ -2778,6 +2801,46 @@ def seguimiento(request, id):
     })
 
 
+
+import locale
+from django.utils import timezone
+
+def reporte_internos(request):
+    # Configuración inicial
+    form = ReporteFechaForm(request.POST or None)
+    clinica_actual = get_clinica_actual(request)
+
+    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
+
+    context = {}
+
+    # Intentar poner la fecha en español para el reporte (ej. "8 de Diciembre")
+    try:
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+    except:
+        pass  # Si falla (común en windows), usará inglés o default
+
+    if request.method == 'POST' and form.is_valid():
+        fecha_inicio = form.cleaned_data['fecha_inicio']
+        fecha_fin = form.cleaned_data['fecha_fin']
+
+        # Filtramos los objetos Interno usando el rango de fechas
+        # Asumiendo que el campo en tu modelo se llama 'fecha'
+        internos = Internos.objects.filter(fechaingreso__range=[fecha_inicio, fecha_fin]).order_by('fechaingreso')
+
+        # Datos para el template
+        context = {
+            'mostrar_reporte': True,
+            'internos': internos,
+            'total_ingresos': internos.count(),
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'hoy': timezone.now(),
+            'datosgrales':datosgrales,
+        }
+
+    context['form'] = form
+    return render(request, 'reporte_internos.html', context)
 
 
 

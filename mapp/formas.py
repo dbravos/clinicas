@@ -101,12 +101,37 @@ class IntProvienef(forms.ModelForm):
                   }
 
 
-# forms.py - SOLO ESTO, nada más
-
 class DatosGralesf(forms.ModelForm):
     class Meta:
         model = DatosGrales
-        exclude=['logo_url','recibo','receta','recibootros','sesiong','expediente']
+        exclude = ['logo_url', 'recibo', 'receta', 'recibootros', 'sesiong', 'expediente']
+        widgets = {
+            'password': forms.PasswordInput(render_value=True),
+        }
+
+    # Modificamos el init para recibir 'permisos'
+    def __init__(self, *args, **kwargs):
+        # 1. Extraemos el permiso directo que mandaremos desde la vista
+        # Si no llega nada, asumimos 'None'
+        self.permisos_usuario = kwargs.pop('permisos', None)
+
+        super(DatosGralesf, self).__init__(*args, **kwargs)
+
+        # 2. Tu lógica de validación usando el dato de la sesión
+        # Ajusta 'admin' al valor exacto que guardaste en el login (ej. 'Administrador', 'ADMIN', etc.)
+        es_admin = False
+
+        # Validamos que exista el dato y que sea igual al rol de administrador
+        if self.permisos_usuario and self.permisos_usuario == 'admin':
+            es_admin = True
+
+        # 3. Si no es admin, borramos el campo
+        if not es_admin:
+            self.fields.pop('password', None)
+            self.fields.pop('clinica', None)
+
+
+
 
 
 class Usuariosf(forms.ModelForm):
@@ -1580,3 +1605,14 @@ class NotasSeguimientof(forms.ModelForm):
             # Establecer valor por defecto para clínica si no existe
             if not self.instance.pk and not self.data.get('clinica'):
                 self.initial['clinica'] = "Demostracion"
+
+
+class ReporteFechaForm(forms.Form):
+    fecha_inicio = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Fecha Inicio"
+    )
+    fecha_fin = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Fecha Fin"
+    )

@@ -114,11 +114,16 @@ class DatosGrales(models.Model):
     receta = models.SmallIntegerField(verbose_name='Folio Receta', null=True, blank=True, default=0)
     recibootros = models.SmallIntegerField(verbose_name='Ultimo recibo otros', null=True, blank=True, default=0)
     sesiong = models.SmallIntegerField( verbose_name='Ultima sesion grupal', null=True, blank=True, default=0)
-    responsable = models.CharField(max_length=30, verbose_name='Responsable', null=True, blank=True, default='')
-    cedula = models.CharField(max_length=20, verbose_name='Cedula', null=True, blank=True, default='')
-    cargo = models.CharField(max_length=20, verbose_name='Cargo', null=True, blank=True, default='')
+    responsable = models.CharField(max_length=50, verbose_name='Responsable', null=True, blank=True, default='')
+    cedula = models.CharField(max_length=50, verbose_name='Cedula', null=True, blank=True, default='')
+    cargo = models.CharField(max_length=50, verbose_name='Cargo', null=True, blank=True, default='')
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default='Demostracion')
-    password = models.CharField(max_length=128, verbose_name='Some data', null=True, blank=True, default='123456')
+    password = models.CharField(max_length=128, verbose_name='Password', null=True, blank=True, default='123456')
+    funcionariouno=models.CharField(max_length=128,verbose_name='Funcionario uno',null=True,blank=True)
+    cargouno=models.CharField(max_length=128,verbose_name='Cargo uno',null=True,blank=True)
+    funcionariodos=models.CharField(max_length=128,verbose_name='Funcionario dos',null=True,blank=True)
+    cargodos=models.CharField(max_length=128,verbose_name='Cargo dos',null=True,blank=True)
+
     logo_url = models.URLField(
         verbose_name="URL del Logo ",
         blank=True,
@@ -2301,6 +2306,7 @@ class Clinicas(models.Model):
     nombre = models.CharField(max_length=200)
     password = models.CharField(max_length=128)  # Para guardar contraseña
     numeroDeInternos = models.SmallIntegerField(default=0)
+
 
     def __str__(self):
         return f"{self.clinica} - {self.nombre}"

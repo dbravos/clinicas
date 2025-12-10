@@ -1,0 +1,306 @@
+{% extends "dgenerales.html" %}
+
+{% block content %}
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte SISVEA</title>
+    <style>
+        /* Estilos generales para visualizar en pantalla */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.3;
+            color: #000;
+            background-color: #f0f0f0; /* Fondo gris solo para pantalla */
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Contenedor tipo hoja de papel */
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Ocultar el formulario al imprimir */
+        .no-print {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        /* HEADER */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-area {
+            width: 40%;
+        }
+
+        /* Simulación del Logo (Reemplaza src con tu url estática) */
+        .logo-img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .company-info {
+            width: 55%;
+            background-color: #d3d3d3; /* El cuadro gris */
+            padding: 10px;
+            font-size: 9pt;
+            border-left: 5px solid #888; /* Decorativo opcional */
+        }
+
+        .company-info h2 {
+            margin: 0 0 5px 0;
+            font-size: 12pt;
+            text-transform: uppercase;
+        }
+
+        .company-info p {
+            margin: 2px 0;
+        }
+
+        /* CUERPO DEL DOCUMENTO */
+        .date-line {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        .recipient {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .attention {
+            margin-bottom: 20px;
+        }
+
+        .body-text {
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+
+        /* TABLA DE INTERNOS */
+        .table-container {
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+
+        th {
+            text-align: left;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000;
+        }
+
+        td {
+            padding: 4px 0;
+        }
+
+        /* FIRMA */
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .signature-line {
+            display: inline-block;
+            width: 300px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+
+        .atentamente {
+            margin-bottom: 50px;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        /* REGLAS DE IMPRESIÓN (CSS PRINT) */
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                width: 100%;
+                margin: 0;
+                padding: 0; /* Ajusta según márgenes de impresora */
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            /* Forzar impresión de fondo gris del header (necesario en navegadores modernos) */
+            .company-info {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background-color: #d3d3d3 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SECCIÓN DEL FORMULARIO (Se oculta al imprimir) -->
+    <div class="no-print">
+        <h2>Generar Reporte SISVEA</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <div>
+                    {{ form.fecha_inicio.label_tag }} <br>
+                    {{ form.fecha_inicio }}
+                </div>
+                <div>
+                    {{ form.fecha_fin.label_tag }} <br>
+                    {{ form.fecha_fin }}
+                </div>
+            </div>
+            <br>
+            <button type="submit" style="padding:10px 20px; cursor:pointer;">Generar Reporte</button>
+            {% if mostrar_reporte %}
+                <button type="button" onclick="window.print()" style="padding:10px 20px; cursor:pointer;">Imprimir / Guardar PDF</button>
+            {% endif %}
+
+            <button type="button"
+        onclick="window.history.back()"
+        style="padding:10px 20px; cursor:pointer; background-color: #6c757d; color: white; border: none; margin-left: 10px;">
+    Cerrar
+</button>
+
+        </form>
+    </div>
+
+    <!-- SECCIÓN DEL DOCUMENTO A IMPRIMIR -->
+    {% if mostrar_reporte %}
+    <div class="page">
+
+        <!-- Header con Logo e Info -->
+        <div class="header-container">
+            <div class="logo-area">
+                 {% if datosgrales.logo_url %}
+        <!-- ✅ MOSTRAR IMGBB -->
+                  <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
+
+                 {% elif datosgrales.logo_clinica %}
+        <!-- ❌ Imagen local (no funciona en producción) -->
+                  <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo"  style="width: 150px; height: 150px;">
+                 {% else %}
+                 <p>❌ NO hay logo subido</p>
+                 {% endif %}
+
+            </div>
+            <div class="company-info">
+                <h2>{{datosgrales.nombre}}</h2>
+                <p><strong>R.F.C.</strong>{{datosgrales.rfc}}</p>
+                <p>{{datosgrales.calleynumero}}, {{datosgrales.colonia}}</p>
+                <p>{{datosgrales.ciudad}}, {{datosgrales.estado}},{{datosgrales.cp}}, MEX. TEL {{datosgrales.telefono}}</p>
+            </div>
+        </div>
+
+        <!-- Fecha -->
+        <div class="date-line">
+            {{datosgrales.ciudad}}, {{datosgrales.estado}} a {{ hoy|date:"j \d\e F \d\e\l Y" }}
+        </div>
+
+        <!-- Destinatarios -->
+        <div class="recipient">
+            {{datosgrales.funcionariouno}}<br>
+            {{datosgrales.cargouno}}<br>
+            Presente.
+        </div>
+
+        <div class="attention">
+            Con atención:<br>
+            <strong>{{datosgrales.funcionariodos}}</strong><br>
+            {{datosgrales.cargodos}}
+        </div>
+
+        <!-- Cuerpo del Texto -->
+        <div class="body-text">
+            Por medio de la presente y en mi cargo de responsable del centro <strong>{{datosgrales.nombre}}</strong>
+            manifiesto mis más atentos saludos. También para hacer mención que esta institución desarrolla un
+            programa de rehabilitación y reintegración social para hombres con problemas de adicciones al
+            alcohol y/o fármaco dependiente.
+        </div>
+
+        <div class="body-text">
+            A través de este conducto les informo que en {{datosgrales.nombre}}
+            durante el periodo del <strong>{{ fecha_inicio|date:"d/m/Y" }}</strong> al <strong>{{ fecha_fin|date:"d/m/Y" }}</strong>
+            se recibieron <strong>{{ total_ingresos }}</strong> nuevos ingresos y así mismo se les hace saber,
+            que según lo requerido por el Sistema de Vigilancia Epidemiológica de las Adicciones, (SISVEA) Clave 0065.
+        </div>
+
+        <!-- Tabla Iterada -->
+        <div class="table-container">
+            <p><strong>Nombre(s) y fecha de entrada de(l) (los) ingresados:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Expediente</th>
+                        <th style="width: 60%;">Nombre Completo</th>
+                        <th style="width: 20%;">Fecha Ingreso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interno in internos %}
+                    <tr>
+                        <td>{{ interno.numeroexpediente }}</td>
+                        <td style="text-transform: uppercase;">{{ interno.nombrecompleto }}</td>
+                        <td>{{ interno.fechaingreso|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; padding:20px;">No hubo ingresos en este periodo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="body-text" style="margin-top: 30px;">
+            Sin otro particular por el momento y esperando haber cumplido con nuestras obligaciones me retiro no sin antes
+            quedar a sus órdenes.
+        </div>
+
+        <div class="footer">
+            <div class="atentamente">A t e n t a m e n t e</div>
+            <br><br>
+            <div class="signature-line">
+                {{datosgrales.responsable}}<br>
+                <span style="font-weight: normal; font-size: 10pt;">{{datosgrales.cargo}}</span>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+</body>
+
+
+{% endblock %}
