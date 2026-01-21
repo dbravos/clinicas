@@ -36,7 +36,7 @@
                             <td class="text-end">
                                 <div class="btn-group" role="group">
                                  {% if mem_user_permisos == 'ADMIN' %}
-                                 {% if usuario.nombre != 'SuperUser' or mem_user_nombre == 'SuperUser' %}
+                                 {% if usuario.nombre != 'demouser' or mem_user_nombre == 'demouser' %}
                                     <a href="{% url 'editausuario' id=usuario.pk %}"
                                        class="btn btn-sm btn-outline-primary"
                                        data-bs-toggle="tooltip"
