@@ -25,6 +25,16 @@ ALLOWED_HOSTS = ['*']  # Desarrollo
 #        '.onrender.com'
 #    ]
 
+
+
+SESSION_COOKIE_AGE = 300
+
+# La sesión se cierra al cerrar el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Evita que JavaScript acceda a la cookie de sesión (Protege contra ataques XSS)
+SESSION_COOKIE_HTTPONLY = True
+
 # DATABASE CONFIGURATION - CORREGIDO
 if os.environ.get('DATABASE_URL'):
     # PRODUCCIÓN (Railway) - PostgreSQL
@@ -65,6 +75,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djmoney',
     'mapp',
+    'django.contrib.humanize',
 
 ]
 

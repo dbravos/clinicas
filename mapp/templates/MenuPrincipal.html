@@ -275,7 +275,48 @@
             color: #fff;
             background-color: #dc3545;
         }
-    </style>
+
+
+#edoctafModal .modal-content {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+#edoctafModal .modal-header {
+  border-radius: 10px 10px 0 0;
+}
+
+#edoctafModal textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+#edoctafModal .form-label {
+  margin-bottom: 0.5rem;
+}
+
+#edoctafModal .input-group-text {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+#edoctafModal #contadorConcepto {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+#edoctafModal .invalid-feedback {
+  font-size: 0.875rem;
+}
+
+#edoctafModal .alert-info {
+  font-size: 0.9rem;
+  padding: 0.75rem;
+}
+</style>
+
+
 </head>
 
 <body class="d-flex">
@@ -346,27 +387,31 @@
             <div class="accordion-item bg-dark border-0 ">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed bg-dark text-white py-3"
-                            type="button " disabled
+                            type="button "
                             data-bs-toggle="collapse"
                             data-bs-target="#collapseAdmin"
                             aria-expanded="false"
                             aria-controls="collapseAdmin">
                         <i class="bi bi-clipboard2-data me-3"></i>
                      <span>Administración <span class="badge bg-warning text-dark ms-1">
-                          <i class="fas fa-tools me-1"></i>en construcción
+
                      </span></span>
                     </button>
                 </h2>
                 <div id="collapseAdmin" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body bg-secondary bg-opacity-10 p-0">
-                        <a href="#" class="nav-link text-white d-flex align-items-center">
+                         <a href="{% url 'captura_pagos' %}" class="nav-link text-white ">
+                            <i class="bi bi-cash-coin"></i>
+                            <span>Captura de cuotas voluntarias</span>
+                        </a>
+                        <a href="{% url 'lista_recibos' %}" class="nav-link text-white ">
+                            <i class="bi bi-cash-coin"></i>
+                            <span>Consulta, Cancelacion y Reimpresion de recibos</span>
+                        </a>
+                        <a href="{% url 'menu_reportes' %}" class="nav-link text-white d-flex align-items-center">
                             <i class="bi bi-file-earmark-bar-graph"></i>
                             <span>Reportes</span>
                             <span class="badge bg-warning ms-auto">3</span>
-                        </a>
-                        <a href="#" class="nav-link text-white ">
-                            <i class="bi bi-cash-coin"></i>
-                            <span>Cuotas</span>
                         </a>
 
                     </div>
@@ -469,12 +514,11 @@
         </div>
     </main>
 
-    <!-- NUEVO FOOTER GLOBAL -->
     <footer>
         <div class="container">
             <p class="mb-1">
-                <strong>Sistema desarrollado por:</strong> David Bravo Sanchez |
-                <strong>Contacto:</strong> dbrasan@gmail.com | Tel: 664-263-1741
+                <strong>Sistema desarrollado por:</strong> Soluciones Digitales |
+                <strong>Contacto:</strong> solucionesdigitales@gmail.com | Tel: 664-979-6859
             </p>
             <small style="color: #9ca3af;">
                 © 2025 Fresh Start - Todos los derechos reservados
@@ -646,7 +690,152 @@
         });
     }
 }
-    </script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('edoctafModal');
+  const form = document.getElementById('edoctafForm');
+  const concepto = document.getElementById('concepto');
+  const contadorConcepto = document.getElementById('contadorConcepto');
+  const tipoMovimiento = document.getElementById('tipoMovimiento');
+  const importeInput = document.getElementById('importe');
+  const saldoActualInput = document.getElementById('saldoActual');
+
+  // Contador de caracteres para concepto
+  concepto.addEventListener('input', function() {
+    const longitud = this.value.length;
+    contadorConcepto.textContent = `${longitud}/200`;
+
+    if (longitud > 200) {
+      this.value = this.value.substring(0, 200);
+    }
+  });
+
+  // Calcular saldo automáticamente cuando cambia tipo o importe
+  function calcularSaldo() {
+    if (!tipoMovimiento.value || !importeInput.value) return;
+
+    const importe = parseFloat(importeInput.value);
+    let saldoActual = 10000; // Valor de ejemplo, reemplazar con saldo real
+
+    switch(tipoMovimiento.value) {
+      case 'deposito':
+      case 'intereses':
+        saldoActual += importe;
+        break;
+      case 'retiro':
+      case 'comision':
+        saldoActual -= importe;
+        break;
+      default:
+        // Para transferencias y otros, se podría ajustar según necesidad
+        saldoActual = 'N/A';
+    }
+
+    if (typeof saldoActual === 'number') {
+      saldoActualInput.value = saldoActual.toFixed(2);
+    } else {
+      saldoActualInput.value = saldoActual;
+    }
+  }
+
+  tipoMovimiento.addEventListener('change', calcularSaldo);
+  importeInput.addEventListener('input', calcularSaldo);
+
+  // Validación del formulario
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!form.checkValidity()) {
+      form.classList.add('was-validated');
+      return;
+    }
+
+    // Recoger datos del formulario
+    const formData = {
+      fecha: document.getElementById('fecha').value,
+      tipoMovimiento: tipoMovimiento.value,
+      concepto: concepto.value,
+      importe: parseFloat(importeInput.value),
+      saldoActual: saldoActualInput.value
+    };
+
+    // Aquí iría la lógica para guardar los datos
+    console.log('Datos del formulario:', formData);
+
+    // Mostrar mensaje de éxito
+    mostrarMensajeExito();
+
+    // Cerrar modal después de guardar
+    setTimeout(() => {
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
+      form.reset();
+      form.classList.remove('was-validated');
+      contadorConcepto.textContent = '0/200';
+    }, 1500);
+  });
+
+  // Resetear formulario
+  form.addEventListener('reset', function() {
+    form.classList.remove('was-validated');
+    contadorConcepto.textContent = '0/200';
+    saldoActualInput.value = '';
+  });
+
+  // Función para mostrar mensaje de éxito
+  function mostrarMensajeExito() {
+    // Crear toast de Bootstrap
+    const toastHTML = `
+      <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle me-2"></i>
+            Movimiento guardado exitosamente
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    `;
+
+    const toastContainer = document.getElementById('toastContainer') || crearToastContainer();
+    toastContainer.innerHTML = toastHTML;
+
+    const toast = new bootstrap.Toast(toastContainer.firstElementChild);
+    toast.show();
+  }
+
+  function crearToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '1060';
+    document.body.appendChild(container);
+    return container;
+  }
+
+  // Función para abrir el modal desde otro lugar
+  window.abrirModalEdoctaf = function(datos) {
+    if (datos) {
+      // Si hay datos, llenar el formulario (para edición)
+      document.getElementById('fecha').value = datos.fecha || '';
+      tipoMovimiento.value = datos.tipoMovimiento || '';
+      concepto.value = datos.concepto || '';
+      importeInput.value = datos.importe || '';
+      saldoActualInput.value = datos.saldoActual || '';
+
+      // Actualizar contador
+      contadorConcepto.textContent = `${concepto.value.length}/200`;
+    }
+
+    const edoctafModal = new bootstrap.Modal(modal);
+    edoctafModal.show();
+  };
+});
+</script>
+
+
 
 </body>
 </html>

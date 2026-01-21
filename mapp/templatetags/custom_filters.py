@@ -27,3 +27,13 @@ def get_form_field(form, field_name):
         return form[field_name]  # Acceso directo al campo del formulario
     except KeyError:
         return None
+
+
+@register.filter
+def moneda(valor):
+    try:
+        valor = float(valor)
+        # El formato ",.2f" agrega comas de miles y 2 decimales
+        return f"${valor:,.2f}"
+    except (ValueError, TypeError):
+        return "$0.00"

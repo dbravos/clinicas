@@ -48,7 +48,7 @@ estados = [
 paises = [('MEX','Mexico'), ('USA','Estados Unidos De Norteamerica')]
 
 tipoMovs=[('C','Cargo'),('A','Abono')]
-conceptos=[(0,'Aportacion total'),(1,'Cuota por pagar'),(2,'Pago'),(3,'Pago parcial'),(4,'Cancelacion de movimiento')]
+conceptos=[(0,'Aportacion total'),(1,'Cuota por pagar'),(2,'Cuota voluntaria'),(3,'Abono a cuota voluntaria'),(4,'Cancelacion de movimiento')]
 
 
 class ClinicaManager(models.Manager):
@@ -64,7 +64,7 @@ class Usuarios(models.Model):
     usuario = models.BigIntegerField(verbose_name='No. Usuario',null=True,blank=True, default='',editable=False)
     nombre = models.CharField(max_length=30, verbose_name='Nombre',null=True,blank=True, default='')
     cargo = models.CharField(max_length=20,verbose_name='Cargo',choices=opcionesCargo,null=True,blank=True, default='')
-    permisos=models.CharField(max_length=5,verbose_name='Permisos',null=True,blank=True, default='')
+    permisos=models.CharField(max_length=50,verbose_name='Permisos',null=True,blank=True, default='')
     password=models.CharField(max_length=10,verbose_name='Password',null=True,blank=True, default='')
     cedula=models.CharField(max_length=20,verbose_name='Cedula',null=True,blank=True, default='')
     expedidapor=models.CharField(max_length=30,verbose_name='Expedida por',null=True,blank=True, default='')
@@ -99,7 +99,7 @@ def ruta_logo_clinica(instance, filename):
 class DatosGrales(models.Model):
 
 
-    nombre = models.CharField(max_length=30, verbose_name='Nombre',null=True,blank=True, default='')
+    nombre = models.CharField(max_length=100, verbose_name='Nombre',null=True,blank=True, default='')
     calleynumero = models.CharField(max_length=50,verbose_name='Calle y numero', null=True,blank=True, default='')
     colonia=models.CharField(max_length=50,verbose_name='Colonia',null=True,blank=True, default='')
     ciudad=models.CharField(max_length=50,verbose_name='Ciudad',null=True,blank=True, default='')
@@ -144,6 +144,7 @@ class Internos(models.Model):
 
     opcionesSexo=[('F','Femenino'),('M','Masculino')]
     opcionesEstadocivil=[('S','Soltero'),('C','Casado'),('V','Viudo'),('D','Divorciado')]
+    opcionesPeriodos=[(7,'Semanal'),(14,'Catorcenal'),(15,'Quincenal'),('30','Mensual')]
     opcionesIngreso=[('V','Voluntario'),('I','Involuntario'),('O','Obligatorio')]
     opcionesAcude=[('S','Solo'),('A','Amigo'),('F','Familiar'),('O','Otro')]
     opcionesProviene=[('D','Domiclio particular'),('P','Institucion publica'),('C','Institucion privada'),('O','Otra')]
@@ -224,7 +225,9 @@ class Internos(models.Model):
     resumenanexo = models.TextField(verbose_name='Resumen anexo', null=True, blank=True)
     estadodesalud = models.TextField(verbose_name='Estado de salud', null=True, blank=True)
     prevencionrecaidas = models.TextField(verbose_name='Prevencion a recaidas', null=True, blank=True)
-    periodopago = models.SmallIntegerField(verbose_name='Periodo de pago', null=True, blank=True,default=0)
+    periodopago = models.SmallIntegerField(verbose_name='Periodo de pago', choices=opcionesPeriodos,null=True, blank=True,default=0)
+    saldo = models.DecimalField(max_digits=10,decimal_places=2,verbose_name='Saldo',null=True,blank=True,default=0)
+    cuota = models.DecimalField(max_digits=10,decimal_places=2,verbose_name='Cuota voluntaria',null=True,blank=True,default=0)
     reciboinicial = models.SmallIntegerField(verbose_name='Recibo inicial', null=True, blank=True,default=0)
     proxsesconind = models.DateField(verbose_name='Próxima sesión individual', null=True, blank=True)
     proxsesconfam = models.DateField(verbose_name='Próxima sesión familiar' , null=True, blank=True)
@@ -235,6 +238,7 @@ class Internos(models.Model):
     fechariesgo = models.DateField(verbose_name='Fecha de riesgo', null=True, blank=True)
     nacionalidad = models.CharField(max_length=15, verbose_name='Nacionalidad', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
+
 
     class Meta:
         unique_together = ['numeroexpediente', 'clinica']  # ✅ Único por clínica
@@ -2487,7 +2491,7 @@ class Edocuenta(models.Model):
     fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
     tipo=models.CharField(max_length=1,verbose_name="Tipo de movimiento",choices=tipoMovs)
     concepto=models.SmallIntegerField(verbose_name='Concepto',choices=conceptos,default=2,blank=True)
-    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    referencia=models.CharField(max_length=100,verbose_name='Referencia',null=True,blank=True)
     importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
     operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
     nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
@@ -2501,7 +2505,7 @@ class Edocuenta(models.Model):
         return f"Expediente: {self.expediente}"
 
     class Meta:
-        unique_together = ('expediente',  'clinica')
+        unique_together = ('expediente',  'clinica', 'referencia')
         ordering = ['expediente', 'fecha', 'tipo']  # Ordenar por expediente y luego por fecha y tipo
 
 
@@ -2511,7 +2515,7 @@ class Otros(models.Model):
     fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
     tipo=models.CharField(max_length=1,verbose_name="Tipo de movimiento",choices=tipoMovs)
     concepto=models.SmallIntegerField(verbose_name='Concepto',choices=conceptos,default=2,blank=True)
-    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    referencia=models.CharField(max_length=100,verbose_name='Referencia',null=True,blank=True)
     importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
     operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
     nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
@@ -2531,15 +2535,36 @@ class Otros(models.Model):
 
 class Recibos(models.Model):
 
-    recibo= models.SmallIntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
+    recibo= models.IntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
     expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
-    referencia=models.CharField(max_length=30,verbose_name='Referencia',null=True,blank=True)
+    referencia=models.CharField(max_length=100,verbose_name='Referencia',null=True,blank=True)
+    periodo_inicio = models.DateField(verbose_name="Periodo Inicio", null=True, blank=True)
+    periodo_fin = models.DateField(verbose_name="Periodo Fin", null=True, blank=True)
     importe=models.DecimalField(max_digits=10,decimal_places=2,default=0.00,verbose_name="Importe de movimiento")
     operador = models.SmallIntegerField(verbose_name="Operador", blank=True, null=True)
     nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+    nombre = models.CharField(max_length=100, verbose_name='Nombre', null=True, blank=True, default='')
+    calleynumero = models.CharField(max_length=50, verbose_name='Calle y numero', null=True, blank=True, default='')
+    colonia = models.CharField(max_length=50, verbose_name='Colonia', null=True, blank=True, default='')
+    ciudad = models.CharField(max_length=50, verbose_name='Ciudad', null=True, blank=True, default='')
+    estado = models.CharField(max_length=4, choices=estados, verbose_name='Estado', null=True, blank=True, default='')
+    telefono = models.CharField(max_length=50, verbose_name='Telefono', null=True, blank=True, default='')
+    sitioweb = models.CharField(max_length=50, verbose_name='Sitio WEB', null=True, blank=True, default='')
+    correoelectronico = models.EmailField(max_length=50, verbose_name='Correo electronico', null=True, blank=True,
+                                          default='')
+    rfc = models.CharField(max_length=13, verbose_name='RFC', null=True, blank=True, default='')
+    cp = models.CharField(max_length=6, verbose_name='Codigo Postal', null=True, blank=True, default='')
+    cancelado = models.BooleanField(default=False, verbose_name="¿Cancelado?")
+    fecha_cancelacion = models.DateTimeField(null=True, blank=True)
+    motivo_cancelacion = models.CharField(max_length=200, null=True, blank=True)
+    usuario_cancela = models.BigIntegerField(verbose_name='Usuario que cancelo',default=0,null=True,blank=True)
+    usuario_cancela_nombre = models.CharField(max_length=50,verbose_name='Usuario que cancelo',default=0,null=True,blank=True)
 
+    def __str__(self):
+        estado = " [CANCELADO]" if self.cancelado else ""
+        return f"Recibo {self.recibo} - Exp: {self.expediente}{estado}"
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
@@ -2552,7 +2577,7 @@ class Recibos(models.Model):
 
 class ROtros(models.Model):
 
-    recibo= models.SmallIntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
+    recibo= models.IntegerField(verbose_name='Numero de recibo',default=0,null=True,blank=True)
     expediente = models.CharField(max_length=10, verbose_name='No.Expediente')
     fecha = models.DateField(verbose_name="Fecha", default=date.today, null=True, blank=True)
     pertenencias = models.TextField(verbose_name='Pertenencias', null=True, blank=True)
@@ -2560,6 +2585,17 @@ class ROtros(models.Model):
     testigo = models.SmallIntegerField(verbose_name="Testigo", blank=True, null=True)
     nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+    nombre = models.CharField(max_length=100, verbose_name='Nombre', null=True, blank=True, default='')
+    calleynumero = models.CharField(max_length=50, verbose_name='Calle y numero', null=True, blank=True, default='')
+    colonia = models.CharField(max_length=50, verbose_name='Colonia', null=True, blank=True, default='')
+    ciudad = models.CharField(max_length=50, verbose_name='Ciudad', null=True, blank=True, default='')
+    estado = models.CharField(max_length=4, choices=estados, verbose_name='Estado', null=True, blank=True, default='')
+    telefono = models.CharField(max_length=50, verbose_name='Telefono', null=True, blank=True, default='')
+    sitioweb = models.CharField(max_length=50, verbose_name='Sitio WEB', null=True, blank=True, default='')
+    correoelectronico = models.EmailField(max_length=50, verbose_name='Correo electronico', null=True, blank=True,
+                                          default='')
+    rfc = models.CharField(max_length=13, verbose_name='RFC', null=True, blank=True, default='')
+    cp = models.CharField(max_length=6, verbose_name='Codigo Postal', null=True, blank=True, default='')
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 

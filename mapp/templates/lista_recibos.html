@@ -1,0 +1,165 @@
+{% extends "MenuPrincipal.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- TÍTULO Y BUSCADOR -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Consulta de Recibos Emitidos</h5>
+        </div>
+        <div class="card-body bg-light">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por Folio, Exp ..." value="{{ busqueda|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="fecha1" class="form-control" value="{{ fecha1 }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="fecha2" class="form-control" value="{{ fecha2 }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLA DE RESULTADOS -->
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Folio</th>
+                            <th>Fecha</th>
+                            <th>Expediente</th>
+                            <th>Concepto / Referencia</th>
+                            <th class="text-end">Importe</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in page_obj %}
+                        <tr class="{% if r.cancelado %}table-danger text-muted{% endif %}">
+                            <td class="fw-bold">{{ r.recibo }}</td>
+                            <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ r.expediente }}</td>
+                            <td><small>{{ r.referencia }}</small></td>
+                            <td class="text-end fw-bold">${{ r.importe|intcomma }}</td>
+                            <td class="text-center">
+                                {% if r.cancelado %}
+                                    <span class="badge bg-danger">CANCELADO</span>
+                                {% else %}
+                                    <span class="badge bg-success">ACTIVO</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <!-- BOTÓN REIMPRIMIR -->
+                                <a href="{% url 'imprimir_recibo' r.id %}" target="_blank" class="btn btn-sm btn-outline-primary" title="Reimprimir">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+
+                                <!-- BOTÓN CANCELAR (Solo si no está cancelado) -->
+                                {% if not r.cancelado %}
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="abrirModalCancelar('{{ r.id }}', '{{ r.recibo }}', '{{ r.importe }}')">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">No se encontraron recibos con esos criterios.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+<!-- PAGINACIÓN CORREGIDA -->
+        <div class="card-footer">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <!-- AQUÍ ESTABA EL ERROR: Agregamos |default_if_none:'' -->
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ busqueda|default_if_none:'' }}&fecha1={{ fecha1|default_if_none:'' }}&fecha2={{ fecha2|default_if_none:'' }}">
+                            &laquo;
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+                    {% if page_obj.has_next %}
+                    <!-- AQUÍ TAMBIÉN CORREGIMOS -->
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ busqueda|default_if_none:'' }}&fecha1={{ fecha1|default_if_none:'' }}&fecha2={{ fecha2|default_if_none:'' }}">
+                            &raquo;
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN DE CANCELACIÓN -->
+<div class="modal fade" id="modalCancelar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Cancelar Recibo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formCancelar" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="fw-bold text-center fs-5">¿Está seguro de cancelar el Recibo #<span id="spanFolio"></span>?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Esta acción generará un <strong>CARGO</strong> de <strong id="spanMonto"></strong> al expediente para revertir el pago.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Motivo de la cancelación:</label>
+                        <textarea name="motivo_cancelacion" class="form-control" rows="2" required placeholder="Ej: Error de captura, cheque devuelto..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-danger">Sí, Cancelar Recibo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalCancelar(id, folio, monto) {
+        // 1. Poner datos visuales
+        document.getElementById('spanFolio').textContent = folio;
+        document.getElementById('spanMonto').textContent = '$' + monto;
+
+        // 2. Construir la URL correcta
+        // Truco: Usamos una URL base y reemplazamos el '0' por el ID real
+        let urlBase = "{% url 'cancelar_recibo' 0 %}".replace('0', id);
+        document.getElementById('formCancelar').action = urlBase;
+
+        // 3. Mostrar modal
+        var myModal = new bootstrap.Modal(document.getElementById('modalCancelar'));
+        myModal.show();
+    }
+</script>
+{% endblock %}

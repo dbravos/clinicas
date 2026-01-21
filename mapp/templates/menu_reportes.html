@@ -1,0 +1,57 @@
+{% extends "MenuPrincipal.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-primary" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Generador de Reportes</h4>
+        </div>
+        <div class="card-body p-4">
+
+            <form method="GET" target="_blank" id="formReportes">
+
+                <!-- Rango de Fechas -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha Inicial:</label>
+                        <input type="date" name="f1" class="form-control" required value="{% now 'Y-m-01' %}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha Final:</label>
+                        <input type="date" name="f2" class="form-control" required value="{% now 'Y-m-d' %}">
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="d-grid gap-3">
+                    <button type="button" onclick="generar('recibidas')" class="btn btn-success btn-lg">
+                        <i class="bi bi-cash-coin me-2"></i> Reporte de Cuotas RECIBIDAS
+                    </button>
+
+                    <button type="button" onclick="generar('por_recibir')" class="btn btn-warning btn-lg text-dark">
+                        <i class="bi bi-calendar-event me-2"></i> Reporte de Cuotas POR RECIBIR
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generar(tipo) {
+        const form = document.getElementById('formReportes');
+
+        if (tipo === 'recibidas') {
+            form.action = "{% url 'rep_recibidas' %}";
+        } else {
+            form.action = "{% url 'rep_por_recibir' %}";
+        }
+
+        // Validar que haya fechas
+        if(form.reportValidity()){
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}

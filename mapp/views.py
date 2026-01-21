@@ -1,27 +1,29 @@
-from django.db.models import Q
-from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import models
 from django.conf import settings
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.http import request, Http404, HttpResponse
+from django.http import  Http404, HttpResponse
 from django.contrib import messages
-from datetime import datetime,date
 from django.core.exceptions import ValidationError
 from django.db import transaction,DatabaseError
 import logging
 import json
 import os
-import requests
 from reportlab.pdfgen import canvas  # ✅ AGREGAR ESTA IMPORTACIÓN
 from reportlab.lib.pagesizes import letter  # ✅ Y ESTA TAMBIÉN
-from django.http import HttpResponse
-from django.conf import settings
-from datetime import date, timedelta
-from django.views import View
-
+from datetime import  timedelta,datetime
+from django.urls import reverse
+import io
+from reportlab.lib import colors
+from reportlab.lib.units import inch, cm
+from num2words import num2words  # pip install num2words
+import io
+import requests  # <--- Necesario para descargar la imagen de ImgBB
+from reportlab.lib.utils import ImageReader
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Sum
 
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
@@ -45,14 +47,15 @@ except ImportError:
 from mapp.models import Internos,Usuarios,DatosGrales,Einicial,Assist,SituacionFamiliar,Cfisicas,Cmentales,\
                         Crelaciones,Tratamientos,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,Riesgos,\
                         Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,HojaAtencionPs,\
-                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas,Seguimiento,NotasSeguimiento
+                        NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas,Seguimiento,NotasSeguimiento,Edocuenta,\
+                        Recibos
 
 from .formas import DatosGralesf,Usuariosf,Internosf,IntResponsablef,IntDependientesf,IntProvienef,Einicialf,\
                     Assistf,SituacionFamiliarf,Cfisicasf,Cmentalesf,Crelacionesf,Tratamientosf,Psicosisf,Sdevidaf,\
                     Usodrogasf,Ansiedadf,Depresionf,Marcadoresf,Riesgosf,Razonesf,Valorizacionf,\
                     CIndividualf,CFamiliarf,CGrupalf,PConsejeriaf,TareaConsejeriaf,HojaAtencionPsf,NotasEvolucionPSf,\
                     Medicof,Recetasf,HistoriaClinicaf,ClinicaLoginForm,IntSalidasf,Seguimientof,NotasSeguimientof,\
-                    ReporteFechaForm
+                    ReporteFechaForm,Edocuentaf
 
 
 
@@ -214,34 +217,114 @@ def borrainterno(request,id):
     internos = Internos.objects.filter(clinca=clinica_actual)
     return render(request, 'listar.html', {'internos': internos})
 
-def grabainterno(request,id):
 
+
+def grabainterno(request, id):
     clinica_actual = get_clinica_actual(request)
-    interno = Internos.objects.get(pk=id, clinica=clinica_actual)
-    internof= Internosf(request.POST,instance=interno)
-    intresponsablef=IntResponsablef(request.POST,instance=interno)
-    intdependientesf = IntDependientesf(request.POST, instance=interno)
-    intprovienef =IntProvienef(request.POST,instance=interno)
-    interno.nombrecompleto=f"{interno.nombre} {interno.apaterno} {interno.amaterno}"
-    interno.comentarios = request.POST.get('comentarios', '')
-    if all([internof.is_valid(),intresponsablef.is_valid(),intdependientesf.is_valid(),intprovienef.is_valid()]) :
-       internof.save()
-       intresponsablef.save()
-       intdependientesf.save()
-       intprovienef.save()
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+    # Usamos get_object_or_404 por seguridad
+    interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
 
-       messages.success(request,'Actualizacion existosa '+str(interno.numeroexpediente))
-    else:
-       messages.error(request,'No se Actualizo ' + str(id))
-    try:
-        with transaction.atomic():
-            interno.save()
-    except Exception as e:
-        messages.error(request, f'Error durante la actualización: {str(e)}')
+    if request.method == 'POST':
+        # Instanciamos los formularios con los datos del POST
+        internof = Internosf(request.POST, instance=interno)
+        intresponsablef = IntResponsablef(request.POST, instance=interno)
+        intdependientesf = IntDependientesf(request.POST, instance=interno)
+        intprovienef = IntProvienef(request.POST, instance=interno)
+
+        # Validamos TODOS los formularios antes de intentar guardar nada
+        if all([internof.is_valid(), intresponsablef.is_valid(), intdependientesf.is_valid(), intprovienef.is_valid()]):
+
+            try:
+                with transaction.atomic():
+                    # 1. Actualizar campos manuales antes de guardar
+                   # interno.nombrecompleto = f"{interno.nombre} {interno.apaterno} {interno.amaterno}"
+                    interno.comentarios = request.POST.get('comentarios', '')
+
+                    # 2. Guardar formularios (internof.save() ya guarda 'interno')
+                    internof.save()
+                    intresponsablef.save()
+                    intdependientesf.save()
+                    intprovienef.save()
+
+                    # ==========================================================
+                    # LÓGICA: GENERACIÓN DE CUOTAS
+                    # ==========================================================
+                    # Verificamos si el checkbox viene marcado ('true' o 'on' dependiendo del navegador, asumimos 'true' por tu script)
+                    if request.POST.get('generar_cuotas') == 'true':
+
+                        # Usamos los datos LIMPIOS del formulario validado, no del POST crudo (más seguro)
+                        # O bien, usamos los del objeto 'interno' que ya se actualizó
+                        saldo_pendiente = float(request.POST.get('saldo') or 0)
+                        monto_cuota = float(request.POST.get('cuota') or 0)
+                        fecha_str = request.POST.get('fecha_inicio_pago')
+                        periodo_texto = str(interno.periodopago).upper()
+
+                        # Validaciones de Cuotas
+                        if saldo_pendiente <= 0 or monto_cuota <= 0:
+                            messages.warning(request,
+                                             "Datos guardados, pero NO se generaron cuotas: Saldo o Cuota en 0.")
+                        elif not fecha_str:
+                            messages.warning(request,
+                                             "Datos guardados, pero NO se generaron cuotas: Falta fecha de inicio.")
+                        else:
+                            # Cálculos
+                            fecha_actual = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+
+                            dias_sumar = 7  # Default
+                            if 'CATORCENAL' in periodo_texto or '14' in periodo_texto:
+                                dias_sumar = 14
+                            elif 'QUINCENAL' in periodo_texto or '15' in periodo_texto:
+                                dias_sumar = 15
+                            elif 'MENSUAL' in periodo_texto or '30' in periodo_texto:
+                                dias_sumar = 30
+
+                            contador = 1
+                            # Limite de seguridad
+                            while saldo_pendiente > 0.1 and contador < 500:
+                                pago_actual = saldo_pendiente if saldo_pendiente < monto_cuota else monto_cuota
+
+                                Edocuenta.objects.create(
+                                    expediente=interno.numeroexpediente,
+                                    clinica=clinica_actual,
+                                    fecha=fecha_actual,
+                                    concepto=1,
+                                    tipo='C',
+                                    importe=pago_actual,
+                                    referencia=f"Cuota # {contador}",
+                                    operador=mem_user_no,
+                                    nombreoperador=mem_user_nombre
+                                )
+
+                                saldo_pendiente -= pago_actual
+                                fecha_actual = fecha_actual + timedelta(days=dias_sumar)
+                                contador += 1
+
+                            messages.success(request,
+                                             f"Se actualizaron los datos y se programaron {contador - 1} cuotas.")
+                    else:
+                        messages.success(request,
+                                         f'Actualización exitosa del expediente {interno.numeroexpediente} (Sin generar cuotas).')
+
+            except Exception as e:
+                # Si algo falla dentro del transaction.atomic, se deshace todo
+                messages.error(request, f'Error crítico al guardar: {str(e)}')
+
+        else:
+            # Si los formularios no son válidos, mostramos qué falló
+            errores = ""
+            if not internof.is_valid(): errores += f"Generales: {internof.errors.as_text()} "
+            if not intresponsablef.is_valid(): errores += f"Responsable: {intresponsablef.errors.as_text()} "
+            messages.error(request, f'No se pudo guardar. Revise los errores: {errores}')
+
+    # RECOMENDACIÓN: Después de un POST exitoso, usa redirect para evitar reenvío de formulario al refrescar.
+    # Si prefieres quedarte en la misma vista, usa render.
 
     internos = Internos.objects.filter(clinica=clinica_actual).order_by('numeroexpediente')
-
     return render(request, 'listar.html', {'internos': internos})
+
 
 def registro(request):
     return render(request,'registro.html')
@@ -348,8 +431,11 @@ def lusuarios(request):
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos').upper()
 
+    if not 'ADMIN' in mem_user_permisos:
+       messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+       return redirect('Menu principal')
 
     context = {'usuarios': usuarios,
                'mem_user_no':mem_user_no,
@@ -383,7 +469,7 @@ def agregausuario(request):
     usuariof = Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+
 
     context = {
         'usuario': usuario,
@@ -455,77 +541,7 @@ def borrausuario(request,id):
 
     return render(request, 'lusuarios.html', context)
 
-def consentimientoold(request,id):
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="consentimiento.pdf"'
-    interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.first()
-    archivo_pdf="consentimiento.pdf"
-    # Crear un canvas de ReportLab
-    p = canvas.Canvas(response, pagesize=letter)
-    width, height = letter
-    p.setFont("Helvetica", 10)
 
-    mSuperior=760
-    mizquierdo =50
-    avance=15
-    # Agregar un título al reporte
-
-
-
-    logo_path = os.path.join(settings.BASE_DIR, 'mapp','static', 'images', 'logo.jpg')
-
-    p.drawImage(logo_path,10,680,width=120,height=100)
-    p.drawString(140,mSuperior,datosgrales.nombre)
-    p.drawString(140,mSuperior-avance,'RFC : '+datosgrales.rfc)
-    p.drawString(140,mSuperior-2*avance,datosgrales.calleynumero+','+datosgrales.colonia)
-    p.drawString(140,mSuperior-3*avance,datosgrales.ciudad+' '+datosgrales.estado+','+datosgrales.cp)
-    p.drawString(140,mSuperior-4*avance,'WEB: '+datosgrales.sitioweb+'   Email :'+datosgrales.correoelectronico)
-    p.drawString(140,mSuperior-5*avance,'Telefono: '+datosgrales.telefono)
-    p.drawString(420,mSuperior-6*avance,'Expediente : '+interno.numeroexpediente)
-    fecha_y_hora=datetime.now()
-    p.drawString(420,mSuperior-7*avance,'Fecha y Hora :'+fecha_y_hora.strftime("%d/%m/%Y  %I:%M %p"))
-
-    p.setFont("Helvetica", 14)
-    p.drawString(220,mSuperior-10*avance, "Consentimiento Informado")
-    p.setFont("Helvetica", 8)
-    p.drawString(10, mSuperior - 12 * avance, 'C. DIRECTOR O RESPONSABLE DEL ESTABLECIMIENTO')
-    p.drawString(10, mSuperior - 13 * avance, 'PRESENTE')
-    p.drawString(10, mSuperior - 15 * avance, 'EL(LA) QUE SUSCRIBE C. '+interno.nombrecompleto)
-    p.drawString(10, mSuperior - 16 * avance, 'OTORGADO MI CONSENTIMIENTO PARA RECIBIR EL TRATAMIENTO EL CUAL CONSISTE EN: REUNIONES Y SESIONES DE LOS 12 PASOS DE')
-    p.drawString(10, mSuperior - 17 * avance, 'N.A. TERAPIA OCUPACIONAL,TRATAMIENTO PSICOLOGICO Y DIVERSAS ACTIVIDADES')
-    p.drawString(10, mSuperior - 18 * avance, 'CON  UNA DURACION DE '+ str(interno.duracion))
-    p.drawString(10, mSuperior - 19 * avance, 'HACIENDO CONSTAR QUE FUI INFORMADO DE TO0OS Y CADA UNO DE LOS PROCEDIMIENTOS, IMPLICACIONES Y RIESGOS QUE ESTE')
-    p.drawString(10, mSuperior - 20 * avance, 'IMPLICA, ASI COMO LOS ESTATUTOS, REGLAMENTO INTERNO Y DE LAS CONDICIONES DE INGRESO, ESTANCIA Y EGRESO DEL')
-    p.drawString(10, mSuperior - 21 * avance, 'ESTABLECIMIENTO, INFORMACION QUE ME FUE PROPORCIONADA DETALLADAMENTE POR EL O LA C. RESPONSABLE DEL CENTRO')
-    p.drawString(10, mSuperior - 22 * avance, 'DE TRATAMIENTO '+datosgrales.nombre)
-    p.drawString(30, mSuperior - 24 * avance, 'LO ANTERIOR APEGADO A LO DISPUESTO EN EL APARTADO 10.3.1 DE LA NORMA OFICIAL MEXICANA NOM-028-2009, PARA LA ')
-    p.drawString(10, mSuperior - 25 * avance, 'PREVENCION , TRATAMIENTO Y CONTROL DE ADICCIONES')
-    p.drawString(85, mSuperior - 28 * avance, 'USUARIO(A)')
-    p.drawString(305, mSuperior - 28 * avance, 'FAMILIAR O RESPONSABLE')
-    p.drawString(60, mSuperior - 31 * avance, '________________  _____________')
-    p.drawString(300, mSuperior - 31 * avance, '_______________  _____________')
-    p.drawString(60, mSuperior - 32 * avance, '       Nombre                    Firma')
-    p.drawString(300, mSuperior - 32 * avance, '      Nombre                    Firma')
-    p.drawString(300, mSuperior - 33 * avance, 'Parentesco o Relacion :___________')
-    p.drawString(220, mSuperior - 36 * avance, 'ENCARGADO DEL ESTABLECIMIENTO')
-    p.drawString(220, (mSuperior-1) - (39 * avance), datosgrales.responsable)
-    p.drawString(220, mSuperior - 39 * avance, '________________        __________________')
-    p.drawString(220, mSuperior - 40 * avance, '     Nombre                               Firma')
-
-    # Finalizar el PDF
-    p.showPage()
-    p.save()
-
-    try:
-        impresora_default = win32print.GetDefaultPrinter()
-        win32api.ShellExecute(0, "print", archivo_pdf, None, ".", 0)
-    except Exception as e:
-        print(f"Error al imprimir: {e}")
-
-    #os.remove(archivo_pdf)
-
-    return response
 
 
 def einicial(request, id):
@@ -533,7 +549,9 @@ def einicial(request, id):
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
-
+    if not 'CONSEJERIA' in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     # Obtener el interno
     interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
 
@@ -718,6 +736,10 @@ def assist(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+    if not 'CONSEJERIA' in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     try:
         assist = Assist.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
@@ -853,6 +875,11 @@ def psicosis(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+    if not 'CONSEJERIA' in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     try:
         psicosis_obj = Psicosis.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
     except Psicosis.DoesNotExist:
@@ -904,7 +931,11 @@ def sdevida(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     # Sdevida - obtener o crear
     try:
         sdevida = Sdevida.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
@@ -954,7 +985,11 @@ def usodrogas(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     # Usodrogas - obtener o crear
     try:
         usodrogas = Usodrogas.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
@@ -1006,7 +1041,11 @@ def ansiedad(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     # Ansiedad - obtener o crear
     try:
         ansiedad = Ansiedad.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
@@ -1056,7 +1095,11 @@ def depresion(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     # Depresion - obtener o crear
     try:
         depresion = Depresion.objects.get(expediente=interno.numeroexpediente, clinica=clinica_actual)
@@ -1109,7 +1152,11 @@ def marcadores(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
     try:
         marcadores = Marcadores.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
         marcadoresf = Marcadoresf(instance=marcadores)
@@ -1139,6 +1186,11 @@ def riesgos(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     try:
         riesgos = Riesgos.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
@@ -1171,6 +1223,11 @@ def razones(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     try:
         razones = Razones.objects.get(expediente=interno.numeroexpediente,clinica=clinica_actual)
@@ -1199,6 +1256,11 @@ def razones(request,id):
 def salidas(request, id):
     clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     if request.method == 'POST':
         form = IntSalidasf(request.POST, instance=interno)
@@ -1219,6 +1281,12 @@ def salidas(request, id):
 def valorizacion(request,id):
 
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     interno = Internos.objects.get(pk=id,clinica=clinica_actual)
     internof= Internosf(request.POST,instance=interno)
     try:
@@ -1337,6 +1405,11 @@ def listaSesiones(request, tipo_sesion, id):
     """
 
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     interno = Internos.objects.get(numeroexpediente=id, clinica=clinica_actual)
     mapping = MODEL_FORM_MAP.get(tipo_sesion)
@@ -1682,6 +1755,11 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     if id is None and 'interno_actual_id' in request.session:
         id = request.session['interno_actual_id']
@@ -1958,6 +2036,11 @@ def listaSesionesGrupales(request,id=None):
     """
     clinica_actual = get_clinica_actual(request)
     sesiones_grupales = CGrupal.objects.filter(clinica=clinica_actual).order_by('-fecha', '-sesion')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     interno = None
     if id:
@@ -1979,6 +2062,12 @@ def listaSesionesPS(request,id=None):
     Vista para listar todas las sesiones grupales
     """
     clinica_actual=get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     interno=Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
     clinica_actual=get_clinica_actual(request)
 
@@ -2003,6 +2092,12 @@ def listaSesionesS(request,id=None):
     Vista para listar todas las sesiones grupales
     """
     clinica_actual=get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     interno=Internos.objects.get(numeroexpediente=id,clinica=clinica_actual)
     clinica_actual=get_clinica_actual(request)
 
@@ -2032,6 +2127,11 @@ def planConsejeria(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     # 2. Buscar consejería existente o crear una nueva
     try:
@@ -2100,6 +2200,11 @@ import requests
 def escanear_tarea(request):
     expediente = request.session.get('expediente_actual')
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     if not expediente:
         messages.error(request, 'No hay expediente en sesión')
@@ -2183,6 +2288,13 @@ def lista_tareas_escaneadas(request):
     # Obtener expediente de la sesión
     expediente = request.session.get('expediente_actual')
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
+
     if not expediente:
         messages.error(request, 'No hay expediente en sesión')
         return redirect('listaint')
@@ -2344,6 +2456,11 @@ def hojaAtencionPs(request, id):
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, numeroexpediente=id,clinica=clinica_actual)
@@ -2413,6 +2530,12 @@ def medicoInicial(request, id):
     """
     # 1. Obtener el interno
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
@@ -2478,7 +2601,11 @@ def emisionDerecetas(request,id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
 
     try:
@@ -2550,6 +2677,11 @@ def historiaClinica(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
       # 2. Buscar consejería existente o crear una nueva
     try:
@@ -2749,6 +2881,12 @@ def seguimiento(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
     # 2. Buscar consejería existente o crear una nueva
     try:
         # Primero intentar obtener una existente
@@ -2809,6 +2947,11 @@ def reporte_internos(request):
     # Configuración inicial
     form = ReporteFechaForm(request.POST or None)
     clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
 
     datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
 
@@ -2843,4 +2986,756 @@ def reporte_internos(request):
     return render(request, 'reporte_internos.html', context)
 
 
+def captura_pagos(request, interno_id=None):
+    # 1. Obtener lista para el select
+    clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
 
+    if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+    recibo_id_imprimir = request.session.pop('recibo_id_imprimir', None)
+
+
+    pacientes_lista = Internos.objects.filter(clinica=clinica_actual).order_by('nombrecompleto')
+
+    interno_seleccionado = None
+    movimientos = []
+
+    # 2. Si hay búsqueda por GET (del select)
+    q_expediente = request.GET.get('q_expediente')
+
+    if q_expediente:
+        interno_seleccionado = get_object_or_404(Internos, pk=q_expediente,clinica=clinica_actual)
+        # Obtener historial
+        movimientos = Edocuenta.objects.filter(expediente=interno_seleccionado.numeroexpediente,clinica=clinica_actual).order_by('fecha')
+
+    # Si viene por URL directa (opcional)
+    elif interno_id:
+        interno_seleccionado = get_object_or_404(Internos, pk=interno_id,clinica=clinica_actual)
+        movimientos = Edocuenta.objects.filter(expediente=interno_seleccionado.numeroexpediente,clinica=clinica_actual).order_by('fecha')
+
+    lista_conceptos = Edocuenta._meta.get_field('concepto').choices
+    context = {
+        'pacientes_lista': pacientes_lista,
+        'interno_seleccionado': interno_seleccionado,
+        'movimientos': movimientos,
+        'lista_conceptos':lista_conceptos,
+        'recibo_id_imprimir': recibo_id_imprimir
+    }
+    return render(request, 'captura_cuotas.html', context)
+
+
+from django.db.models import Max
+def guardar_pago(request, id):
+    # 1. Seguridad: Solo aceptamos POST
+    if request.method != 'POST':
+        return redirect('captura_pagos')
+
+    clinica_actual = get_clinica_actual(request)
+    # 2. Obtener el interno (paciente)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
+
+    try:
+        with transaction.atomic():
+            # A. Obtener datos del formulario
+            importe_str = request.POST.get('importe')
+            recibido_de = request.POST.get('recibido_de')
+            fecha_pago = request.POST.get('fecha_pago')
+            observaciones = request.POST.get('observaciones', '')
+            try:
+                mconcepto = int(request.POST.get('concepto', 0))
+            except (ValueError, TypeError):
+                mconcepto = 0
+
+            p_inicio_str = request.POST.get('periodo_inicio') or None
+            p_fin_str = request.POST.get('periodo_fin') or None
+
+
+            # B. Validaciones
+            try:
+                monto = float(importe_str)
+                if monto <= 0:
+                    raise ValueError("El monto debe ser mayor a cero.")
+            except (ValueError, TypeError):
+                messages.error(request, "El importe ingresado no es válido.")
+                # Redirigir de vuelta al paciente seleccionado
+                url = reverse('captura_pagos') + f'?q_expediente={id}'
+                return redirect(url)
+
+            if mconcepto == 4:
+                mtipo='C'
+                concepto_detalle = f"Cancelacion de movimiento "
+            else:
+                mtipo='A'
+                concepto_detalle = f"RECIBIMOS DE: {recibido_de}"
+                if p_inicio_str and p_fin_str:
+                   concepto_detalle += f" CUOTA DEL {p_inicio_str} AL {p_fin_str}"
+                elif p_inicio_str:
+                   concepto_detalle += f" A PARTIR DEL {p_inicio_str}"
+
+                # ==========================================================
+                # NUEVO: CREACIÓN DEL RECIBO (Solo si NO es cancelación)
+                # ==========================================================
+            recibo_nuevo = None
+
+            if mtipo != 'C':  # Si es un Abono real
+
+                # A. Calcular el siguiente Folio para ESTA clínica
+                # Buscamos el número más alto en esta clínica y le sumamos 1
+                max_folio = Recibos.objects.filter(clinica=clinica_actual).aggregate(Max('recibo'))['recibo__max']
+                nuevo_folio = (max_folio or 0) + 1
+
+                # B. Crear el registro en Recibos
+                recibo_nuevo = Recibos.objects.create(
+                    recibo=nuevo_folio,
+                    expediente=interno.numeroexpediente,  # Guardamos el string, no el objeto
+                    fecha=fecha_pago,
+                    referencia=concepto_detalle.upper(),
+                    importe=monto,
+                    operador=mem_user_no,  # ID del usuario logueado
+                    nombreoperador=mem_user_nombre,  # Nombre para mostrar
+                    clinica=clinica_actual,
+                    periodo_inicio=p_inicio_str,
+                    periodo_fin=p_fin_str
+
+                )
+
+                # C. Guardar ID en sesión para imprimir ESTE recibo
+                request.session['recibo_id_imprimir'] = recibo_nuevo.id
+
+
+
+
+            # D. Crear el Movimiento en Estado de Cuenta (ABONO)
+            Edocuenta.objects.create(
+                expediente=interno.numeroexpediente,  # Enlace lógico
+                fecha=fecha_pago,
+                tipo=mtipo,
+                concepto=mconcepto,
+                referencia=f"{concepto_detalle.upper()} {observaciones.upper()} Recibo #"+str(nuevo_folio),
+                importe=monto
+            )
+
+            # E. Actualizar el Saldo Maestro del Interno
+            # Si el saldo representa DEUDA, un pago la disminuye.
+            saldo_actual = float(interno.saldo)
+            if mconcepto == 4:
+                nuevo_saldo = saldo_actual + monto
+            else:
+                nuevo_saldo = saldo_actual - monto
+
+            interno.saldo = nuevo_saldo
+            interno.save()
+
+            messages.success(request, f"Importe de ${monto:,.2f} aplicado correctamente.")
+
+    except Exception as e:
+        messages.error(request, f"Error al guardar el movimiento: {str(e)}")
+
+    # 3. Redirección Inteligente
+    # Construimos la URL para volver a la misma pantalla PERO con el paciente seleccionado
+    request.session['recibo_id_imprimir'] = recibo_nuevo.id
+    messages.success(request, f"Pago aplicado. Generado Recibo #{nuevo_folio if recibo_nuevo else 'N/A'}")
+    base_url = reverse('captura_pagos')  # Asegúrate que este sea el 'name' de tu vista principal en urls.py
+    return redirect(f"{base_url}?q_expediente={id}")
+
+
+
+
+
+def cantidad_con_letra(importe):
+    """Convierte un número a formato de moneda en letra (Pesos Mexicanos)"""
+    enteros = int(importe)
+    centavos = int(round((importe - enteros) * 100))
+
+    texto = num2words(enteros, lang='es').upper()
+
+    # Manejo especial para "UN" vs "UNO"
+    if enteros == 1:
+        texto = "UN"
+
+    return f"{texto} PESOS {centavos:02d}/100 M.N."
+
+
+def dibujar_recibo(c, y_inicio, datos):
+    """
+    Dibuja un solo recibo comenzando en la coordenada Y especificada.
+    """
+    # --- CONFIGURACIÓN DE COLORES Y FUENTES ---
+    color_fondo = colors.HexColor("#D1E7D1")
+    color_borde = colors.black
+    margen_izq = 30
+    ancho_util = 550
+
+    # ---------------------------------------------------------
+    # 1. ENCABEZADO (LOGO Y RFC)
+    # ---------------------------------------------------------
+    c.setFillColor(color_fondo)
+    c.setStrokeColor(color_borde)
+    c.roundRect(margen_izq, y_inicio - 80, 400, 80, 5, fill=1, stroke=1)
+
+    # LOGO (Texto Simulado)
+    # --- LÓGICA DEL LOGO (IGUAL QUE TU HTML) ---
+
+    if datos.get('logo_objeto'):
+        try:
+            # ✅ CORRECTO: Pasamos la variable que contiene el ImageReader
+            c.drawImage(datos['logo_objeto'], margen_izq + 10, y_inicio - 75, width=80, height=70, mask='auto',
+                        preserveAspectRatio=True)
+        except Exception as e:
+            print(f"Error pintando logo: {e}")
+            # Fallback a texto
+            c.setFillColor(colors.green)
+            c.setFont("Helvetica-Bold", 35)
+            c.drawString(margen_izq + 20, y_inicio - 50, "CLINICA")
+
+    else:
+        # Si 'logo_objeto' es None (no se descargó o no existe)
+        c.setFillColor(colors.green)
+        c.setFont("Helvetica-Bold", 35)
+        c.drawString(margen_izq + 20, y_inicio - 50, "CLINICA")
+    # 1. PRIORIDAD: ¿Existe logo_url (ImgBB)?
+
+
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 10)
+    # CORRECCIÓN 1: Usar corchetes y el nombre correcto de la clave
+    c.drawString(margen_izq + 150, y_inicio - 25, datos['nombre_clinica'])
+
+    # Datos Fiscales (Centro)
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 12)
+
+    # CORRECCIÓN 2: Concatenar usando f-strings y claves de diccionario
+    direccion_1 = f"{datos['calle_y_numero']} {datos['colonia']}"
+    c.drawString(margen_izq + 150, y_inicio - 40, direccion_1)
+
+    c.setFont("Helvetica", 12)
+    # CORRECCIÓN 3: Usar .get() para estado por si viene vacío
+    direccion_2 = f"{datos['ciudad']} {datos.get('estado', '')}"
+    c.drawString(margen_izq + 150, y_inicio - 55, direccion_2)
+
+    c.setFont("Helvetica", 10)
+    c.drawString(margen_izq + 150, y_inicio - 70, f"RFC: {datos['rfc']}")
+
+    # ---------------------------------------------------------
+    # 2. CAJA DE FOLIO Y FECHA (Derecha)
+    # ---------------------------------------------------------
+    x_folio = margen_izq + 410
+    ancho_folio = 140
+
+    c.setFillColor(color_fondo)
+    c.roundRect(x_folio, y_inicio - 80, ancho_folio, 80, 5, fill=1, stroke=1)
+    c.line(x_folio, y_inicio - 40, x_folio + ancho_folio, y_inicio - 40)
+
+    # Sección FOLIO
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(x_folio + (ancho_folio / 2), y_inicio - 15, "FOLIO")
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(x_folio + 10, y_inicio - 32, "No.")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawRightString(x_folio + ancho_folio - 15, y_inicio - 32, str(datos['folio']))
+
+    # Sección FECHA
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(x_folio + (ancho_folio / 2), y_inicio - 55, "FECHA")
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(x_folio + (ancho_folio / 2), y_inicio - 72, datos['fecha'])
+
+    # ---------------------------------------------------------
+    # 3. CUERPO DEL RECIBO (Datos)
+    # ---------------------------------------------------------
+    y_cuerpo = y_inicio - 90
+    alto_cuerpo = 180
+
+    c.setFillColor(color_fondo)
+    c.roundRect(margen_izq, y_cuerpo - alto_cuerpo, ancho_util, alto_cuerpo, 5, fill=1, stroke=1)
+    c.setFillColor(colors.black)
+
+    # A. Recibimos de
+    linea_1 = y_cuerpo - 25
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(margen_izq + 10, linea_1, "Recibimos De(l) (la) Sr(a) :")
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(margen_izq + 160, linea_1, datos['recibido_de'])
+
+    c.setStrokeColor(colors.gray)
+    c.setLineWidth(0.5)
+    c.line(margen_izq, linea_1 - 10, margen_izq + ancho_util, linea_1 - 10)
+
+    # B. Nombre del interno
+    linea_2 = linea_1 - 30
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 10)
+    c.drawString(margen_izq + 10, linea_2, "Nombre del interno :")
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(margen_izq + 120, linea_2, datos['nombre_interno'])
+
+    # C. Fechas (Del / Al)
+    linea_3 = linea_2 - 25
+    c.setFont("Helvetica", 10)
+    c.drawString(margen_izq + 10, linea_3, "Del :")
+    c.setFont("Helvetica", 10)
+    # Usamos .get() por seguridad
+    c.drawString(margen_izq + 40, linea_3, datos.get('periodo_inicio', ''))
+
+    c.drawString(margen_izq + 200, linea_3, "Al :")
+    c.drawString(margen_izq + 230, linea_3, datos.get('periodo_fin', ''))
+
+    # D. Caja de Aportación
+    linea_4 = linea_3 - 15
+    c.setStrokeColor(colors.black)
+    c.setLineWidth(1)
+    c.line(margen_izq, linea_4, margen_izq + ancho_util, linea_4)
+
+    linea_dinero = linea_4 - 20
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(margen_izq + 10, linea_dinero, "Aportacion voluntaria (no reembosable) :")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(margen_izq + 250, linea_dinero, f"${datos['importe']:,.2f}")
+
+    # Cantidad con letra
+    linea_letra = linea_dinero - 20
+    c.setFont("Helvetica", 9)
+    c.drawString(margen_izq + 10, linea_letra, "Cantidad con letra :")
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(margen_izq + 10, linea_letra - 12, datos['importe_letra'])
+
+    c.line(margen_izq, linea_letra - 20, margen_izq + ancho_util, linea_letra - 20)
+
+    # E. Observaciones
+    linea_obs = linea_letra - 40
+    c.setFont("Helvetica", 10)
+    c.drawString(margen_izq + 10, linea_obs, "Observaciones :")
+    c.setFont("Helvetica", 10)
+    c.drawString(margen_izq + 95, linea_obs, datos['observaciones'])
+
+    if datos.get('cancelado'):
+          c.saveState()
+          c.translate(300, y_inicio - 100) # Mover al centro del recibo
+          c.rotate(45) # Rotar 45 grados
+          c.setFillColorRGB(0.8, 0, 0, 0.3) # Rojo transparente (Alpha 0.3)
+          c.setFont("Helvetica-Bold", 60)
+          c.drawCentredString(0, 0, "CANCELADO")
+          c.restoreState()
+
+def imprimir_recibo_pdf(request, id_recibo):
+    # 1. Obtener datos de la BD
+    recibo = get_object_or_404(Recibos, pk=id_recibo)
+
+    try:
+        clinica_actual = get_clinica_actual(request)
+        # Obtenemos los datos generales de la clínica para el encabezado
+        datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
+
+        interno = get_object_or_404(Internos, numeroexpediente=recibo.expediente, clinica=clinica_actual)
+
+        nombre_interno = interno.nombrecompleto if interno else "NO ENCONTRADO"
+        recibido_de = f"{interno.responsable}" if interno else "PARTICULAR"
+
+        # Manejo seguro de fechas
+        p_ini_txt = recibo.periodo_inicio.strftime("%d/%m/%Y") if recibo.periodo_inicio else ""
+        p_fin_txt = recibo.periodo_fin.strftime("%d/%m/%Y") if recibo.periodo_fin else ""
+
+        objeto_imagen_logo=None
+
+        if datosgrales.logo_url:
+            try:
+                # Descargamos
+                response = requests.get(datosgrales.logo_url, timeout=5)
+                if response.status_code == 200:
+                    # Convertimos a objeto ImageReader en memoria
+                    img_bytes = io.BytesIO(response.content)
+                    objeto_imagen_logo = ImageReader(img_bytes)
+            except Exception as e:
+                print(f"Error descargando logo: {e}")
+
+            # B) Si no hay URL, intentamos local (logo_clinica)
+        elif datosgrales.logo_clinica:
+            try:
+                objeto_imagen_logo = ImageReader(datosgrales.logo_clinica)
+            except:
+                pass
+
+
+    except Exception as e:
+        # Valores por defecto en caso de error (ej: no existen DatosGrales)
+        nombre_interno = "DESCONOCIDO"
+        recibido_de = "PARTICULAR"
+        p_ini_txt = ""
+        p_fin_txt = ""
+
+        # Objeto dummy para que no falle el diccionario abajo
+        class DummyGrales:
+            nombre = "CLINICA"
+            calleynumero = ""
+            colonia = ""
+            ciudad = ""
+            estado = ""  # Agregado
+            rfc = ""
+            telefono = ""
+            logo_url = ""
+            cp=""
+
+        datosgrales = DummyGrales()
+
+    # Preparar diccionario de datos
+    datos_recibo = {
+        'folio': str(recibo.recibo).zfill(4),
+        'expediente': interno.numeroexpediente,
+        'fecha': recibo.fecha.strftime("%d/%m/%Y"),
+        'recibido_de': recibido_de.upper(),
+        'nombre_interno': nombre_interno.upper(),
+        'importe': float(recibo.importe),
+        'importe_letra': cantidad_con_letra(float(recibo.importe)),
+        'observaciones': recibo.referencia or '',
+        'periodo_inicio': p_ini_txt,
+        'periodo_fin': p_fin_txt,
+
+        # --- AQUÍ DEFINIMOS LAS CLAVES QUE USAMOS ARRIBA ---
+        'nombre_clinica': datosgrales.nombre.upper(),
+        'calle_y_numero': datosgrales.calleynumero.title(),
+        'colonia': datosgrales.colonia.title(),
+        'ciudad': datosgrales.ciudad.title(),
+        'estado': getattr(datosgrales, 'estado', '').title(),  # AGREGADO: Asegúrate que tu modelo lo tenga
+        'rfc': datosgrales.rfc,
+        'telefono': datosgrales.telefono,
+        'url_logo': datosgrales.logo_url,
+        'codigo_postal':datosgrales.cp,
+        'logo_objeto': objeto_imagen_logo,
+        'cancelado': recibo.cancelado,
+
+    }
+
+    # 2. Configurar el PDF
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    c.setTitle(f"Recibo_{recibo.recibo}")
+
+    width, height = letter
+
+    # 3. DIBUJAR LOS DOS RECIBOS
+    # Primer Recibo
+    y_arriba = height - 50
+    dibujar_recibo(c, y_arriba, datos_recibo)
+
+    # Línea de corte
+    y_corte = height / 2
+    c.setStrokeColor(colors.gray)
+    c.setLineWidth(1)
+    c.setDash(4, 4)
+    c.line(20, y_corte, width - 20, y_corte)
+    c.setDash()
+
+    c.setFont("ZapfDingbats", 14)
+    c.drawCentredString(width / 2, y_corte - 5, chr(34))
+
+    # Segundo Recibo
+    y_abajo = y_corte - 40
+    dibujar_recibo(c, y_abajo, datos_recibo)
+
+    # 4. Finalizar
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type='application/pdf')
+
+
+def lista_recibos(request):
+    clinica_actual = get_clinica_actual(request)
+    mem_user_permisos = request.session.get('usuario_permisos')
+
+    if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+        messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
+        return redirect('Menu principal')
+
+    # 1. QuerySet Base (Solo recibos de esta clínica)
+    recibos = Recibos.objects.filter(clinica=clinica_actual).order_by('-recibo')  # Del más nuevo al viejo
+
+    # 2. Filtros de Búsqueda
+    busqueda = request.GET.get('q')
+    fecha_inicio = request.GET.get('fecha1')
+    fecha_fin = request.GET.get('fecha2')
+
+    if busqueda:
+        # Busca por Folio, Expediente O Nombre del Operador
+        recibos = recibos.filter(
+            Q(recibo__icontains=busqueda) |
+            Q(expediente__icontains=busqueda) |
+            Q(nombreoperador__icontains=busqueda)
+        )
+
+    if fecha_inicio and fecha_fin:
+        recibos = recibos.filter(fecha__range=[fecha_inicio, fecha_fin])
+
+    # 3. Paginación (Mostrar 20 por página)
+    paginator = Paginator(recibos, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'busqueda': busqueda,
+        'fecha1': fecha_inicio,
+        'fecha2': fecha_fin
+    }
+    return render(request, 'lista_recibos.html', context)
+
+
+from django.utils import timezone
+
+
+def cancelar_recibo(request, id_recibo):
+    if request.method != 'POST':
+        return redirect('lista_recibos')  # Seguridad
+    print(f"--- INTENTANDO CANCELAR RECIBO ID: {id_recibo} ---")  # DEBUG
+    recibo = get_object_or_404(Recibos, pk=id_recibo)
+    clinica_actual = get_clinica_actual(request)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    # Validaciones
+    if recibo.cancelado:
+        messages.warning(request, f"El recibo #{recibo.recibo} ya estaba cancelado.")
+        return redirect('lista_recibos')
+
+    try:
+        with transaction.atomic():
+            # 1. Obtener datos clave
+            interno = Internos.objects.filter(numeroexpediente=recibo.expediente, clinica=clinica_actual).first()
+            motivo = request.POST.get('motivo_cancelacion', 'Cancelación administrativa')
+
+            # 2. Marcar Recibo como Cancelado
+            recibo.cancelado = True
+            recibo.fecha_cancelacion = timezone.now()
+            recibo.usuario_cancela = mem_user_no
+            recibo.usuario_cancela_nombre=mem_user_nombre
+            recibo.motivo_cancelacion = motivo
+            recibo.save()
+            print("1. Recibo marcado como cancelado OK")  # DEBUG
+            # 3. GENERAR CONTRA-MOVIMIENTO EN ESTADO DE CUENTA
+            # Creamos un CARGO por el mismo monto para anular el abono original
+            Edocuenta.objects.create(
+                expediente=recibo.expediente,
+                fecha=timezone.now().date(),
+                concepto=4,
+                referencia=f"CANCELACION RECIBO #{recibo.recibo}",
+                importe=recibo.importe,  # <--- AQUÍ ESTÁ EL TRUCO: ES UN CARGO
+                tipo='C'  # Tipo Cancelación o Cargo
+
+            )
+            print("2. Contra-movimiento creado OK")  # DEBUG
+            # 4. ACTUALIZAR SALDO DEL PACIENTE
+            # Si cancelamos un pago, la deuda vuelve a subir
+            if interno:
+                print(f"3. Interno encontrado: {interno.nombre}. Saldo actual: {interno.saldo}")  # DEBUG
+                interno.saldo = float(interno.saldo) + float(recibo.importe)
+                interno.save()
+                print(f"4. Nuevo saldo guardado: {interno.saldo}")  # DEBUG
+
+            messages.success(request, f"Recibo #{recibo.recibo} cancelado correctamente. Saldo actualizado.")
+
+    except Exception as e:
+        messages.error(request, f"Error al cancelar: {str(e)}")
+
+    return redirect('lista_recibos')
+
+
+
+
+
+# --- VISTA DEL MENÚ ---
+def menu_reportes(request):
+    return render(request, 'menu_reportes.html')
+
+
+# --- FUNCIÓN AUXILIAR PARA DIBUJAR ENCABEZADOS Y PIE ---
+def dibujar_encabezado(c, titulo, f1, f2, page_num):
+    width, height = letter
+
+    # Fondo Título
+    c.setFillColor(colors.HexColor("#0d6efd"))  # Azul Bootstrap
+    c.rect(0, height - 60, width, 60, fill=1, stroke=0)
+
+    # Texto Título
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(width / 2, height - 40, titulo.upper())
+
+    # Subtítulo Fechas
+    c.setFont("Helvetica", 12)
+    c.drawCentredString(width / 2, height - 80, f"Del {f1} al {f2}")
+
+    # Pie de página
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica", 9)
+    c.drawString(30, 30, f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    c.drawRightString(width - 30, 30, f"Página {page_num}")
+
+
+# =========================================================
+# REPORTE 1: CUOTAS RECIBIDAS (Basado en Recibos)
+# =========================================================
+def reporte_cuotas_recibidas(request):
+    # 1. Obtener filtros
+    f1 = request.GET.get('f1')
+    f2 = request.GET.get('f2')
+    clinica_actual = get_clinica_actual(request)
+
+    # 2. Consultar Datos (Recibos NO cancelados)
+    recibos = Recibos.objects.filter(
+        clinica=clinica_actual,
+        cancelado=False,
+        fecha__range=[f1, f2]
+    ).order_by('fecha', 'recibo')
+
+    # Optimización: Obtener nombres de pacientes en un diccionario
+    # { 'EXP001': 'JUAN PEREZ', ... }
+    exps = recibos.values_list('expediente', flat=True)
+    mapa_nombres = {
+        i.numeroexpediente: i.nombrecompleto
+        for i in Internos.objects.filter(numeroexpediente__in=exps, clinica=clinica_actual)
+    }
+
+    # 3. Configurar PDF
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    y = height - 120  # Posición inicial Y
+    page_num = 1
+    total_gral = 0
+
+    dibujar_encabezado(c, "REPORTE DE CUOTAS RECIBIDAS", f1, f2, page_num)
+
+    # Encabezados de Tabla
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(30, y, "FECHA")
+    c.drawString(100, y, "FOLIO")
+    c.drawString(160, y, "PACIENTE / EXPEDIENTE")
+    c.drawString(400, y, "REFERENCIA")
+    c.drawRightString(580, y, "IMPORTE")
+    c.line(30, y - 5, 580, y - 5)
+    y -= 20
+
+    # 4. Imprimir Filas
+    c.setFont("Helvetica", 9)
+
+    for r in recibos:
+        # Verificar salto de página
+        if y < 50:
+            c.showPage()
+            page_num += 1
+            y = height - 120
+            dibujar_encabezado(c, "REPORTE DE CUOTAS RECIBIDAS", f1, f2, page_num)
+            # Re-imprimir encabezados tabla
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(30, y, "FECHA")
+            c.drawString(100, y, "FOLIO")
+            c.drawRightString(580, y, "IMPORTE")
+            c.line(30, y - 5, 580, y - 5)
+            y -= 20
+            c.setFont("Helvetica", 9)
+
+        # Datos
+        nombre = mapa_nombres.get(r.expediente, "DESCONOCIDO")
+
+        c.drawString(30, y, r.fecha.strftime("%d/%m/%Y"))
+        c.drawString(100, y, str(r.recibo))
+        c.drawString(160, y, f"{nombre[:30]} ({r.expediente})")  # Recorta nombre largo
+        c.drawString(400, y, r.referencia[:25] if r.referencia else "")
+        c.drawRightString(580, y, f"${r.importe:,.2f}")
+
+        total_gral += r.importe
+        y -= 15
+
+    # 5. Total Final
+    c.line(30, y + 5, 580, y + 5)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(400, y - 15, "TOTAL RECIBIDO:")
+    c.drawRightString(580, y - 15, f"${total_gral:,.2f}")
+
+    c.save()
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type='application/pdf')
+
+
+# =========================================================
+# REPORTE 2: CUOTAS POR RECIBIR (Basado en Edocuenta Cargo)
+# =========================================================
+def reporte_cuotas_por_recibir(request):
+    f1 = request.GET.get('f1')
+    f2 = request.GET.get('f2')
+    clinica_actual = get_clinica_actual(request)
+
+    # Buscamos en Edocuenta donde haya CARGO > 0 (Es deuda programada)
+    # Excluimos Cancelaciones si tu sistema usa 'C' para cancelar y cargo para deuda
+    # Ajusta el filtro según tu lógica: cargo > 0 suele ser suficiente para "Deuda"
+    cuotas = Edocuenta.objects.filter(
+        # clinica=clinica_actual, # Descomenta si Edocuenta tiene campo clinica
+        referencia__startswith='Cuota #',
+        fecha__range=[f1, f2]
+    ).exclude(concepto__icontains="CANCELACION").order_by('fecha')
+
+    # Mapa de nombres
+    exps = cuotas.values_list('expediente', flat=True)
+    mapa_nombres = {
+        i.numeroexpediente: i.nombrecompleto
+        for i in Internos.objects.filter(numeroexpediente__in=exps, clinica=clinica_actual)
+    }
+
+    # Configurar PDF
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    y = height - 120
+    page_num = 1
+    total_gral = 0
+
+    dibujar_encabezado(c, "CUOTAS POR RECIBIR (PROGRAMADAS)", f1, f2, page_num)
+
+    # Encabezados
+    c.setFillColor(colors.black)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(30, y, "FECHA PROG.")
+    c.drawString(120, y, "EXPEDIENTE / PACIENTE")
+    c.drawString(400, y, "CONCEPTO")
+    c.drawRightString(580, y, "MONTO ESPERADO")
+    c.line(30, y - 5, 580, y - 5)
+    y -= 20
+
+    c.setFont("Helvetica", 9)
+
+    for row in cuotas:
+        if y < 50:
+            c.showPage()
+            page_num += 1
+            y = height - 120
+            dibujar_encabezado(c, "CUOTAS POR RECIBIR", f1, f2, page_num)
+            c.setFont("Helvetica-Bold", 10)
+            c.drawRightString(580, y, "MONTO")
+            y -= 20
+            c.setFont("Helvetica", 9)
+
+        nombre = mapa_nombres.get(row.expediente, "DESCONOCIDO")
+
+        c.drawString(30, y, row.fecha.strftime("%d/%m/%Y"))
+        c.drawString(120, y, f"{row.expediente} - {nombre[:35]}")
+        c.drawString(400, y, row.referencia)
+        c.drawRightString(580, y, f"${row.importe:,.2f}")
+
+        total_gral += row.importe
+        y -= 15
+
+    c.line(30, y + 5, 580, y + 5)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(350, y - 15, "TOTAL POR RECIBIR:")
+    c.drawRightString(580, y - 15, f"${total_gral:,.2f}")
+
+    c.save()
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type='application/pdf')

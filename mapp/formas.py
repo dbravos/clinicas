@@ -4,7 +4,7 @@ from mapp.models import Internos,DatosGrales,Usuarios,Einicial,Assist,Cfisicas,C
                         Tratamientos,SituacionFamiliar,Psicosis,Sdevida,Usodrogas,Ansiedad,Depresion,Marcadores,\
                         Riesgos,Razones,Valorizacion,CIndividual,CFamiliar,CGrupal,PConsejeria,TareaConsejeria,\
                         HojaAtencionPs,NotasEvolucionPS,Medico,Recetas,HistoriaClinica,Clinicas,Seguimiento,Estados,\
-                        NotasSeguimiento
+                        NotasSeguimiento,Edocuenta,Recibos,ROtros,Otros
 
 from django.utils import timezone
 from django.forms import widgets,NumberInput
@@ -68,17 +68,16 @@ class IntDependientesf(forms.ModelForm):
 
 class IntProvienef(forms.ModelForm):
 
-    aportaciontotal = forms.DecimalField(decimal_places=2, widget=forms.TextInput(attrs={'class': 'dinero'}),
-                                         label='Aportacion total')
-    aportacioninicial = forms.DecimalField(decimal_places=2, widget=forms.TextInput(attrs={'class': 'dinero'}),
-                                           label='Aportacion inicial')
+
+
     class Meta:
         model = Internos
         fields = ['proviene','provieneotro','acudecon','acudeotro','tomamedicinas',
                   'especifique','padecimientos','embarazo','psiquiatricas','fisicas','contagiosas',
                   'enfermedadesotro','basiloscopia','alcohol','anfetaminas','secantes','marihuana',
                   'rohypnol','analgesicos','disolventes','cocaina','opio','cristal','porcualingresa','numeroreuniones',
-                  'diversasactividades', 'duracion','aportaciontotal', 'aportacioninicial','quieninformo']
+                  'diversasactividades', 'duracion','aportaciontotal', 'aportacioninicial','quieninformo','saldo',
+                  'cuota','periodopago']
 
         widgets={'embarazo':forms.CheckboxInput(),
                  'psiquiatricas':forms.CheckboxInput(),
@@ -96,9 +95,36 @@ class IntProvienef(forms.ModelForm):
                  'opio': forms.CheckboxInput(),
                  'cristal': forms.CheckboxInput(),
                  'tomamedicinas': forms.CheckboxInput(),
-                 'padecimientos': forms.CheckboxInput()
+                 'padecimientos': forms.CheckboxInput(),
+                 'aportaciontotal': forms.NumberInput(attrs={
+                     'class': 'form-control',  # Estilo Bootstrap
+                     'step': '0.01',  # Permite centavos
+                     'placeholder': '0.00'  # Texto de ayuda
+                 }),
+                 'aportacioninicial': forms.NumberInput(attrs={
+                     'class': 'form-control',
+                     'step': '0.01',
+                     'placeholder': '0.00'
+                 }),
+                 'saldo': forms.NumberInput(attrs={
+                     'class': 'form-control',
+                     'step': '0.01',
+                     'placeholder': '0.00',
+                     'readonly': 'readonly',
+                     'id':'id_saldo'
+                 }),
+                 'cuota': forms.NumberInput(attrs={
+                     'class': 'form-control',
+                     'step': '0.01',
+                     'placeholder': '0.00',
+                     'id': 'id_cuota'
+                 }),
 
-                  }
+                 'periodopago': forms.Select(attrs={
+                     'class': 'form-control',
+                     'style': 'width: 100%;'
+                 }),
+                 }
 
 
 class DatosGralesf(forms.ModelForm):
@@ -1616,3 +1642,8 @@ class ReporteFechaForm(forms.Form):
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         label="Fecha Fin"
     )
+
+class Edocuentaf(forms.ModelForm):
+    class Meta:
+        model = Edocuenta
+        fields = '__all__'

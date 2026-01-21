@@ -29,7 +29,8 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         lista_tareas_escaneadas,eliminar_tarea,lista_archivos_word,imprimir_archivos_word,hojaAtencionPs,\
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
                         cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard,salidas,\
-                        seguimiento,listaSesionesS,capturaSesionS,reporte_internos
+                        seguimiento,listaSesionesS,capturaSesionS,reporte_internos,captura_pagos,guardar_pago,imprimir_recibo_pdf,\
+                        lista_recibos,cancelar_recibo,menu_reportes,reporte_cuotas_por_recibir,reporte_cuotas_recibidas
 
 
 
@@ -96,8 +97,25 @@ urlpatterns = [
     path('salidas/<int:id>', salidas, name='salidas'),
     path('seguimiento/<int:id>', seguimiento, name='seguimiento'),
     path('reporte_internos/', reporte_internos, name='reporte_internos'),
+    path('captura_pagos/', captura_pagos, name='captura_pagos'),
+    path('guardar_pago/<int:id>', guardar_pago, name='guardar_pago'),
+    path('imprimir-recibo/<int:id_recibo>', imprimir_recibo_pdf, name='imprimir_recibo'),
+    path('recibos/consultar/', lista_recibos, name='lista_recibos'),
 
+    # 2. Acción de Cancelar (Oculta, se llama desde el botón)
+    path('recibos/cancelar/<int:id_recibo>/', cancelar_recibo, name='cancelar_recibo'),
+
+    # 3. Tu vista de impresión ya existe (asegúrate que esté así)
+    path('imprimir-recibo/<int:id_recibo>/', imprimir_recibo_pdf, name='imprimir_recibo'),
+    path('reportes/menu/', menu_reportes, name='menu_reportes'),
+
+    # Generadores de PDF
+    path('reportes/pdf/recibidas/', reporte_cuotas_recibidas, name='rep_recibidas'),
+    path('reportes/pdf/por-recibir/', reporte_cuotas_por_recibir, name='rep_por_recibir'),
 ]
+
+
+
 
 
 
