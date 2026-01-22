@@ -549,7 +549,7 @@ def einicial(request, id):
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos:
+    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
     # Obtener el interno
@@ -737,7 +737,7 @@ def assist(request,id):
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos:
+    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
 
@@ -876,7 +876,7 @@ def psicosis(request, id):
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos:
+    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
 
