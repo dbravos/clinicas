@@ -481,29 +481,58 @@ def agregausuario(request):
 
     return render(request, 'usuarios.html', context)
 
-def grabadatosusuario(request,id):
 
-    clinica_actual=get_clinica_actual(request)
-    usuario = Usuarios.objects.get(usuario=id,clinica=clinica_actual)
-    usuariof= Usuariosf(request.POST,instance=usuario)
-    if usuariof.is_valid():
-        usuariof.save()
-        messages.success(request,'Actualizacion existosa '+str(usuario.usuario))
-    else:
-        messages.error(request,'No se Actualizo ' + str(id))
+def grabadatosusuario(request, id):
+    clinica_actual = get_clinica_actual(request)
 
+    # Usamos get_object_or_404 para evitar error 500 si el usuario no existe
+    usuario = get_object_or_404(Usuarios, usuario=id, clinica=clinica_actual)
+
+    # 1. GUARDAMOS LA CONTRASEÑA ACTUAL EN UNA VARIABLE TEMPORAL
+    password_anterior = usuario.password
+
+    if request.method == 'POST':
+        usuariof = Usuariosf(request.POST, instance=usuario)
+
+        if usuariof.is_valid():
+            # 2. PAUSA EL GUARDADO (commit=False)
+            usuario_editado = usuariof.save(commit=False)
+
+            # 3. VERIFICAR SI ESCRIBIERON PASSWORD
+            nueva_pass = usuariof.cleaned_data.get('password')
+
+            if not nueva_pass:
+                # Si está vacío, le volvemos a poner la contraseña vieja
+                usuario_editado.password = password_anterior
+            else:
+                # Si escribieron algo, se queda la nueva (ya está en usuario_editado)
+                pass
+
+                # 4. AHORA SÍ GUARDAMOS EN LA BD
+            usuario_editado.save()
+
+            messages.success(request, 'Actualización exitosa del usuario ' + str(usuario.usuario))
+        else:
+            # Es bueno mostrar los errores del formulario
+            messages.error(request, f'No se actualizó {id}. Errores: {usuariof.errors}')
+
+    # -------------------------------------------------------------
+    # RECARGAR LA LISTA (Igual que como lo tenías)
+    # -------------------------------------------------------------
     usuarios = Usuarios.objects.filter(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
     mem_user_permisos = request.session.get('usuario_permisos')
 
-    context = {'usuarios': usuarios,
-               'mem_user_no': mem_user_no,
-               'mem_user_nombre': mem_user_nombre,
-               'mem_user_permisos': mem_user_permisos
-               }
+    context = {
+        'usuarios': usuarios,
+        'mem_user_no': mem_user_no,
+        'mem_user_nombre': mem_user_nombre,
+        'mem_user_permisos': mem_user_permisos
+    }
 
     return render(request, 'lusuarios.html', context)
+
 
 def editausuario(request,id):
 
@@ -2817,8 +2846,21 @@ def validar_usuario(request):
 def cerrar_sesion(request):
     if request.method == 'POST':
         # Limpiar toda la sesión
-        request.session.flush()
+        keys_to_delete = [
+            'usuario_autenticado',
+            'usuario_id',
+            'usuario_no',
+            'usuario_nombre',
+            'usuario_cargo',
+            'usuario_permisos'
+        ]
+
+        for key in keys_to_delete:
+            if key in request.session:
+                del request.session[key]
+
         return JsonResponse({'success': True})
+
     return JsonResponse({'success': False})
 
 
@@ -2853,24 +2895,26 @@ def login_clinica(request):
     return render(request, 'login.html', {'form': form})
 
 
+
 def dashboard(request):
-    from mapp.models import ClinicaManager
-    print("🔍 DEBUG MIDDLEWARE:")
-    print(f"¿Tiene _request el manager?: {hasattr(ClinicaManager, '_request')}")
-    if hasattr(ClinicaManager, '_request'):
-        print(f"Clínica en sesión: {ClinicaManager._request.session.get('clinica_actual')}")
-    else:
-        print("❌ El manager NO tiene _request - el middleware no está funcionando")
-
-
-
-    # Verificar que esté loggeado
+    # 1. Seguridad: Si no han entrado a la clínica, mandar al login
     if 'clinica_actual' not in request.session:
         return redirect('login_clinica')
 
-    # Aquí van tus vistas normales
-    return render(request, 'MenuPrincipal.html')
+    # 2. Obtener el ID de la clínica de la sesión
+    clinica_nombre = request.session.get('clinica_actual')
 
+    # 3. Buscar los usuarios de ESTA clínica para llenar el Modal
+    # Agregué .order_by('nombre') para que salgan en orden alfabético
+    usuarios_lista = Usuarios.objects.filter(clinica=clinica_nombre).order_by('nombre')
+
+    # 4. Empaquetar los datos
+    context = {
+        'usuarios_para_login': usuarios_lista
+    }
+
+    # 5. Renderizar
+    return render(request, 'MenuPrincipal.html', context)
 
 def seguimiento(request, id):
     """

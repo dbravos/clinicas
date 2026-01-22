@@ -3,10 +3,12 @@
 {% load static %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-8 col-xl-6">
+        <!-- AQUI ESTA EL CAMBIO: De 6 pasamos a 10 para hacerla mas ancha -->
+        <div class="col-12 col-lg-10 col-xl-10">
+
             <!-- Tarjeta principal -->
             <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
-                <!-- Header de la tarjeta -->
+                <!-- Header -->
                 <div class="card-header bg-gradient-primary text-white py-4">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
@@ -25,39 +27,83 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form method="post" action="{% url 'grabadatosusuario' id=usuario.usuario %}" class="needs-validation" novalidate>
+                    <form method="post" action="{% url 'grabadatosusuario' id=usuario.usuario %}" class="needs-validation" novalidate id="formUsuario">
                         {% csrf_token %}
 
                         <div class="row g-4">
                             {% for field in usuariof %}
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-gray-700 mb-2">
-                                        <i class="bi {% cycle 'bi-person-badge' 'bi-person-vcard' 'bi-briefcase' 'bi-shield-check' 'bi-key' 'bi-card-text' 'bi-building' %} me-2 text-primary"></i>
-                                        {{ field.label }}
-                                    </label>
 
-                                    <div class="input-group">
-                                        {{ field }}
+                            <!-- LÓGICA ESPECIAL PARA EL CAMPO PASSWORD -->
+                            {% if field.name == 'password' %}
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-gray-700 mb-2">
+                                            <i class="bi bi-key me-2 text-primary"></i>
+                                            {{ field.label }}
+                                        </label>
+
+                                        <!-- Forzamos type="password" y agregamos evento oninput -->
+                                        <div class="input-group">
+                                            <input type="{{ field.field.widget.input_type|default:'password' }}"
+                                                   name="{{ field.name }}"
+                                                   id="id_password"
+                                                   class="form-control"
+                                                   placeholder="Dejar en blanco para mantener la actual">
+                                        </div>
+                                        <small class="form-text text-muted mt-1">Escriba solo si desea cambiar la contraseña.</small>
                                     </div>
-
-                                    {% if field.help_text %}
-                                    <small class="form-text text-muted mt-1">{{ field.help_text }}</small>
-                                    {% endif %}
-
-                                    {% for error in field.errors %}
-                                    <div class="invalid-feedback d-block mt-1">
-                                        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
-                                    </div>
-                                    {% endfor %}
                                 </div>
-                            </div>
+
+                                <!-- CAMPO EXTRA: CONFIRMAR PASSWORD (Inicialmente Oculto) -->
+                                <div class="col-12 col-md-6 d-none" id="col-confirmar">
+                                    <div class="form-group">
+                                        <label for="confirm_password" class="form-label fw-semibold text-gray-700 mb-2">
+                                            <i class="bi bi-shield-lock me-2 text-danger"></i>
+                                            Rectificar Contraseña
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                   id="confirm_password"
+                                                   class="form-control"
+                                                   placeholder="Vuelva a escribir la contraseña">
+                                        </div>
+                                        <div class="invalid-feedback" id="error-match">
+                                            Las contraseñas no coinciden.
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% else %}
+                            <!-- LÓGICA NORMAL PARA EL RESTO DE CAMPOS -->
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-gray-700 mb-2">
+                                            <i class="bi {% cycle 'bi-person-badge' 'bi-person-vcard' 'bi-briefcase' 'bi-shield-check' 'bi-key' 'bi-card-text' 'bi-building' %} me-2 text-primary"></i>
+                                            {{ field.label }}
+                                        </label>
+
+                                        <div class="input-group">
+                                            {{ field }}
+                                        </div>
+
+                                        {% if field.help_text %}
+                                        <small class="form-text text-muted mt-1">{{ field.help_text }}</small>
+                                        {% endif %}
+
+                                        {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block mt-1">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
 
                         <!-- Botón de guardar -->
                         <div class="text-center mt-5 pt-4 border-top">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-2 fw-semibold">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-2 fw-semibold" id="btnGuardar">
                                 <i class="bi bi-save me-2"></i>
                                 Guardar Cambios
                             </button>
@@ -69,104 +115,73 @@
     </div>
 </div>
 
-<!-- Estilos mejorados -->
+<!-- Estilos -->
 <style>
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%) !important;
-}
-
-.form-control, .form-select {
-    padding: 0.75rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #4a6cf7;
-    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
-    transform: translateY(-1px);
-}
-
-.form-label {
-    font-size: 0.9rem;
-    letter-spacing: 0.2px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%);
-    border: none;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(74, 108, 247, 0.3);
-}
-
-.card {
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-}
-
-body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
-}
-
-.input-group {
-    position: relative;
-}
-
-.invalid-feedback {
-    font-size: 0.8rem;
-}
-
-/* Asegurar que los campos tengan el mismo estilo */
-input, select, textarea {
-    width: 100% !important;
-}
-
-/* Estilos específicos para el dropdown */
-.form-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 16px 12px;
-}
+.bg-gradient-primary { background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%) !important; }
+.form-control, .form-select { padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem; transition: all 0.3s ease; width: 100%; }
+.form-control:focus, .form-select:focus { border-color: #4a6cf7; box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15); transform: translateY(-1px); }
+.form-label { font-size: 0.9rem; letter-spacing: 0.2px; }
+.btn-primary { background: linear-gradient(135deg, #4a6cf7 0%, #6a11cb 100%); border: none; border-radius: 0.5rem; transition: all 0.3s ease; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(74, 108, 247, 0.3); }
+.card { transition: transform 0.3s ease; }
+.card:hover { transform: translateY(-3px); }
+body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+.input-group { position: relative; }
+.invalid-feedback { font-size: 0.8rem; }
+input, select, textarea { width: 100% !important; }
+.form-select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 16px 12px; }
 </style>
 
+<!-- SCRIPTS DE VALIDACIÓN DE PASSWORD -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar clases Bootstrap a todos los campos
     const inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
         if (input.type !== 'checkbox' && input.type !== 'radio') {
-            if (input.tagName === 'SELECT') {
-                input.classList.add('form-select');
-            } else {
-                input.classList.add('form-control');
-            }
+            if (input.tagName === 'SELECT') input.classList.add('form-select');
+            else input.classList.add('form-control');
         }
     });
 
-    // Validación de formulario
-    const forms = document.querySelectorAll('.needs-validation');
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
+    const passInput = document.getElementById('id_password');
+    const confirmInput = document.getElementById('confirm_password');
+    const confirmCol = document.getElementById('col-confirmar');
+    const form = document.getElementById('formUsuario');
+
+    if(passInput) {
+        passInput.type = 'password';
+
+        passInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                confirmCol.classList.remove('d-none');
+                confirmInput.setAttribute('required', 'required');
+            } else {
+                confirmCol.classList.add('d-none');
+                confirmInput.removeAttribute('required');
+                confirmInput.value = '';
+                confirmInput.classList.remove('is-invalid');
+                passInput.classList.remove('is-invalid');
             }
-            form.classList.add('was-validated');
-        }, false);
-    });
+        });
+    }
+
+    form.addEventListener('submit', event => {
+        let valid = true;
+        if (passInput && passInput.value.length > 0) {
+            if (passInput.value !== confirmInput.value) {
+                confirmInput.classList.add('is-invalid');
+                valid = false;
+            } else {
+                confirmInput.classList.remove('is-invalid');
+                confirmInput.classList.add('is-valid');
+            }
+        }
+        if (!form.checkValidity() || !valid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
 });
 </script>
 {% endblock %}

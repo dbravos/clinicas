@@ -130,7 +130,7 @@ class IntProvienef(forms.ModelForm):
 class DatosGralesf(forms.ModelForm):
     class Meta:
         model = DatosGrales
-        exclude = ['logo_url', 'recibo', 'receta', 'recibootros', 'sesiong', 'expediente']
+        exclude = ['logo_url', 'recibo', 'receta', 'recibootros', 'sesiong', 'expediente','clinica']
         widgets = {
             'password': forms.PasswordInput(render_value=True),
         }
@@ -157,11 +157,11 @@ class DatosGralesf(forms.ModelForm):
             self.fields.pop('clinica', None)
 
 
-
+from django import forms
+from .models import Usuarios
 
 
 class Usuariosf(forms.ModelForm):
-    # Define el ChoiceField AQUÍ, fuera del Meta
     cargo = forms.ChoiceField(
         choices=Usuarios.opcionesCargo,
         widget=forms.Select(attrs={
@@ -172,21 +172,63 @@ class Usuariosf(forms.ModelForm):
 
     class Meta:
         model = Usuarios
-        fields = '__all__'
+        exclude = ['clinica']
+
         widgets = {
-            'nombre': forms.TextInput(attrs={'maxlength': 30}),
-            'permisos': forms.TextInput(attrs={'maxlength': 5}),
-            'password': forms.PasswordInput(attrs={'maxlength': 10}),
-            'cedula': forms.TextInput(attrs={'maxlength': 20}),
-            'expedidapor': forms.TextInput(attrs={'maxlength': 30})
+            # 1. VISUAL: Agregamos 'text-uppercase' a las clases CSS
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control text-uppercase',
+                'maxlength': 30
+            }),
+            'permisos': forms.TextInput(attrs={
+                'class': 'form-control text-uppercase',
+                'maxlength': 5,
+                'autocomplete': 'off',
+                'data-lpignore': 'true'
+            }),
+            'password': forms.PasswordInput(attrs={
+                'class': 'form-control',  # ¡OJO! El password NO lleva mayúsculas forzadas
+                'maxlength': 10,
+                'autocomplete': 'new-password',
+                'placeholder': 'Dejar vacío para mantener la actual'
+            }),
+            'cedula': forms.TextInput(attrs={
+                'class': 'form-control text-uppercase',
+                'maxlength': 20
+            }),
+            'expedidapor': forms.TextInput(attrs={
+                'class': 'form-control text-uppercase',
+                'maxlength': 30
+            })
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
+
+        # Lista de campos que quieres convertir a Mayúsculas
+        campos_a_mayusculas = ['nombre', 'permisos', 'cedula', 'expedidapor']
+
         for field in self.fields:
-            if cleaned_data.get(field) is None:
+            valor = cleaned_data.get(field)
+
+            # 1. Si es None, lo ponemos vacío (tu lógica original)
+            if valor is None:
                 cleaned_data[field] = ''
+                valor = ''  # Actualizamos la variable local
+
+            # 2. LOGICA DE MAYÚSCULAS
+            # Si el campo está en la lista y tiene texto, lo convertimos
+            if field in campos_a_mayusculas and isinstance(valor, str):
+                cleaned_data[field] = valor.upper()
+
         return cleaned_data
+
+
+
 
 class Einicialf(forms.ModelForm):
 
