@@ -92,34 +92,43 @@ def imprime_solicitud(request,id):
 
     return render(request,'solicitud_internacion.html', {'interno': interno,'datosgrales':datosgrales})
 
-def imprime_aviso(request,id):
 
+
+def imprime_aviso(request, id):
     clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id)
-    datosgrales = DatosGrales.objects.get(clinica=clinica_actual)
-    # En tu vista
 
+    # Usamos filter().first() es más seguro que get() por si acaso no existe el registro
+    datosgrales = DatosGrales.objects.filter(clinica=clinica_actual).first()
+
+    # --- 1. LÓGICA DE FECHA ---
+    fecha_formateada = "FECHA NO DISPONIBLE"
 
     if interno.fechaingreso:
-        # Formatear la fecha como "17 de FEBRERO del 2024"
-       meses = {
-        1: "ENERO", 2: "FEBRERO", 3: "MARZO", 4: "ABRIL",
-        5: "MAYO", 6: "JUNIO", 7: "JULIO", 8: "AGOSTO",
-        9: "SEPTIEMBRE", 10: "OCTUBRE", 11: "NOVIEMBRE", 12: "DICIEMBRE"
-    }
-       fecha_formateada = f"{interno.fechaingreso.day} de {meses[interno.fechaingreso.month]} del {interno.fechaingreso.year}"
+        meses = {
+            1: "ENERO", 2: "FEBRERO", 3: "MARZO", 4: "ABRIL",
+            5: "MAYO", 6: "JUNIO", 7: "JULIO", 8: "AGOSTO",
+            9: "SEPTIEMBRE", 10: "OCTUBRE", 11: "NOVIEMBRE", 12: "DICIEMBRE"
+        }
+        fecha_formateada = f"{interno.fechaingreso.day} de {meses[interno.fechaingreso.month]} del {interno.fechaingreso.year}"
 
-       return render(request, 'aviso_internacion.html', {
-               'interno': interno,
-               'datosgrales': datosgrales,
-               'fecha_formateada': fecha_formateada  # ¡Aquí la agregas!
-                })
-    else:
-        return render(request, 'aviso_internacion.html', {
-               'interno': interno,
-               'datosgrales': datosgrales,
-               'fecha_formateada': "FECHA NO DISPONIBLE"
-           })
+    # --- 2. LÓGICA DE MÉDICOS (NUEVO) ---
+    # Buscamos usuarios de esta clínica que tengan el cargo 'Medico'
+    # IMPORTANTE: Revisa en tu base de datos si lo guardaste como 'Medico', 'MEDICO' o 'Médico'
+    lista_medicos = Usuarios.objects.filter(
+        clinica=clinica_actual,
+        cargo='Medico'
+    )
+
+    # --- 3. CONTEXTO Y RENDER ---
+    context = {
+        'interno': interno,
+        'datosgrales': datosgrales,
+        'fecha_formateada': fecha_formateada,
+        'medicos': lista_medicos  # <--- Enviamos la lista al template
+    }
+
+    return render(request, 'aviso_internacion.html', context)
 
 
 # En tu vista de consentimiento
@@ -469,6 +478,7 @@ def agregausuario(request):
     usuariof = Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos')
 
 
     context = {

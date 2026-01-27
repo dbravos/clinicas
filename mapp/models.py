@@ -1,4 +1,3 @@
-from django.db import models
 from djmoney.models.fields import MoneyField
 from django.utils import timezone
 from datetime import date
@@ -9,6 +8,11 @@ from cloudinary.models import CloudinaryField
 
 # models.py - AGREGA esto al inicio del archivo
 from django.db import models
+from simple_history.models import HistoricalRecords
+
+from django.dispatch import receiver
+from simple_history.signals import pre_create_historical_record
+
 
 estados = [
     ('AGS', 'Aguascalientes'),
@@ -50,6 +54,12 @@ paises = [('MEX','Mexico'), ('USA','Estados Unidos De Norteamerica')]
 tipoMovs=[('C','Cargo'),('A','Abono')]
 conceptos=[(0,'Aportacion total'),(1,'Cuota por pagar'),(2,'Cuota voluntaria'),(3,'Abono a cuota voluntaria'),(4,'Cancelacion de movimiento')]
 
+class HistorialConNombre(models.Model):
+    # Este campo solo existirá en la tabla de historial, no en la real
+    historial_usuario_custom = models.CharField(max_length=100, null=True, blank=True, verbose_name="Modificado por")
+
+    class Meta:
+        abstract = True
 
 class ClinicaManager(models.Manager):
     def get_queryset(self):
@@ -74,6 +84,7 @@ class Usuarios(models.Model):
         unique_together = ['usuario', 'clinica']  # ✅ Único por clínica
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
 class Estados(models.Model):
 
@@ -138,6 +149,8 @@ class DatosGrales(models.Model):
         unique_together = ['clinica']  # ✅ Único por clínica
 
  #   objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
 
 class Internos(models.Model):
 
@@ -239,7 +252,7 @@ class Internos(models.Model):
     nacionalidad = models.CharField(max_length=15, verbose_name='Nacionalidad', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
 
-
+    history = HistoricalRecords(bases=[HistorialConNombre])
     class Meta:
         unique_together = ['numeroexpediente', 'clinica']  # ✅ Único por clínica
 
@@ -367,6 +380,7 @@ class Einicial(models.Model):
     razon3=models.CharField(verbose_name='Razon 3',max_length=50,null=True,blank=True)
     clinica=models.CharField(verbose_name='Clinica',max_length=30,null=False,blank=True,default='Demostracion')
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -540,7 +554,7 @@ class Assist(models.Model):
     riesgo9=models.SmallIntegerField(verbose_name='',null=True,blank=True)
     riesgo10=models.SmallIntegerField(verbose_name='',null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
-
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
@@ -728,6 +742,7 @@ class SituacionFamiliar(models.Model):
     porconsumo = models.SmallIntegerField(verbose_name='Ha sido por problemas de consumo?',choices=opcionesConflicto, null=True,  default=0)
     clinica=models.CharField(max_length=30,verbose_name='Clinica',null=True,blank=True,default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -828,7 +843,7 @@ class Cfisicas(models.Model):
     rsexuales = models.SmallIntegerField(verbose_name='Has tenido relaciones sexuales despues de consumir alcohol y/o drogas?',choices=opcionesSioNo,null=True, default=0)
     involucrado = models.SmallIntegerField(verbose_name='Te has involucrado en una situacion de abuso fisico a consecuencia de haber consumido alcohol y/o drogas?',choices=opcionesSioNo,null=True, default=0)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True,default="Demostracion")
-
+    history = HistoricalRecords(bases=[HistorialConNombre])
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -982,6 +997,7 @@ class Cmentales(models.Model):
     otro3 = models.CharField(max_length=20,verbose_name='Otro',null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -1170,6 +1186,7 @@ class Crelaciones(models.Model):
     fechaduracionycausa = models.CharField(max_length=50,verbose_name='Fecha duracion y causa',null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1334,6 +1351,8 @@ class Tratamientos(models.Model):
     observaciones=models.TextField(verbose_name='Observaciones :',null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1368,6 +1387,8 @@ class Psicosis(models.Model):
     psnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     pspuntos = models.SmallIntegerField(verbose_name="Puntaje",null=True,blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -1445,6 +1466,8 @@ class Sdevida(models.Model):
     svconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
     svnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -1537,6 +1560,8 @@ class Usodrogas(models.Model):
     udnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1573,6 +1598,8 @@ class Ansiedad(models.Model):
     annombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     anpuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -1680,6 +1707,8 @@ class Depresion(models.Model):
     deppuntos = models.SmallIntegerField(verbose_name="Puntaje", null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1756,7 +1785,16 @@ class Marcadores(models.Model):
     marconsejero = models.SmallIntegerField(verbose_name="Consejero",blank=True,null=True)
     marnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
+    class Meta:
+        unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
+
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+
+
 
 
 class Riesgos(models.Model):
@@ -1784,6 +1822,8 @@ class Riesgos(models.Model):
     riesgonombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1805,6 +1845,8 @@ class Razones(models.Model):
     razonesconsejero = models.SmallIntegerField(verbose_name="Consejero", blank=True, null=True)
     razonesnombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -1835,6 +1877,8 @@ class Valorizacion(models.Model):
     ansiedad = models.CharField(verbose_name='Ansiedad', max_length=30, null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1860,6 +1904,8 @@ class CIndividual(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -1894,6 +1940,8 @@ class CFamiliar(models.Model):
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     familiares = models.TextField(verbose_name='Familiares', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -1932,6 +1980,8 @@ class CGrupal(models.Model):
     quesetrabajo = models.TextField(verbose_name='Qué se trabajó', null=True, blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     # RELACIÓN MUCHOS A MUCHOS CON INTERNOS
     participantes = models.ManyToManyField(
@@ -1974,6 +2024,8 @@ class PConsejeria(models.Model):
     prevencion = models.TextField(verbose_name='Prevencion de recaidas', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -1997,6 +2049,8 @@ class TareaConsejeria(models.Model):
     )
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class Meta:
         verbose_name = "Tarea de Consejería"
@@ -2024,6 +2078,8 @@ class HojaAtencionPs(models.Model):
     resultados = models.TextField(verbose_name='Resultados', null=True, blank=True)
     diagnostico = models.TextField(verbose_name='Diagnosticos', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class meta:
          unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -2057,6 +2113,8 @@ class NotasEvolucionPS(models.Model):
     individualogrupal = models.CharField(verbose_name='Sesion Individual o Grupal',max_length=15,choices=opcionesQueTipo, null=True, default='Individual')
     selograron = models.BooleanField(verbose_name='Se logro objetivo?', null=True, default=False)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -2096,6 +2154,8 @@ class Medico(models.Model):
     tratamientosugerido = models.TextField(verbose_name='Tratamiento sugerido', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -2116,6 +2176,8 @@ class Recetas(models.Model):
     nombremedico = models.CharField(max_length=30, verbose_name='Nombre del medico', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     class meta:
         unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
@@ -2297,6 +2359,8 @@ class HistoriaClinica(models.Model):
       observacionesTratamiento = models.TextField(verbose_name='Observaciones', null=True, blank=True)
       clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+      history = HistoricalRecords(bases=[HistorialConNombre])
+
       class meta:
           unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -2448,6 +2512,8 @@ class Seguimiento(models.Model):
     nombreconsejero = models.CharField(max_length=30, verbose_name='Nombre del consejero', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class meta:
           unique_together = ['expediente', 'clinica']  # ✅ Único por clínica
 
@@ -2471,6 +2537,8 @@ class NotasSeguimiento(models.Model):
     aspectosqueserevisaran = models.TextField(verbose_name='Aspectos que se revisaran en el proximo seguimiento', null=True, blank=True)
     observaciones = models.TextField(verbose_name='Comentarios y/o Observaciones', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="Demostracion")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -2498,6 +2566,8 @@ class Edocuenta(models.Model):
     comentarios = models.TextField(verbose_name='Comentarios ', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
     def __str__(self):
@@ -2521,6 +2591,8 @@ class Otros(models.Model):
     nombreoperador = models.CharField(max_length=30, verbose_name='Nombre del operador', null=True, blank=True)
     comentarios = models.TextField(verbose_name='Comentarios ', null=True, blank=True)
     clinica = models.CharField(max_length=30, verbose_name='Clinica', null=True, blank=True, default="DEMO")
+
+    history = HistoricalRecords(bases=[HistorialConNombre])
 
     objects = ClinicaManager()  # ← FILTRO AUTOMÁTICO
 
@@ -2571,6 +2643,8 @@ class Recibos(models.Model):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
         return f"Expediente: {self.expediente}"
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ('expediente', 'recibo', 'clinica')
         ordering = ['expediente', 'fecha']  # Ordenar por expediente y luego por fecha
@@ -2603,6 +2677,29 @@ class ROtros(models.Model):
         # Ahora 'expediente' es un CharField normal, no un objeto relacionado.
         return f"Expediente: {self.expediente}"
 
+    history = HistoricalRecords(bases=[HistorialConNombre])
+
     class Meta:
         unique_together = ('expediente', 'recibo', 'clinica')
         ordering = ['expediente', 'fecha']  # Ordenar por expediente y luego por fecha
+
+
+
+
+@receiver(pre_create_historical_record)
+def guardar_usuario_custom(sender, **kwargs):
+    # 1. Obtenemos el registro histórico que está a punto de crearse
+    history_instance = kwargs['history_instance']
+
+    # 2. Obtenemos el 'request' (gracias al middleware que instalamos antes)
+    request = kwargs.get('request')
+
+    # 3. Si hay request y hay usuario en tu sesión personalizada...
+    if request and request.session.get('usuario_nombre'):
+        # ... ¡Lo guardamos en el campo extra que creamos!
+        history_instance.historial_usuario_custom = request.session['usuario_nombre']
+    elif request and request.user.is_authenticated:
+        # Fallback: Si es admin de Django, guardamos su username
+        history_instance.historial_usuario_custom = request.user.username
+    else:
+        history_instance.historial_usuario_custom = "Sistema / Automático"

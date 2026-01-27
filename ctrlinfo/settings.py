@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'djmoney',
     'mapp',
     'django.contrib.humanize',
+    'simple_history',
 
 ]
 
@@ -90,7 +91,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mapp.middleware.ClinicaMiddleware',  # ← AGREGA esta línea
-
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 

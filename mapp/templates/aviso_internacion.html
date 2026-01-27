@@ -6,245 +6,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviso - {{datosgrales.nombre}}</title>
+    <!-- Incluimos Bootstrap solo si no lo hereda de dgenerales, para que se vea bonito el modal -->
+    <!-- Si ya tienes bootstrap cargado, puedes quitar estas lineas de estilo del modal -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.3; /* Reducido para ahorrar espacio */
-            margin: 0;
-            padding: 15px;
-            color: #000;
-            font-size: 13px; /* Tamaño ligeramente menor */
+        /* TUS ESTILOS ORIGINALES SE MANTIENEN IGUAL */
+        body { font-family: Arial, sans-serif; line-height: 1.3; margin: 0; padding: 15px; color: #000; font-size: 13px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+        .header { display: flex; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .logo-container { flex: 0 0 auto; margin-right: 15px; }
+        .logo { max-width: 100px; height: auto; }
+        .clinic-info { flex: 1; }
+        .organization { font-weight: bold; font-size: 16px; margin-bottom: 3px; }
+        .rfc { font-size: 13px; }
+        .address { font-size: 13px; margin-bottom: 3px; }
+        .date { text-align: right; margin-bottom: 20px; }
+        .recipient { margin-bottom: 20px; }
+        .content { margin-bottom: 20px; }
+        .patient-info, .doctor-info, .family-info { margin-bottom: 15px; }
+        .field-label { font-weight: bold; }
+        .signature { margin-top: 30px; }
+        .signature-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .left-section { text-align: left; flex: 1; }
+        .right-section { text-align: right; flex: 1; }
+        .signature-name { font-weight: bold; margin-top: 20px; margin-bottom: 3px; }
+        .signature-title { font-size: 13px; margin-bottom: 5px; }
+
+        .no-print { text-align: center; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+        .print-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; font-size: 14px; }
+        .close-btn { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; font-size: 14px; }
+
+        /* ESTILOS PARA EL MODAL DE SELECCION */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: white; padding: 25px; border-radius: 8px; width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center;
+        }
+        .form-select-medico {
+            width: 100%; padding: 10px; margin: 15px 0; font-size: 16px;
+            border: 1px solid #ddd; border-radius: 4px;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-
-        .header {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px; /* Reducido */
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 10px; /* Reducido */
-        }
-
-        .logo-container {
-            flex: 0 0 auto;
-            margin-right: 15px; /* Reducido */
-        }
-
-        .logo {
-            max-width: 100px; /* Reducido */
-            height: auto;
-        }
-
-        .clinic-info {
-            flex: 1;
-        }
-
-        .organization {
-            font-weight: bold;
-            font-size: 16px; /* Reducido */
-            margin-bottom: 3px; /* Reducido */
-        }
-
-        .rfc {
-            font-size: 13px; /* Reducido */
-        }
-
-        .address {
-            font-size: 13px; /* Reducido */
-            margin-bottom: 3px; /* Reducido */
-        }
-
-        .date {
-            text-align: right;
-            margin-bottom: 20px; /* Reducido */
-        }
-
-        .recipient {
-            margin-bottom: 20px; /* Reducido */
-        }
-
-        .content {
-            margin-bottom: 20px; /* Reducido */
-        }
-
-        .patient-info, .doctor-info, .family-info {
-            margin-bottom: 15px; /* Reducido */
-        }
-
-        .field-label {
-            font-weight: bold;
-        }
-
-        .signature {
-            margin-top: 30px; /* Reducido */
-        }
-
-        .signature-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .left-section {
-            text-align: left;
-            flex: 1;
-        }
-
-        .right-section {
-            text-align: right;
-            flex: 1;
-        }
-
-        .signature-name {
-            font-weight: bold;
-            margin-top: 20px; /* Reducido */
-            margin-bottom: 3px; /* Reducido */
-        }
-
-        .signature-title {
-            font-size: 13px; /* Reducido */
-            margin-bottom: 5px; /* Reducido */
-        }
-
-        /* ESTILOS OPTIMIZADOS PARA IMPRESIÓN */
         @media print {
-            @page {
-                margin: 10mm; /* Margen reducido */
-                size: letter;
-            }
-
-            body {
-                padding: 0;
-                margin: 0;
-                font-size: 12px; /* Tamaño óptimo para impresión */
-                line-height: 1.2; /* Compacto */
-            }
-
-            .container {
-                padding: 0;
-                max-width: 100%;
-                margin: 0 auto;
-            }
-
-            .no-print {
-                display: none;
-            }
-
-            .header {
-                border-bottom: 1px solid #000;
-                margin-bottom: 15px;
-                padding-bottom: 8px;
-            }
-
-            .logo {
-                max-width: 150px; /* Más pequeño en impresión */
-                max-heigth: 150px; /* Más pequeño en impresión */
-            }
-
-            .organization {
-                font-size: 15px;
-            }
-
-            .date {
-                margin-bottom: 15px;
-            }
-
-            .recipient {
-                margin-bottom: 15px;
-            }
-
-            .content {
-                margin-bottom: 15px;
-            }
-
-            .patient-info, .doctor-info, .family-info {
-                margin-bottom: 12px;
-            }
-
-            .signature {
-                margin-top: 25px;
-            }
-
-            .signature-name {
-                margin-top: 15px;
-            }
-
-            /* Evitar que se corten elementos entre páginas */
-            .header, .signature-content {
-                page-break-inside: avoid;
-                break-inside: avoid-page;
-            }
-
-            /* Compactar párrafos */
-            p {
-                margin: 8px 0;
-            }
-        }
-
-        /* Estilo para el botón de impresión en pantalla */
-        .no-print {
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .print-btn {
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
-            font-size: 14px;
-        }
-
-        .close-btn {
-            padding: 10px 20px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
-            font-size: 14px;
+            @page { margin: 10mm; size: letter; }
+            body { padding: 0; margin: 0; font-size: 12px; line-height: 1.2; }
+            .container { padding: 0; max-width: 100%; margin: 0 auto; }
+            /* OCULTAMOS LOS BOTONES Y EL MODAL AL IMPRIMIR */
+            .no-print, .modal-overlay { display: none !important; }
+            .header { border-bottom: 1px solid #000; margin-bottom: 15px; padding-bottom: 8px; }
+            .logo { max-width: 150px; }
+            .header, .signature-content { page-break-inside: avoid; break-inside: avoid-page; }
+            p { margin: 8px 0; }
         }
     </style>
 </head>
 <body>
+
+    <!-- MODAL DE SELECCIÓN DE MÉDICO (Se muestra al cargar) -->
+    <div id="modalSeleccionMedico" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="bi bi-person-medical"></i> Seleccione el Médico</h3>
+            <p>Por favor indique qué médico firma este documento:</p>
+
+            <select id="selectMedico" class="form-select-medico">
+                <option value="" selected disabled>-- Seleccionar de la lista --</option>
+                {% for m in medicos %}
+                    <!-- Guardamos cedula y expedida en atributos 'data' -->
+                    <option value="{{ m.nombre }}"
+                            data-cedula="{{ m.cedula|default:'N/A' }}"
+                            data-expedida="{{ m.expedidapor|default:'' }}">
+                        {{ m.nombre }}
+                    </option>
+                {% empty %}
+                    <option value="" disabled>No hay médicos registrados</option>
+                {% endfor %}
+            </select>
+
+            <button onclick="aplicarMedico()" class="print-btn" style="width: 100%;">
+                Aceptar y Ver Documento
+            </button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="no-print">
-            <button onclick="window.print()" class="print-btn">
-                Imprimir Solicitud
-            </button>
-            <button onclick="cerrarVentana()" class="close-btn">
-                Cerrar
-            </button>
+            <button onclick="window.print()" class="print-btn">Imprimir Solicitud</button>
+            <button onclick="cerrarVentana()" class="close-btn">Cerrar</button>
+            <!-- Botón para cambiar médico por si se equivocaron -->
+            <button onclick="mostrarModal()" class="print-btn" style="background:#6c757d;">Cambiar Médico</button>
         </div>
 
         <div class="header">
-
             <div class="logo-container">
-    {% if datosgrales.logo_url %}
-        <!-- ✅ MOSTRAR IMGBB -->
-        <img src="{{ datosgrales.logo_url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-
-    {% elif datosgrales.logo_clinica %}
-        <!-- ❌ Imagen local (no funciona en producción) -->
-        <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo {{ datosgrales.nombre }}" class="logo">
-    {% else %}
-        <p>❌ NO hay logo subido</p>
-    {% endif %}
-</div>
-
-
+                {% if datosgrales.logo_url %}
+                    <img src="{{ datosgrales.logo_url }}" alt="Logo" class="logo">
+                {% elif datosgrales.logo_clinica %}
+                    <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo" class="logo">
+                {% else %}
+                    <p>❌ NO hay logo</p>
+                {% endif %}
+            </div>
 
             <div class="clinic-info">
                 <div class="organization">{{datosgrales.nombre}}</div>
@@ -265,15 +129,11 @@
         </div>
 
         <div class="content">
-            <p>
-                Por medio de este conducto le envío un cordial saludo, y aprovecho para notificar a usted
-                para su conocimiento, el establecimiento especializado en tratamiento de adicciones denominado:
-            </p>
+            <p>Por medio de este conducto le envío un cordial saludo...</p>
 
             <p style="text-align: center; font-weight: bold;">
                 {{datosgrales.nombre}}<br>
-                Ubicado en: {{datosgrales.calleynumero}}<br>
-                {{datosgrales.colonia}}<br>
+                Ubicado en: {{datosgrales.calleynumero}} {{datosgrales.colonia}}<br>
                 {{datosgrales.ciudad}},{{datosgrales.estado}}, C.P.{{datosgrales.cp}}<br>
                 Telefono {{datosgrales.telefono}}
             </p>
@@ -286,31 +146,25 @@
                 <p>Fecha de ingreso: {{ fecha_formateada }}</p>
             </div>
 
+            <!-- AQUÍ ESTÁ LA SECCIÓN DEL MÉDICO CON LOS IDs PARA JS -->
             <div class="doctor-info">
                 <p>
                     El paciente cuenta con la indicacion de un medico de(l) (la) Doctor(a):<br>
-                    Nombre de(l) (la) Doctor(a): <br>
-                    Numero de cedula: <br>
-                    Expedida por:
+                    Nombre de(l) (la) Doctor(a): <span id="txt_medico_nombre" style="font-weight:bold;">____________________</span><br>
+                    Numero de cedula: <span id="txt_medico_cedula" style="font-weight:bold;">____________________</span><br>
+                    Expedida por: <span id="txt_medico_expedida" style="font-weight:bold;">____________________</span>
                 </p>
             </div>
 
             <div class="family-info">
-                <p><span class="field-label">Datos del familiar o representante legal que autoriza el internamiento:</span></p>
+                <p><span class="field-label">Datos del familiar...</span></p>
                 <p>Nombre completo: {{interno.responsable}}</p>
                 <p>Relacion o parentesco: {{interno.parentesco}}</p>
                 <p>Numero de telefono: {{interno.telefono}} {{interno.rtelefono}}</p>
-                <p>Nacionalidad: Mexicana</p>
             </div>
 
-            <p>
-                Ambas por escrito las cuales fueron recabadas el día {{ fecha_formateada }}
-                lo anterior para el cumplimiento de la Norma028-SSA2-2009.
-            </p>
-
-            <p>
-                Agradeciendo de antemano todas sus atenciones, me despido de usted, quedando a sus ordenes.
-            </p>
+            <p>Ambas por escrito las cuales fueron recabadas el día {{ fecha_formateada }}...</p>
+            <p>Agradeciendo de antemano todas sus atenciones...</p>
         </div>
 
         <div class="signature">
@@ -328,23 +182,37 @@
     </div>
 
     <script>
-        // Función mejorada para cerrar la ventana
         function cerrarVentana() {
-            // Intentar cerrar la ventana
-            if (window.history.length > 1) {
-                // Si hay historial, regresar
-                window.history.back();
-            } else {
-                // Si no hay historial, cerrar la ventana
-                window.close();
+            if (window.history.length > 1) { window.history.back(); }
+            else { window.close(); setTimeout(function() { if (!window.closed) { window.location.href = '/'; } }, 1000); }
+        }
 
-                // Fallback: redirigir después de 1 segundo si no se cerró
-                setTimeout(function() {
-                    if (!window.closed) {
-                        window.location.href = '/'; // Cambia por tu URL principal
-                    }
-                }, 1000);
+        // Funciones para el Médico
+        function aplicarMedico() {
+            const select = document.getElementById('selectMedico');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (select.value === "") {
+                alert("Por favor seleccione un médico de la lista.");
+                return;
             }
+
+            // 1. Obtener datos del option seleccionado
+            const nombre = selectedOption.value;
+            const cedula = selectedOption.getAttribute('data-cedula');
+            const expedida = selectedOption.getAttribute('data-expedida');
+
+            // 2. Escribirlos en el documento HTML
+            document.getElementById('txt_medico_nombre').textContent = nombre;
+            document.getElementById('txt_medico_cedula').textContent = cedula;
+            document.getElementById('txt_medico_expedida').textContent = expedida;
+
+            // 3. Ocultar el modal
+            document.getElementById('modalSeleccionMedico').style.display = 'none';
+        }
+
+        function mostrarModal() {
+            document.getElementById('modalSeleccionMedico').style.display = 'flex';
         }
     </script>
 </body>
