@@ -64,8 +64,7 @@
     </style>
 </head>
 <body>
-
-    <!-- MODAL DE SELECCIÓN DE MÉDICO (Se muestra al cargar) -->
+<!-- MODAL DE SELECCIÓN DE MÉDICO (Mejorado) -->
     <div id="modalSeleccionMedico" class="modal-overlay">
         <div class="modal-box">
             <h3><i class="bi bi-person-medical"></i> Seleccione el Médico</h3>
@@ -74,7 +73,6 @@
             <select id="selectMedico" class="form-select-medico">
                 <option value="" selected disabled>-- Seleccionar de la lista --</option>
                 {% for m in medicos %}
-                    <!-- Guardamos cedula y expedida en atributos 'data' -->
                     <option value="{{ m.nombre }}"
                             data-cedula="{{ m.cedula|default:'N/A' }}"
                             data-expedida="{{ m.expedidapor|default:'' }}">
@@ -85,9 +83,24 @@
                 {% endfor %}
             </select>
 
-            <button onclick="aplicarMedico()" class="print-btn" style="width: 100%;">
-                Aceptar y Ver Documento
-            </button>
+            <!-- BOTONES DE ACCIÓN -->
+            <div style="display: flex; gap: 10px;">
+                <!-- Botón CANCELAR (Rojo) -->
+                <button onclick="cerrarVentana()" class="close-btn" style="flex: 1;">
+                    <i class="bi bi-x-circle"></i> Cancelar / Salir
+                </button>
+
+                <!-- Botón ACEPTAR (Azul) -->
+                <button onclick="aplicarMedico()" class="print-btn" style="flex: 1; margin: 5px 0;">
+                    Aceptar
+                </button>
+            </div>
+
+            {% if not medicos %}
+            <div class="alert alert-warning mt-2" style="font-size: 12px; color: #856404; background-color: #fff3cd; padding: 5px; border-radius: 4px;">
+                ⚠️ No hay médicos dados de alta con el cargo 'Medico'.
+            </div>
+            {% endif %}
         </div>
     </div>
 
