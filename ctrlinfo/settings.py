@@ -27,7 +27,7 @@ ALLOWED_HOSTS = ['*']  # Desarrollo
 
 
 
-SESSION_COOKIE_AGE = 300
+SESSION_COOKIE_AGE = 1800
 
 # La sesión se cierra al cerrar el navegador
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

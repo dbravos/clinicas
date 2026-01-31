@@ -551,7 +551,7 @@ def editausuario(request,id):
     usuariof = Usuariosf(instance=usuario)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     context = {'usuario': usuario,
                'usuariof': usuariof,
@@ -570,7 +570,7 @@ def borrausuario(request,id):
     usuarios = Usuarios.objects.filter(clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     context = {'usuarios': usuarios,
                'mem_user_no': mem_user_no,
@@ -587,8 +587,9 @@ def einicial(request, id):
     clinica_actual = get_clinica_actual(request)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+    mem_user_permisos = request.session.get('usuario_permisos','')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
     # Obtener el interno
@@ -775,8 +776,9 @@ def assist(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+    mem_user_permisos = request.session.get('usuario_permisos','')
+
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
 
@@ -914,8 +916,8 @@ def psicosis(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
-    if not 'CONSEJERIA' in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
+    mem_user_permisos = request.session.get('usuario_permisos','')
+    if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
         return redirect('Menu principal')
 
@@ -970,7 +972,7 @@ def sdevida(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1024,7 +1026,7 @@ def usodrogas(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1080,7 +1082,7 @@ def ansiedad(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1134,7 +1136,7 @@ def depresion(request, id):
     interno = Internos.objects.get(pk=id, clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1191,7 +1193,7 @@ def marcadores(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1225,7 +1227,7 @@ def riesgos(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1262,7 +1264,7 @@ def razones(request,id):
     internof= Internosf(request.POST,instance=interno)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1295,7 +1297,7 @@ def razones(request,id):
 def salidas(request, id):
     clinica_actual = get_clinica_actual(request)
     interno = get_object_or_404(Internos, pk=id, clinica=clinica_actual)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1320,7 +1322,7 @@ def salidas(request, id):
 def valorizacion(request,id):
 
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1444,7 +1446,7 @@ def listaSesiones(request, tipo_sesion, id):
     """
 
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -1794,7 +1796,7 @@ def capturaSesionPS(request, accion, id=None, no_sesion=None):
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2075,7 +2077,7 @@ def listaSesionesGrupales(request,id=None):
     """
     clinica_actual = get_clinica_actual(request)
     sesiones_grupales = CGrupal.objects.filter(clinica=clinica_actual).order_by('-fecha', '-sesion')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2101,7 +2103,7 @@ def listaSesionesPS(request,id=None):
     Vista para listar todas las sesiones grupales
     """
     clinica_actual=get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2131,7 +2133,7 @@ def listaSesionesS(request,id=None):
     Vista para listar todas las sesiones grupales
     """
     clinica_actual=get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2166,7 +2168,7 @@ def planConsejeria(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2239,7 +2241,7 @@ import requests
 def escanear_tarea(request):
     expediente = request.session.get('expediente_actual')
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2327,7 +2329,7 @@ def lista_tareas_escaneadas(request):
     # Obtener expediente de la sesión
     expediente = request.session.get('expediente_actual')
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2495,7 +2497,7 @@ def hojaAtencionPs(request, id):
 
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'PSICOLOGIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2569,7 +2571,7 @@ def medicoInicial(request, id):
     """
     # 1. Obtener el interno
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2640,7 +2642,7 @@ def emisionDerecetas(request,id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2716,7 +2718,7 @@ def historiaClinica(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'MEDICO' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -2935,7 +2937,7 @@ def seguimiento(request, id):
     interno = get_object_or_404(Internos, pk=id,clinica=clinica_actual)
     mem_user_no = request.session.get('usuario_no')
     mem_user_nombre = request.session.get('usuario_nombre')
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'CONSEJERIA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -3001,7 +3003,7 @@ def reporte_internos(request):
     # Configuración inicial
     form = ReporteFechaForm(request.POST or None)
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -3043,7 +3045,7 @@ def reporte_internos(request):
 def captura_pagos(request, interno_id=None):
     # 1. Obtener lista para el select
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
@@ -3502,7 +3504,7 @@ def imprimir_recibo_pdf(request, id_recibo):
 
 def lista_recibos(request):
     clinica_actual = get_clinica_actual(request)
-    mem_user_permisos = request.session.get('usuario_permisos')
+    mem_user_permisos = request.session.get('usuario_permisos','')
 
     if 'OFICINA' not in mem_user_permisos and 'ADMIN' not in mem_user_permisos:
         messages.error(request, f"⛔ No tienes permisos para entrar aquí.")
