@@ -6,353 +6,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Freshstart | Sistema de Gestión</title>
+
+    <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'mapp/css/estiloss.css' %}">
+
     <style>
-        :root {
-            --sidebar-width: 280px;
-            --primary-color: #0d6efd;
-            --sidebar-bg: #1e293b;
-            --sidebar-active: rgba(13, 110, 253, 0.2);
-            --transition-speed: 0.3s;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            color: #212529;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            z-index: 1030;
-            overflow-y: auto;
-            background-color: var(--sidebar-bg);
-            color: white;
-            transition: all var(--transition-speed) ease;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-header {
-            background-color: var(--primary-color);
-            padding: 1.5rem 1rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-header h3 {
-            font-weight: 600;
-            font-size: 1.25rem;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .accordion-item {
-            border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .accordion-button {
-            background-color: transparent;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            transition: all var(--transition-speed) ease;
-        }
-
-        .accordion-button:not(.collapsed) {
-            background-color: var(--sidebar-active);
-            color: white;
-        }
-
-        .accordion-button:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .accordion-button::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-            transition: transform var(--transition-speed) ease;
-        }
-
-        .accordion-button:not(.collapsed)::after {
-            transform: rotate(-180deg);
-        }
-
-        .accordion-body {
-            padding: 0;
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 0.75rem 1.5rem 0.75rem 3.5rem;
-            position: relative;
-            font-weight: 400;
-            transition: all var(--transition-speed) ease;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar .nav-link:hover, .nav-link:focus {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left-color: var(--primary-color);
-            padding-left: 3.25rem;
-        }
-
-        .sidebar .nav-link i {
-            width: 1.5rem;
-            text-align: center;
-            margin-right: 0.75rem;
-            transition: all var(--transition-speed) ease;
-        }
-
-        .sidebar .nav-link:hover i {
-            transform: scale(1.1);
-        }
-
-        main {
-            margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-            padding: 1.5rem;
-            overflow: visible !important;
-            min-height: calc(100vh - 120px);
-            transition: margin-left var(--transition-speed) ease;
-            flex: 1;
-        }
-
-        .main-container {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            padding: 1.5rem;
-            min-height: calc(100vh - 180px);
-        }
-
-        /* NUEVO FOOTER */
-        footer {
-            text-align: center;
-            width: 100%;
-            padding: 15px;
-            background: var(--sidebar-bg);
-            color: white;
-            margin-top: auto;
-            position: relative;
-            left: 0;
-            border-top: 1px solid #374151;
-            font-size: 0.9rem;
-            margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-            transition: margin-left var(--transition-speed) ease;
-        }
-
-        footer .container {
-            max-width: 100%;
-        }
-
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-                z-index: 1040;
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            main {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            footer {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .navbar-toggler {
-                display: block;
-                position: fixed;
-                top: 1rem;
-                left: 1rem;
-                z-index: 1050;
-            }
-        }
-
-        *:focus {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Estilos del Modal */
-        .auth-modal .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .auth-modal .modal-header {
-            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            border: none;
-        }
-
-        .auth-modal .modal-body {
-            padding: 2rem;
-        }
-
-        .auth-icon {
-            font-size: 3rem;
-            color: #0d6efd;
-            margin-bottom: 1rem;
-        }
-
-        .btn-auth {
-            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-            border: none;
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
-        }
-
-        .sidebar-disabled {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        /* Estilos para el menú de usuario */
-        .user-menu {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .user-menu:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-
-        .logout-btn {
-            color: #dc3545;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            color: #fff;
-            background-color: #dc3545;
-        }
-
-
-#edoctafModal .modal-content {
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-}
-
-#edoctafModal .modal-header {
-  border-radius: 10px 10px 0 0;
-}
-
-#edoctafModal textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-#edoctafModal .form-label {
-  margin-bottom: 0.5rem;
-}
-
-#edoctafModal .input-group-text {
-  background-color: #f8f9fa;
-  font-weight: 500;
-}
-
-#edoctafModal #contadorConcepto {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-#edoctafModal .invalid-feedback {
-  font-size: 0.875rem;
-}
-
-#edoctafModal .alert-info {
-  font-size: 0.9rem;
-  padding: 0.75rem;
-}
-</style>
-
-
+        /* ESTILOS (Sin cambios) */
+        :root { --sidebar-width: 280px; --primary-color: #0d6efd; --sidebar-bg: #1e293b; --sidebar-active: rgba(13, 110, 253, 0.2); --transition-speed: 0.3s; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; min-height: 100vh; background-color: #f8f9fa; color: #212529; display: flex; flex-direction: column; }
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; z-index: 1030; overflow-y: auto; background-color: var(--sidebar-bg); color: white; transition: all var(--transition-speed) ease; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); }
+        .sidebar-header { background-color: var(--primary-color); padding: 1.5rem 1rem; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-disabled { opacity: 0.5; pointer-events: none; filter: blur(4px); transition: filter 0.3s; }
+        .accordion-button { background-color: transparent; color: white; }
+        .accordion-button:not(.collapsed) { background-color: var(--sidebar-active); color: white; }
+        .sidebar .nav-link { color: rgba(255, 255, 255, 0.8); padding: 0.75rem 1.5rem; }
+        .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 1.5rem; min-height: calc(100vh - 60px); transition: margin-left var(--transition-speed) ease; }
+        .main-container { background-color: white; border-radius: 0.5rem; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); padding: 1.5rem; min-height: 80vh; }
+        .auth-modal .modal-content { border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+        .auth-modal .modal-header { background: linear-gradient(135deg, #0d6efd, #0dcaf0); color: white; border-radius: 15px 15px 0 0; }
+        .auth-icon { font-size: 3rem; color: #0d6efd; margin-bottom: 1rem; }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } main { margin-left: 0; width: 100%; } }
+    </style>
 </head>
 
 <body class="d-flex">
-    <!-- Modal de Autenticación -->
-    <div class="modal fade auth-modal" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+
+    <!-- 1. LIMPIEZA INMEDIATA -->
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'warning' in message.tags %}
+                    console.log("⚠️ TIMEOUT: Limpiando credenciales.");
+                    sessionStorage.clear();
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- 2. MODAL -->
+    <div class="modal fade auth-modal" id="authModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header text-center">
-                    <h5 class="modal-title w-100" id="authModalLabel">
-                        <i class="bi bi-shield-lock me-2"></i>Autenticación Requerida
-                    </h5>
+                    <h5 class="modal-title w-100"><i class="bi bi-shield-lock me-2"></i>Acceso Requerido</h5>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="auth-icon">
-                        <i class="bi bi-person-badge"></i>
+                    <div class="auth-icon"><i class="bi bi-person-badge"></i></div>
+
+                    <div id="timeoutMessage" class="alert alert-warning d-none">
+                        <i class="bi bi-clock-history"></i> Sesión expirada por inactividad.
                     </div>
-                    <h4 class="mb-4">Acceso al Sistema</h4>
 
                     <form id="authForm">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="usuario" class="form-label">Número de Usuario</label>
-                            <input type="number" class="form-control form-control-lg" id="usuario" name="usuario" required placeholder="Ingresa tu número de usuario">
+                        <!-- INPUT OCULTO TOKEN -->
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                        <div class="mb-3 text-start">
+                            <label for="usuario" class="form-label fw-bold">Usuario Operador</label>
+                            <select class="form-select form-select-lg" id="usuario" name="usuario" required>
+                                <option value="" selected disabled>Seleccione...</option>
+                                {% for u in usuarios_para_login %}
+                                    <option value="{{ u.usuario }}">{{ u.nombre }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No hay usuarios disponibles</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control form-control-lg" id="password" name="password" required placeholder="Ingresa tu contraseña">
+                        <div class="mb-4 text-start">
+                            <label for="password" class="form-label fw-bold">Contraseña</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" required>
                         </div>
 
                         <div id="authMessage" class="alert alert-danger d-none" role="alert">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
                             <span id="messageText"></span>
                         </div>
 
-                        <button type="submit" class="btn btn-auth w-100" id="btnLogin">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar al Sistema
+                        <button type="submit" class="btn btn-primary w-100 py-2" id="btnLogin">
+                            Ingresar
                         </button>
                     </form>
                 </div>
@@ -360,482 +93,272 @@
         </div>
     </div>
 
-    <!-- Mobile Toggle Button -->
-    <button class="navbar-toggler d-lg-none btn btn-primary" id="sidebarToggle">
+    <!-- 3. SIDEBAR -->
+    <button class="navbar-toggler d-lg-none btn btn-primary position-fixed top-0 start-0 m-2" style="z-index: 1040;" id="sidebarToggle">
         <i class="bi bi-list"></i>
     </button>
 
-    <!-- Sidebar -->
     <div class="sidebar bg-dark text-white p-0" id="sidebar">
+        <!-- HEADER -->
         <div class="sidebar-header text-center py-4 bg-primary">
-            <h3 class="mb-0">
-                <i class="bi bi-heart-pulse me-2"></i>Freshstart
-            </h3>
+            <h3 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Freshstart</h3>
             <small class="text-white-50">v1.0.0</small>
         </div>
 
         <div class="accordion accordion-flush" id="sidebarAccordion">
-            <!-- 1. INTERNOS -->
+            <!-- INTERNOS -->
             <div class="accordion-item bg-dark border-0">
-                <a href="{% url 'listaint' %}" class="accordion-button bg-dark text-white d-flex align-items-center py-3">
-                    <i class="bi bi-people-fill me-3"></i>
-                    <span>Internos</span>
+                <a href="{% url 'listaint' %}" class="accordion-button bg-dark text-white text-decoration-none">
+                    <i class="bi bi-people-fill me-3"></i><span>Internos</span>
                 </a>
             </div>
-
-            <!-- 2. ADMINISTRACIÓN -->
-            <div class="accordion-item bg-dark border-0 ">
+            <!-- ADMINISTRACIÓN -->
+            <div class="accordion-item bg-dark border-0">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed bg-dark text-white py-3"
-                            type="button "
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseAdmin"
-                            aria-expanded="false"
-                            aria-controls="collapseAdmin">
-                        <i class="bi bi-clipboard2-data me-3"></i>
-                     <span>Administración <span class="badge bg-warning text-dark ms-1">
-
-                     </span></span>
+                    <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmin">
+                        <i class="bi bi-clipboard2-data me-3"></i><span>Administración</span>
                     </button>
                 </h2>
                 <div id="collapseAdmin" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body bg-secondary bg-opacity-10 p-0">
-                         <a href="{% url 'captura_pagos' %}" class="nav-link text-white ">
-                            <i class="bi bi-cash-coin"></i>
-                            <span>Captura de cuotas voluntarias</span>
-                        </a>
-                        <a href="{% url 'lista_recibos' %}" class="nav-link text-white ">
-                            <i class="bi bi-cash-coin"></i>
-                            <span>Consulta, Cancelacion y Reimpresion de recibos</span>
-                        </a>
-                        <a href="{% url 'menu_reportes' %}" class="nav-link text-white d-flex align-items-center">
-                            <i class="bi bi-file-earmark-bar-graph"></i>
-                            <span>Reportes</span>
-                            <span class="badge bg-warning ms-auto">3</span>
-                        </a>
-
+                        <a href="{% url 'captura_pagos' %}" class="nav-link text-white"><i class="bi bi-cash-coin me-2"></i>Captura de cuotas</a>
+                        <a href="{% url 'lista_recibos' %}" class="nav-link text-white"><i class="bi bi-receipt me-2"></i>Recibos</a>
+                        <a href="{% url 'menu_reportes' %}" class="nav-link text-white"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes</a>
                     </div>
                 </div>
             </div>
-
-            <!-- 3. UTILIDADES -->
+            <!-- UTILERIAS -->
             <div class="accordion-item bg-dark border-0">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed bg-dark text-white py-3"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseUtils"
-                            aria-expanded="false"
-                            aria-controls="collapseUtils">
-                        <i class="bi bi-tools me-3"></i>
-                        <span>Utilerias</span>
+                    <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUtils">
+                        <i class="bi bi-tools me-3"></i><span>Utilerias</span>
                     </button>
                 </h2>
                 <div id="collapseUtils" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body bg-secondary bg-opacity-10 p-0">
-                        <a href="{% url 'datosgrales' %}" class="nav-link text-white">
-                            <i class="bi bi-building"></i>
-                            <span>Datos de la Clínica</span>
-                        </a>
-                        <a href="{% url 'lusuarios' %}" class="nav-link text-white">
-                            <i class="bi bi-person-lines-fill"></i>
-                            <span>Usuarios</span>
-                            <span class="badge bg-danger ms-auto">!</span>
-                        </a>
-                  <!--      <a href="{% url 'lista_archivos_word' %}" class="nav-link text-white">
-                            <i class="bi bi-person-lines-fill"></i>
-                            <span>Imprime Tareas</span>
-                            <span class="badge bg-danger ms-auto">!</span>
-                        </a>
-                        <a href="#" class="nav-link text-white">
-                            <i class="bi bi-list-check"></i>
-                            <span>Conceptos</span>
-                        </a>
-
-                        <a href="#" class="nav-link text-white">
-                            <i class="bi bi-gear"></i>
-                            <span>Configuración</span>
-                        </a> -->
+                        <a href="{% url 'datosgrales' %}" class="nav-link text-white"><i class="bi bi-building me-2"></i>Datos Clínica</a>
+                        <a href="{% url 'lusuarios' %}" class="nav-link text-white"><i class="bi bi-person-lines-fill me-2"></i>Usuarios</a>
                     </div>
                 </div>
             </div>
-
-            <!-- 4. MENÚ DE USUARIO (NUEVA SECCIÓN) -->
-            <div class="accordion-item bg-dark border-0 d-print-none">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed bg-dark text-white py-3 user-menu"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseUser"
-                            aria-expanded="false"
-                            aria-controls="collapseUser">
-                        <i class="bi bi-person-circle me-3"></i>
-                        <span id="userMenuTitle">Usuario</span>
-                    </button>
-                </h2>
-                <div id="collapseUser" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
-                    <div class="accordion-body bg-secondary bg-opacity-10 p-0">
-                        <div class="nav-link text-white">
-                            <i class="bi bi-person"></i>
-                            <span id="userInfo">No autenticado</span>
+            <!-- USUARIO -->
+            <div class="accordion-item bg-dark border-0 mt-3 border-top border-secondary">
+                <div class="p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-person-circle fs-4 me-2"></i>
+                        <div>
+                            <div class="fw-bold" id="userMenuTitle">Usuario</div>
+                            <small class="text-white-50" id="userCargo">-</small>
                         </div>
-                        <div class="nav-link text-white">
-                            <i class="bi bi-briefcase"></i>
-                            <span id="userCargo">-</span>
-                        </div>
-                        <hr class="my-1 mx-3 text-white-50">
-                        <a href="#" class="nav-link text-white logout-btn" onclick="cerrarSesion()">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span>Cerrar Sesión</span>
-                        </a>
                     </div>
+                    <a href="#" class="btn btn-outline-danger btn-sm w-100" onclick="cerrarSesionManual()">
+                        <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+                    </a>
                 </div>
-            </div>
-        </div>
-
-        <!-- Sidebar Footer (versión simplificada) -->
-        <div class="sidebar-footer position-absolute bottom-0 start-0 end-0 p-3 bg-dark border-top border-dark">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="text-muted small">
-                    <i class="bi bi-person-circle me-2"></i>
-                    <span id="currentUser">No autenticado</span>
-                </div>
-                <a href="#" class="text-white" title="Cerrar sesión" onclick="cerrarSesion()">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
             </div>
         </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- 4. CONTENIDO -->
     <main>
+        <!-- Alertas -->
+        <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000; width: 90%; max-width: 600px;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-lg border-0">
+                        <strong>Aviso:</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
         <div class="main-container">
             {% block content %} {% endblock %}
         </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p class="mb-1">
-                <strong>Sistema desarrollado por:</strong> Soluciones Digitales |
-                <strong>Contacto:</strong> solucionesdigitales@gmail.com |
-            </p>
-            <small style="color: #9ca3af;">
-                © 2025 Fresh Start - Todos los derechos reservados
-            </small>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS with Popper -->
+    <!-- 5. SCRIPTS ROBUSTOS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // CONFIGURACIÓN DE TIEMPO
+        const MINUTOS_TIMEOUT_JS = 5;
+        const INTERVALO_PING_SERVIDOR = 5;
+        let temporizadorInactividad;
+        let ultimoPing = Date.now();
+        let globalAuthModal = null;
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar si ya está autenticado
+            // A. INICIAR MODAL
+            const authModalEl = document.getElementById('authModal');
+            globalAuthModal = new bootstrap.Modal(authModalEl, { backdrop: 'static', keyboard: false });
+
+            // B. VERIFICAR SI HAY SESIÓN
             const estaAutenticado = sessionStorage.getItem('usuario_autenticado');
 
             if (!estaAutenticado) {
-                // Mostrar modal solo si no está autenticado
-                const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-                authModal.show();
-
-                // Deshabilitar sidebar
-                document.getElementById('sidebar').classList.add('sidebar-disabled');
+                bloquearSistema(false);
             } else {
-                // Si ya está autenticado, mostrar información del usuario
-                const usuarioNombre = sessionStorage.getItem('usuario_nombre');
-                const usuarioCargo = sessionStorage.getItem('usuario_cargo');
-
-                document.getElementById('currentUser').textContent = usuarioNombre;
-                document.getElementById('userMenuTitle').textContent = usuarioNombre;
-                document.getElementById('userInfo').textContent = usuarioNombre;
-                document.getElementById('userCargo').textContent = usuarioCargo || 'Sin cargo asignado';
+                actualizarInterfaz();
+                iniciarDetectores();
             }
 
-            // Mobile sidebar toggle
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                });
-            }
-
-            // Active link highlighting
-            const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
-
-            // Manejar el formulario de autenticación
+            // C. LÓGICA DE LOGIN (CORREGIDA Y SIMPLIFICADA)
             const authForm = document.getElementById('authForm');
-            const authMessage = document.getElementById('authMessage');
-            const messageText = document.getElementById('messageText');
-            const btnLogin = document.getElementById('btnLogin');
-
             if (authForm) {
                 authForm.addEventListener('submit', function(e) {
                     e.preventDefault();
 
-                    const usuario = document.getElementById('usuario').value;
-                    const password = document.getElementById('password').value;
+                    // 1. Obtener valores MANUALMENTE (Más seguro)
+                    const usuarioInput = document.getElementById('usuario').value;
+                    const passwordInput = document.getElementById('password').value;
 
-                    if (!usuario || !password) {
-                        showMessage('Por favor, completa todos los campos', 'danger');
+                    // 2. Obtener CSRF MANUALMENTE
+                    const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                    const token = csrfInput ? csrfInput.value : '';
+
+                    const btn = document.getElementById('btnLogin');
+                    const msgBox = document.getElementById('authMessage');
+                    const msgText = document.getElementById('messageText');
+
+                    if(!usuarioInput || !passwordInput) {
+                        msgText.textContent = "Complete los campos";
+                        msgBox.classList.remove('d-none');
                         return;
                     }
 
-                    btnLogin.disabled = true;
-                    btnLogin.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i>Verificando...';
+                    // UI Loading
+                    btn.disabled = true; btn.innerHTML = 'Verificando...'; msgBox.classList.add('d-none');
 
-                    // Enviar datos al servidor
+                    // 3. FETCH CON ERROR HANDLING MEJORADO
                     fetch('{% url "validar_usuario" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            'X-CSRFToken': token
                         },
-                        body: `usuario=${usuario}&password=${password}`
+                        body: `usuario=${usuarioInput}&password=${passwordInput}`
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showMessage('Autenticación exitosa', 'success');
-
-                            // Guardar en sessionStorage del navegador
-                            sessionStorage.setItem('usuario_autenticado', 'true');
-                            sessionStorage.setItem('usuario_nombre', data.nombre);
-                            sessionStorage.setItem('usuario_cargo', data.cargo || 'Usuario');
-
-                            // Actualizar la interfaz inmediatamente
-                            document.getElementById('currentUser').textContent = data.nombre;
-                            document.getElementById('userMenuTitle').textContent = data.nombre;
-                            document.getElementById('userInfo').textContent = data.nombre;
-                            document.getElementById('userCargo').textContent = data.cargo || 'Usuario';
-
-                            setTimeout(() => {
-                                const authModal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
-                                authModal.hide();
-
-                                // Habilitar sidebar
-                                document.getElementById('sidebar').classList.remove('sidebar-disabled');
-
-                                // Recargar la página para que Django tenga los datos de sesión
-                                location.reload();
-                            }, 1000);
-                        } else {
-                            showMessage(data.message || 'Credenciales incorrectas', 'danger');
-                            btnLogin.disabled = false;
-                            btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Ingresar al Sistema';
+                    .then(async response => {
+                        const text = await response.text();
+                        try {
+                            // Intentamos convertir a JSON
+                            return JSON.parse(text);
+                        } catch {
+                            // Si falla, es que el servidor devolvió HTML (Error 500)
+                            throw new Error("Error del Servidor: " + text.substring(0, 100)); // Muestra primeros 100 chars
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showMessage('Error de conexión', 'danger');
-                        btnLogin.disabled = false;
-                        btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Ingresar al Sistema';
+                    .then(data => {
+                        if (data.success) {
+                            sessionStorage.setItem('usuario_autenticado', 'true');
+                            sessionStorage.setItem('usuario_nombre', data.nombre);
+                            sessionStorage.setItem('usuario_cargo', data.cargo);
+                            sessionStorage.setItem('usuario_permisos', data.permisos);
+
+                            actualizarInterfaz();
+                            document.getElementById('sidebar').classList.remove('sidebar-disabled');
+                            globalAuthModal.hide();
+                            iniciarDetectores();
+
+                            btn.disabled = false; btn.innerHTML = 'Ingresar'; authForm.reset();
+                            document.getElementById('timeoutMessage').classList.add('d-none');
+                        } else {
+                            msgText.textContent = data.message || 'Credenciales incorrectas';
+                            msgBox.classList.remove('d-none');
+                            btn.disabled = false; btn.innerHTML = 'Ingresar';
+                        }
+                    })
+                    .catch(err => {
+                        console.error("ERROR FETCH:", err);
+                        // Mostrar el error real en la pantalla
+                        msgText.textContent = err.message || 'Error de conexión.';
+                        msgBox.classList.remove('d-none');
+                        btn.disabled = false; btn.innerHTML = 'Ingresar';
                     });
                 });
             }
 
-            function showMessage(text, type) {
-                if (messageText) {
-                    messageText.textContent = text;
-                    authMessage.className = `alert alert-${type}`;
-                    authMessage.classList.remove('d-none');
-                }
-            }
+            // Toggle Sidebar
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            if(toggle && sidebar) toggle.addEventListener('click', () => sidebar.classList.toggle('active'));
         });
 
- function cerrarSesion() {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?\nSerás redirigido al menú principal.')) {
+        // --- FUNCIONES GLOBALES ---
 
-        // Efecto visual de cerrando sesión
-        document.body.style.opacity = '0.7';
-        document.body.style.transition = 'opacity 0.3s ease';
+        function iniciarDetectores() {
+            resetearTimer();
+            window.addEventListener('mousemove', actividadDetectada);
+            window.addEventListener('keydown', actividadDetectada);
+            window.addEventListener('click', actividadDetectada);
+        }
 
-        // Mostrar mensaje
-        const loadingMessage = document.createElement('div');
-        loadingMessage.innerHTML = `
-            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                       background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.3);
-                       z-index: 9999; text-align: center;">
-                <i class="bi bi-box-arrow-right" style="font-size: 2rem; color: #0d6efd;"></i>
-                <h5 class="mt-2">Cerrando sesión...</h5>
-                <p>Redirigiendo al menú principal</p>
-            </div>
-        `;
-        document.body.appendChild(loadingMessage);
-
-        // Limpiar datos
-        sessionStorage.clear();
-
-        // Limpiar sesión del servidor y redirigir
-        fetch('{% url "cerrar_sesion" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        function actividadDetectada() {
+            resetearTimer();
+            const ahora = Date.now();
+            if (((ahora - ultimoPing) / 1000 / 60) >= INTERVALO_PING_SERVIDOR) {
+                console.log("💓 Heartbeat enviado...");
+                ultimoPing = ahora;
+                fetch(window.location.href, { method: 'HEAD' });
             }
-        })
-        .finally(() => {
-            // Redirigir después de 1 segundo para que se vea el mensaje
-            setTimeout(() => {
-                window.location.href = "{% url 'Menu principal' %}";
-            }, 1000);
-        });
-    }
-}
+        }
 
+        function resetearTimer() {
+            clearTimeout(temporizadorInactividad);
+            temporizadorInactividad = setTimeout(ejecutarLogout, MINUTOS_TIMEOUT_JS * 60 * 1000);
+        }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('edoctafModal');
-  const form = document.getElementById('edoctafForm');
-  const concepto = document.getElementById('concepto');
-  const contadorConcepto = document.getElementById('contadorConcepto');
-  const tipoMovimiento = document.getElementById('tipoMovimiento');
-  const importeInput = document.getElementById('importe');
-  const saldoActualInput = document.getElementById('saldoActual');
+       function ejecutarLogout() {
+            console.log("💤 Cerrando sesión...");
 
-  // Contador de caracteres para concepto
-  concepto.addEventListener('input', function() {
-    const longitud = this.value.length;
-    contadorConcepto.textContent = `${longitud}/200`;
+            // 1. Borrar credenciales del navegador
+            sessionStorage.clear();
 
-    if (longitud > 200) {
-      this.value = this.value.substring(0, 200);
-    }
-  });
+            // 2. Obtener token CSRF
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            const token = csrfInput ? csrfInput.value : '';
 
-  // Calcular saldo automáticamente cuando cambia tipo o importe
-  function calcularSaldo() {
-    if (!tipoMovimiento.value || !importeInput.value) return;
+            // 3. Avisar al servidor
+            fetch('{% url "cerrar_sesion" %}', {
+                method: 'POST',
+                headers: {'X-CSRFToken': token}
+            })
+            .finally(() => {
+                // CAMBIO AQUÍ: Forzamos la recarga al Dashboard.
+                // Al recargar, como el sessionStorage está vacío, el modal se abrirá solo.
+                window.location.href = "{% url 'dashboard' %}";
+            });
+        }
 
-    const importe = parseFloat(importeInput.value);
-    let saldoActual = 10000; // Valor de ejemplo, reemplazar con saldo real
+        function bloquearSistema(esTimeout = false) {
+            document.getElementById('sidebar').classList.add('sidebar-disabled');
+            if(esTimeout) {
+                document.getElementById('timeoutMessage').classList.remove('d-none');
+                document.getElementById('modalTitle').textContent = "Sesión Expirada";
+            }
+            if(globalAuthModal) globalAuthModal.show();
+        }
 
-    switch(tipoMovimiento.value) {
-      case 'deposito':
-      case 'intereses':
-        saldoActual += importe;
-        break;
-      case 'retiro':
-      case 'comision':
-        saldoActual -= importe;
-        break;
-      default:
-        // Para transferencias y otros, se podría ajustar según necesidad
-        saldoActual = 'N/A';
-    }
+        function actualizarInterfaz() {
+            const nombre = sessionStorage.getItem('usuario_nombre') || 'Usuario';
+            const cargo = sessionStorage.getItem('usuario_cargo') || '';
 
-    if (typeof saldoActual === 'number') {
-      saldoActualInput.value = saldoActual.toFixed(2);
-    } else {
-      saldoActualInput.value = saldoActual;
-    }
-  }
+            const els = ['userMenuTitle', 'currentUser', 'userInfo'];
+            els.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.textContent = nombre;
+            });
+            const elCargo = document.getElementById('userCargo');
+            if(elCargo) elCargo.textContent = cargo;
+        }
 
-  tipoMovimiento.addEventListener('change', calcularSaldo);
-  importeInput.addEventListener('input', calcularSaldo);
-
-  // Validación del formulario
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!form.checkValidity()) {
-      form.classList.add('was-validated');
-      return;
-    }
-
-    // Recoger datos del formulario
-    const formData = {
-      fecha: document.getElementById('fecha').value,
-      tipoMovimiento: tipoMovimiento.value,
-      concepto: concepto.value,
-      importe: parseFloat(importeInput.value),
-      saldoActual: saldoActualInput.value
-    };
-
-    // Aquí iría la lógica para guardar los datos
-    console.log('Datos del formulario:', formData);
-
-    // Mostrar mensaje de éxito
-    mostrarMensajeExito();
-
-    // Cerrar modal después de guardar
-    setTimeout(() => {
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
-      bootstrapModal.hide();
-      form.reset();
-      form.classList.remove('was-validated');
-      contadorConcepto.textContent = '0/200';
-    }, 1500);
-  });
-
-  // Resetear formulario
-  form.addEventListener('reset', function() {
-    form.classList.remove('was-validated');
-    contadorConcepto.textContent = '0/200';
-    saldoActualInput.value = '';
-  });
-
-  // Función para mostrar mensaje de éxito
-  function mostrarMensajeExito() {
-    // Crear toast de Bootstrap
-    const toastHTML = `
-      <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            <i class="bi bi-check-circle me-2"></i>
-            Movimiento guardado exitosamente
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-    `;
-
-    const toastContainer = document.getElementById('toastContainer') || crearToastContainer();
-    toastContainer.innerHTML = toastHTML;
-
-    const toast = new bootstrap.Toast(toastContainer.firstElementChild);
-    toast.show();
-  }
-
-  function crearToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '1060';
-    document.body.appendChild(container);
-    return container;
-  }
-
-  // Función para abrir el modal desde otro lugar
-  window.abrirModalEdoctaf = function(datos) {
-    if (datos) {
-      // Si hay datos, llenar el formulario (para edición)
-      document.getElementById('fecha').value = datos.fecha || '';
-      tipoMovimiento.value = datos.tipoMovimiento || '';
-      concepto.value = datos.concepto || '';
-      importeInput.value = datos.importe || '';
-      saldoActualInput.value = datos.saldoActual || '';
-
-      // Actualizar contador
-      contadorConcepto.textContent = `${concepto.value.length}/200`;
-    }
-
-    const edoctafModal = new bootstrap.Modal(modal);
-    edoctafModal.show();
-  };
-});
-</script>
-
-
-
+        function cerrarSesionManual() {
+            if(confirm("¿Cerrar sesión?")) {
+                ejecutarLogout();
+            }
+        }
+    </script>
 </body>
 </html>

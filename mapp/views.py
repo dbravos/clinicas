@@ -24,7 +24,7 @@ from reportlab.lib.utils import ImageReader
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.db.models import Sum
-
+from .decorators import permiso_requerido
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -263,53 +263,63 @@ def grabainterno(request, id):
                     # ==========================================================
                     # Verificamos si el checkbox viene marcado ('true' o 'on' dependiendo del navegador, asumimos 'true' por tu script)
                     if request.POST.get('generar_cuotas') == 'true':
+                        cuotas_existen = Edocuenta.objects.filter(
+                            expediente=interno.numeroexpediente,
+                            clinica=clinica_actual,
+                            referencia__startswith="Cuota #"  # O el criterio que uses para identificarlas
+                        ).exists()
 
-                        # Usamos los datos LIMPIOS del formulario validado, no del POST crudo (más seguro)
-                        # O bien, usamos los del objeto 'interno' que ya se actualizó
-                        saldo_pendiente = float(request.POST.get('saldo') or 0)
-                        monto_cuota = float(request.POST.get('cuota') or 0)
-                        fecha_str = request.POST.get('fecha_inicio_pago')
-                        periodo_texto = str(interno.periodopago).upper()
+                        if cuotas_existen:
+                            # Si ya existen, mandamos advertencia y NO generamos nada
+                            messages.warning(request,
+                                             "⚠️ ATENCIÓN: No se generaron cuotas nuevas porque ya existe un plan de pagos registrado para este expediente.")
+                        else:
+                            # Usamos los datos LIMPIOS del formulario validado, no del POST crudo (más seguro)
+                            # O bien, usamos los del objeto 'interno' que ya se actualizó
+                            saldo_pendiente = float(request.POST.get('saldo') or 0)
+                            monto_cuota = float(request.POST.get('cuota') or 0)
+                            fecha_str = request.POST.get('fecha_inicio_pago')
+                            periodo_texto = str(interno.periodopago).upper()
 
                         # Validaciones de Cuotas
-                        if saldo_pendiente <= 0 or monto_cuota <= 0:
-                            messages.warning(request,
-                                             "Datos guardados, pero NO se generaron cuotas: Saldo o Cuota en 0.")
-                        elif not fecha_str:
-                            messages.warning(request,
+                            if saldo_pendiente <= 0 or monto_cuota <= 0:
+                               messages.warning(request,
+                                               "Datos guardados, pero NO se generaron cuotas: Saldo o Cuota en 0.")
+                            elif not fecha_str:
+                               messages.warning(request,
                                              "Datos guardados, pero NO se generaron cuotas: Falta fecha de inicio.")
-                        else:
-                            # Cálculos
-                            fecha_actual = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+                            else:
+                                # Cálculos
+                                fecha_actual = datetime.strptime(fecha_str, '%Y-%m-%d').date()
 
-                            dias_sumar = 7  # Default
-                            if 'CATORCENAL' in periodo_texto or '14' in periodo_texto:
-                                dias_sumar = 14
-                            elif 'QUINCENAL' in periodo_texto or '15' in periodo_texto:
-                                dias_sumar = 15
-                            elif 'MENSUAL' in periodo_texto or '30' in periodo_texto:
-                                dias_sumar = 30
+                                dias_sumar = 7  # Default
+                                if 'CATORCENAL' in periodo_texto or '14' in periodo_texto:
+                                   dias_sumar = 14
+                                elif 'QUINCENAL' in periodo_texto or '15' in periodo_texto:
+                                   dias_sumar = 15
+                                elif 'MENSUAL' in periodo_texto or '30' in periodo_texto:
+                                   dias_sumar = 30
 
-                            contador = 1
+                                contador = 1
                             # Limite de seguridad
-                            while saldo_pendiente > 0.1 and contador < 500:
-                                pago_actual = saldo_pendiente if saldo_pendiente < monto_cuota else monto_cuota
+                                while saldo_pendiente > 0.1 and contador < 500:
+                                     pago_actual = saldo_pendiente if saldo_pendiente < monto_cuota else monto_cuota
 
-                                Edocuenta.objects.create(
-                                    expediente=interno.numeroexpediente,
-                                    clinica=clinica_actual,
-                                    fecha=fecha_actual,
-                                    concepto=1,
-                                    tipo='C',
-                                    importe=pago_actual,
-                                    referencia=f"Cuota # {contador}",
-                                    operador=mem_user_no,
-                                    nombreoperador=mem_user_nombre
-                                )
+                                     Edocuenta.objects.create(
+                                        expediente=interno.numeroexpediente,
+                                        clinica=clinica_actual,
+                                        fecha=fecha_actual,
+                                        concepto=1,
+                                        tipo='C',
+                                        importe=pago_actual,
+                                        referencia=f"Cuota # {contador}",
+                                        operador=mem_user_no,
+                                        nombreoperador=mem_user_nombre
+                                        )
 
-                                saldo_pendiente -= pago_actual
-                                fecha_actual = fecha_actual + timedelta(days=dias_sumar)
-                                contador += 1
+                                     saldo_pendiente -= pago_actual
+                                     fecha_actual = fecha_actual + timedelta(days=dias_sumar)
+                                     contador += 1
 
                             messages.success(request,
                                              f"Se actualizaron los datos y se programaron {contador - 1} cuotas.")
@@ -2806,29 +2816,47 @@ def historiaClinica(request, id):
     })
 
 
-
-
 @csrf_exempt
 def validar_usuario(request):
     if request.method == 'POST':
+        # 1. Obtener datos
         usuario_numero = request.POST.get('usuario')
         password = request.POST.get('password')
 
+        # 2. Obtener la clínica de la sesión (CRÍTICO)
+        clinica_sesion = request.session.get('clinica_actual')
+
+        # DEBUG: Ver qué está llegando (Míralo en tu terminal negra)
+        print(
+            f"🔐 INTENTO LOGIN: Usuario: {usuario_numero} | Password: {password} | Clínica en Sesión: {clinica_sesion}")
+
+        if not clinica_sesion:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error de sesión: No se detecta la clínica. Recargue la página.'
+            })
+
         try:
-            # Buscar usuario por número
-            usuario = Usuarios.objects.get(usuario=usuario_numero,
-                      clinica=request.session.get('clinica_actual', 'Demostracion'))
+            # 3. Conversión segura a entero (por si acaso)
+            # A veces llega "1" (string) y la BD quiere 1 (int)
+            u_num = int(usuario_numero)
 
-            # Verificar password
-            if usuario.password == password:
+            # 4. Búsqueda exacta
+            usuario = Usuarios.objects.get(
+                usuario=u_num,
+                clinica=clinica_sesion
+            )
 
+            # 5. Verificar password
+            if str(usuario.password) == str(password):  # Comparamos como texto para evitar errores
+
+                # REGENERAMOS LA SESIÓN DEL OPERADOR
                 request.session['usuario_autenticado'] = True
                 request.session['usuario_id'] = usuario.id
                 request.session['usuario_no'] = usuario.usuario
                 request.session['usuario_nombre'] = usuario.nombre
                 request.session['usuario_cargo'] = usuario.cargo
                 request.session['usuario_permisos'] = usuario.permisos
-
 
                 return JsonResponse({
                     'success': True,
@@ -2837,27 +2865,36 @@ def validar_usuario(request):
                     'permisos': usuario.permisos
                 })
             else:
+                print(f"❌ Password incorrecto. BD: {usuario.password} vs Input: {password}")
                 return JsonResponse({
                     'success': False,
                     'message': 'Contraseña incorrecta'
                 })
 
+        except ValueError:
+            print("❌ Error: El número de usuario no es válido")
+            return JsonResponse({'success': False, 'message': 'Número de usuario inválido'})
+
         except Usuarios.DoesNotExist:
+            print(f"❌ No existe usuario {usuario_numero} en clínica {clinica_sesion}")
             return JsonResponse({
                 'success': False,
-                'message': 'Usuario no encontrado'
+                'message': f'Usuario no encontrado en {clinica_sesion}'
             })
+        except Exception as e:
+            print(f"❌ Error desconocido: {str(e)}")
+            return JsonResponse({'success': False, 'message': f'Error interno: {str(e)}'})
 
-    return JsonResponse({
-        'success': False,
-        'message': 'Método no permitido'
-    })
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
 
 @csrf_exempt
 def cerrar_sesion(request):
     if request.method == 'POST':
-        # Limpiar toda la sesión
+        # ERROR ANTERIOR: Probablemente había un request.session.flush() aquí.
+        # ESO BORRABA LA CLÍNICA y por eso te sacaba totalmente.
+
+        # SOLUCIÓN: Borramos EXPLÍCITAMENTE solo las variables del operador.
         keys_to_delete = [
             'usuario_autenticado',
             'usuario_id',
@@ -2871,10 +2908,12 @@ def cerrar_sesion(request):
             if key in request.session:
                 del request.session[key]
 
+        # IMPORTANTE: NO TOCAMOS 'clinica_actual' NI 'clinica_nombre'
+        # Así la vista 'dashboard' permite entrar y muestra el HTML con el modal.
+
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False})
-
 
 # views.py - ACTUALIZA tu vista de login
 def login_clinica(request):
@@ -2910,11 +2949,14 @@ def login_clinica(request):
 
 def dashboard(request):
     # 1. Seguridad: Si no han entrado a la clínica, mandar al login
-    if 'clinica_actual' not in request.session:
-        return redirect('login_clinica')
 
     # 2. Obtener el ID de la clínica de la sesión
     clinica_nombre = request.session.get('clinica_actual')
+
+    if 'clinica_actual' not in request.session:
+        return redirect('login_clinica')
+
+
 
     # 3. Buscar los usuarios de ESTA clínica para llenar el Modal
     # Agregué .order_by('nombre') para que salgan en orden alfabético
