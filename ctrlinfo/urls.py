@@ -20,6 +20,8 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path, include
 
 from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgrales,lusuarios,\
                         agregausuario,grabadatosusuario,editausuario,borrausuario,borrainterno,agregainterno,seleccionainterno,\
@@ -37,7 +39,8 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', login_clinica, name='login_clinica'),
+    path('', include('landing.urls')),  # Landing en la raíz
+    path('login/', login_clinica, name='login_clinica'),
     path('dashboard/', dashboard, name='dashboard'),
     path('menuprincipal/', primermenu, name='Menu principal'),
     path('listaint/',listaint,name='listaint'),
@@ -112,7 +115,8 @@ urlpatterns = [
     # Generadores de PDF
     path('reportes/pdf/recibidas/', reporte_cuotas_recibidas, name='rep_recibidas'),
     path('reportes/pdf/por-recibir/', reporte_cuotas_por_recibir, name='rep_por_recibir'),
-]
+    path('', include('landing.urls')),  # Landing en la raíz
+  ]
 
 
 

@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'mapp',
     'django.contrib.humanize',
     'simple_history',
+    'landing',
 
 ]
 
@@ -194,3 +195,16 @@ LOGGING = {
 #            print("✅ Los datos ya fueron cargados previamente")
 #    except Exception as e:
 #        print(f"⚠️  Error en carga de datos: {e}")
+
+# ==============================
+# CONFIGURACIÓN DE EMAIL SMTP
+# ==============================
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'dbrasan@gmail.com'
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_PASSWORD = 'iehjdstxfsceyusi'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
