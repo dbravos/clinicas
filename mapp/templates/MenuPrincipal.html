@@ -161,6 +161,11 @@
 
     <!-- 4. CONTENIDO -->
     <main>
+
+
+        <!-- ========================================== -->
+
+
         <!-- Alertas -->
         <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000; width: 90%; max-width: 600px;">
             {% if messages %}
@@ -177,6 +182,44 @@
             {% block content %} {% endblock %}
         </div>
     </main>
+<!-- ========================================== -->
+        <!-- FOOTER PROFESIONAL (CENTRADO COMPACTO) -->
+        <!-- ========================================== -->
+        <footer class="mt-5 pt-4 pb-3 border-top text-center text-muted small" style="background-color: transparent;">
+            <div class="container">
+
+                <!-- Línea 1: Sistema -->
+                <div class="mb-2">
+                    <span class="fw-bold text-secondary">&copy; {% now "Y" %} Freshstart</span>
+                    <span class="mx-2">|</span>
+                    <span>Sistema de Gestión</span>
+                </div>
+
+                <!-- Línea 2: Desarrollador y Ubicación -->
+                <div class="mb-2">
+                    <span class="fw-bold text-dark">
+                        <i class="bi bi-code-slash text-primary me-1"></i> Desarrollado por Soluciones Digitales
+                    </span>
+                    <span class="mx-2 d-none d-sm-inline">&bull;</span>
+                    <span class="d-block d-sm-inline text-muted mt-1 mt-sm-0">
+                        <i class="bi bi-geo-alt me-1"></i> Tijuana, Baja Cfa.
+                    </span>
+                </div>
+
+                <!-- Línea 3: Datos de Contacto -->
+                <div>
+                    <a href="mailto:sdigitalestj@gmail.com" class="text-muted text-decoration-none transition-hover">
+                        <i class="bi bi-envelope-at me-1"></i> sdigitalestj@gmail.com
+                    </a>
+                    <span class="mx-2 d-none d-sm-inline">&bull;</span>
+                    <a href="tel:+526649796859" class="text-muted text-decoration-none d-block d-sm-inline mt-1 mt-sm-0 transition-hover">
+                        <i class="bi bi-telephone me-1"></i> 664-9796859
+                    </a>
+                </div>
+
+            </div>
+        </footer>
+        <!-- ========================================== -->
 
     <!-- 5. SCRIPTS ROBUSTOS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

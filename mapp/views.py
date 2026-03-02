@@ -2933,7 +2933,7 @@ def login_clinica(request):
                     # GUARDAR en sesión
                     request.session['clinica_actual'] = clinica.clinica
                     request.session['clinica_nombre'] = clinica.nombre
-                    request.session['ffazzuorrtt'] = clinica.password
+                #    request.session['ffazzuorrtt'] = clinica.password
 
                     return redirect('dashboard')
                 else:
