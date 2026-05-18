@@ -590,35 +590,78 @@
   </div>
 </div>
 
-      <div class="form-actions mt-5">
-      <button type="submit" class="btn btn-primary btn-save">
-        <i class="bi bi-save"></i> Guardar registro
-      </button>
-      </div>
+
         </div>
-    </form>
+
     {% endif%}
-</div>
-<div class="no-print" style="text-align: center; margin-top:-40px;margin-left:100px;">
-    <div style="display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-        <button onclick="location.href='{% url 'consentimiento' id=interno.pk %}'"
-                style="padding: 8px 12px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-         <i class="bi-file-text"></i>   Imprime Consentimiento
+
+
+<div class="form-actions mt-4 d-flex justify-content-center align-items-center gap-3 flex-wrap">
+
+    <!-- Guardar -->
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-1"></i> Guardar registro
+    </button>
+
+    <!-- Dropdown imprimir -->
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+            <i class="bi bi-printer me-1"></i> Imprimir
         </button>
-        <button onclick="location.href='{% url 'imprime_contrato' id=interno.pk %}'"
-                style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-          <i class="bi-printer"></i> Imprime Contrato
-        </button>
-        <button onclick="location.href='{% url 'imprime_solicitud' id=interno.pk %}'"
-                style="padding: 8px 12px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-           <i class="bi-file-text"></i>  Imprime Solicitud
-        </button>
-        <button onclick="location.href='{% url 'imprime_aviso' id=interno.pk %}'"
-                style="padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-            <i class="bi-file-text"></i> Imprime Aviso
-        </button>
+
+        <ul class="dropdown-menu shadow-sm">
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'consentimiento' id=interno.pk %}">
+                    <i class="bi bi-file-text me-2 text-info"></i>
+                    Carta de consentimiento
+                </a>
+            </li>
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'imprime_contrato' id=interno.pk %}">
+                    <i class="bi bi-printer me-2 text-success"></i>
+                    Contrato de servicio
+                </a>
+            </li>
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'imprime_solicitud' id=interno.pk %}">
+                    <i class="bi bi-file-text me-2 text-warning"></i>
+                    Solicitud de internamiento
+                </a>
+            </li>
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'imprime_aviso' id=interno.pk %}">
+                    <i class="bi bi-file-text me-2 text-danger"></i>
+                    Aviso internacion
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'imprimir_datos' id=interno.pk %}"
+                   target="_blank">
+                    <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                    Imprimir Expediente
+                </a>
+            </li>
+
+        </ul>
     </div>
+
 </div>
+    </form>
 
 <style>
     /* 1. Para Chrome, Safari, Edge y Opera */

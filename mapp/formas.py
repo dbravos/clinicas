@@ -236,7 +236,7 @@ class Einicialf(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False)
 
-    mayortiempo6 = forms.CharField(
+    maximotiempo = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False)
 

@@ -8,41 +8,57 @@
 <div class="interview-container">
   <!-- Header Sticky -->
   <div class="sticky-top interview-header">
-  <div class="header-content">
-  <div class="header-title">
+<div class="header-content shadow-sm rounded-4 p-3 bg-white">
 
-<div class="d-flex justify-content-between align-items-center mb-2">
-    <h3 class="mb-0">Entrevista Inicial</h3>
-    <div class="d-flex align-items-center gap-2">
-        <label class="mb-0 text-muted">Consejero:</label>
-        <span class="badge bg-secondary rounded-pill fs-5">{{ einicialf.instance.nombreconsejero|default:"Sin asignar" }}</span>
-    </div>
-</div>
+    <!-- Encabezado superior -->
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
 
-    <div class="patient-info d-flex align-items-center">
-      <!-- Información del paciente a la izquierda -->
-      <div>
-        <div class="patient-id d-inline-block me-3">
-          <label>Expediente:</label>
-          <span>{{ interno.numeroexpediente }}</span>
-        </div>
-        <div class="patient-name d-inline-block">
-          <label>Nombre:</label>
-          <span>{{ interno.nombrecompleto }}</span>
+        <h3 class="mb-0 fw-bold text-primary">
+            <i class="bi bi-file-earmark-medical me-2"></i>
+            Entrevista Inicial
+        </h3>
+
+        <div class="d-flex align-items-center gap-2">
+            <label class="mb-0 text-muted fw-semibold">
+                Consejero:
+            </label>
+
+            <span class="badge rounded-pill px-3 py-2 bg-secondary fs-6 shadow-sm">
+                {{ einicialf.instance.nombreconsejero|default:"Sin asignar" }}
+            </span>
         </div>
 
-
-      </div>
-
-      <!-- El botón "Regresar" con margen automático a la izquierda -->
-      <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar"
-         class="btn btn-primary ms-auto"
-         style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem;">
-         Regresar
-      </a>
     </div>
-  </div>
+
+    <!-- Información del paciente -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+        <div class="d-flex flex-wrap gap-4">
+
+            <div>
+                <small class="text-muted d-block">Expediente</small>
+                <strong>{{ interno.numeroexpediente }}</strong>
+            </div>
+
+            <div>
+                <small class="text-muted d-block">Nombre</small>
+                <strong>{{ interno.nombrecompleto }}</strong>
+            </div>
+
+        </div>
+
+        <!-- Botón regresar -->
+        <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar"
+           class="btn btn-primary rounded-pill px-4 shadow-sm">
+
+            <i class="bi bi-arrow-left-circle me-2"></i>
+            Regresar
+        </a>
+
+    </div>
+
 </div>
+
 
     <!-- Pestañas -->
     <div class="interview-tabs">
@@ -2353,7 +2369,8 @@
     </thead>
  <tbody>
         {% for i in "1,2,3,4,5,6,7,8"|split:"," %}
-        {% with a_field="a"|add:i d_field="d"|add:i c_field="c"|add:i h_field="h"|add:i r_field="r"|add:i %}
+        {% with endonde_field="endonde"|add:i a_field="a"|add:i d_field="d"|add:i c_field="c"|add:i h_field="h"|add:i r_field="r"|add:i %}
+            {% get_form_field tratamientosf endonde_field as endonde %}
             {% get_form_field tratamientosf a_field as campoa %}
             {% get_form_field tratamientosf d_field as campod %}
             {% get_form_field tratamientosf c_field as campoc %}
@@ -2364,8 +2381,9 @@
             <tr class="{% cycle '' 'bg-light' %}">
                 <!-- Columna Radio Buttons (Consume) -->
               <td>
-               {{campoa.label}}
+               {{endonde.label}}
               </td>
+
                 <td>
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                         {% for choice in campoa.field.choices %}
@@ -2890,11 +2908,45 @@
 
       </div> <!-- se cierra tab menor de edad-->
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary btn-save">
-        <i class="bi bi-save"></i> Guardar
-      </button>
-    </div>
+<div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+
+    <!-- Guardar -->
+    <button type="submit"
+        class="btn px-4 py-2 shadow-sm rounded-pill"
+        style="
+            background: linear-gradient(135deg, #198754, #20c997);
+            color:white;
+            border:none;
+            font-weight:600;
+            transition:all .25s ease;
+        "
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,.18)'"
+        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)'">
+
+        <i class="bi bi-save-fill me-2"></i>
+        Guardar
+    </button>
+
+    <!-- Imprimir -->
+    <a href="{% url 'imprimir_entrevista' id=interno.pk %}"
+       target="_blank"
+       class="btn px-4 py-2 shadow-sm rounded-pill"
+       style="
+           background: linear-gradient(135deg, #0d6efd, #6610f2);
+           color:white;
+           border:none;
+           font-weight:600;
+           transition:all .25s ease;
+       "
+       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,.18)'"
+       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)'">
+
+        <i class="bi bi-file-earmark-text-fill me-2"></i>
+        Imprimir Entrevista
+    </a>
+
+</div>
+
 
 
    </div> <!-- se cierra el tab-content -->

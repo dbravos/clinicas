@@ -4,7 +4,7 @@ register = template.Library()
 
 
 @register.filter
-def getattr(obj, attr_name):
+def obtener_atributo(obj, attr_name):
     """Versión segura que evita recursión"""
     try:
         return getattr(obj, attr_name)
@@ -37,3 +37,34 @@ def moneda(valor):
         return f"${valor:,.2f}"
     except (ValueError, TypeError):
         return "$0.00"
+
+
+import builtins
+@register.filter
+def valor_editado(form, field_name):
+    instance = form.instance
+
+    metodo = f"get_{field_name}_display"
+    if builtins.hasattr(instance, metodo):
+        return getattr(instance, metodo)()
+
+    valor = builtins.getattr(instance, field_name, None)
+
+    if isinstance(valor, bool):
+        return "Sí" if valor else "No"
+
+    try:
+        return valor.strftime("%d/%m/%Y")
+    except:
+        pass
+
+
+
+    if isinstance(valor, (int, float)) and (
+        "aportacion" in field_name or
+        "saldo" in field_name or
+        "cuota" in field_name
+    ):
+        return f"${valor:,.2f}"
+
+    return valor if valor else "-"

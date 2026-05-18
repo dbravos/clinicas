@@ -32,7 +32,8 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         listaSesionesPS,capturaSesionPS,medicoInicial,emisionDerecetas,historiaClinica,validar_usuario,\
                         cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard,salidas,\
                         seguimiento,listaSesionesS,capturaSesionS,reporte_internos,captura_pagos,guardar_pago,imprimir_recibo_pdf,\
-                        lista_recibos,cancelar_recibo,menu_reportes,reporte_cuotas_por_recibir,reporte_cuotas_recibidas
+                        lista_recibos,cancelar_recibo,menu_reportes,reporte_cuotas_por_recibir,reporte_cuotas_recibidas,\
+                        imprimir_datos,imprimir_entrevista
 
 
 
@@ -104,6 +105,8 @@ urlpatterns = [
     path('captura_pagos/', captura_pagos, name='captura_pagos'),
     path('guardar_pago/<int:id>', guardar_pago, name='guardar_pago'),
     path('imprimir-recibo/<int:id_recibo>', imprimir_recibo_pdf, name='imprimir_recibo'),
+    path('imprimir_datos/<int:id>', imprimir_datos, name='imprimir_datos'),
+    path('imprimir_entrevista/<int:id>', imprimir_entrevista, name='imprimir_entrevista'),
     path('recibos/consultar/', lista_recibos, name='lista_recibos'),
 
     # 2. Acción de Cancelar (Oculta, se llama desde el botón)

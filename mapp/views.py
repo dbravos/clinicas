@@ -25,6 +25,8 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from .decorators import permiso_requerido
+from django.utils import timezone
+
 
 # IMPORTS COMPATIBLES CON WINDOWS/LINUX
 try:
@@ -2970,6 +2972,92 @@ def dashboard(request):
     # 5. Renderizar
     return render(request, 'MenuPrincipal.html', context)
 
+from django.shortcuts import render, redirect
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import datetime
+
+def dashboard_balin(request):
+
+    if 'clinica_actual' not in request.session:
+        return redirect('login_clinica')
+
+    clinica_nombre = request.session.get('clinica_actual')
+
+    usuarios_lista = Usuarios.objects.filter(
+        clinica=clinica_nombre
+    ).order_by('nombre')
+
+    internos = Internos.objects.filter(clinica=clinica_nombre)
+
+    # KPIs
+    activos = internos.filter(fsalidareal__isnull=True).count()
+    capacidad = 35
+    disponible = capacidad - activos
+    ocupacion = int((activos / capacidad) * 100) if capacidad > 0 else 0
+
+    # INGRESOS
+    hoy = timezone.now()
+    inicio_mes = hoy.replace(day=1)
+
+    ingresos_mes = Edocuenta.objects.filter(
+        clinica=clinica_nombre,
+        fecha__gte=inicio_mes,
+        tipo='A'
+    ).aggregate(total=Sum('importe'))['total'] or 0
+
+    # RECIENTES
+    recientes = internos.order_by('-fechaingreso')[:5]
+
+    # GRAFICA
+    labels = []
+    data = []
+
+    for i in range(5, -1, -1):
+        mes = hoy.month - i
+        año = hoy.year
+
+        if mes <= 0:
+            mes += 12
+            año -= 1
+
+        inicio = datetime(año, mes, 1)
+
+        if mes == 12:
+            fin = datetime(año + 1, 1, 1)
+        else:
+            fin = datetime(año, mes + 1, 1)
+
+        total = Edocuenta.objects.filter(
+            clinica=clinica_nombre,
+            fecha__gte=inicio,
+            fecha__lt=fin,
+            tipo='A'
+        ).aggregate(suma=Sum('importe'))['suma'] or 0
+
+        labels.append(inicio.strftime('%b'))
+        data.append(float(total))
+
+    # ALERTAS
+    pendientes = Edocuenta.objects.filter(
+        clinica=clinica_nombre,
+        tipo='C'
+    ).count()
+
+    return render(request, 'dashboard.html', {
+        'usuarios_para_login': usuarios_lista,
+        'activos': activos,
+        'capacidad': capacidad,
+        'disponible': disponible,
+        'ocupacion': ocupacion,
+        'ingresos_mes': ingresos_mes,
+        'recientes': recientes,
+        'labels': labels,
+        'data': data,
+        'pendientes': pendientes,
+    })
+
+
 def seguimiento(request, id):
     """
     Obtiene el interno por ID y luego busca/crea su consejería
@@ -3837,3 +3925,262 @@ def reporte_cuotas_por_recibir(request):
     c.save()
     buffer.seek(0)
     return HttpResponse(buffer, content_type='application/pdf')
+
+def imprimir_datos(request, id):
+    interno = Internos.objects.get(pk=id)
+    internof = Internosf(instance=interno)
+    intresponsablef = IntResponsablef(instance=interno)
+    intdependientesf = IntDependientesf(instance=interno)
+    intprovienef = IntProvienef(instance=interno)
+
+    return render(request, 'print_datos.html', {
+        'internof': internof,
+        'intresponsablef': intresponsablef,
+        'intdependientesf': intdependientesf,
+        'intprovienef': intprovienef,
+    })
+
+def imprimir_entrevista(request, id):
+    clinica_actual = get_clinica_actual(request)
+    mem_user_no = request.session.get('usuario_no')
+    mem_user_nombre = request.session.get('usuario_nombre')
+    mem_user_permisos = request.session.get('usuario_permisos', '')
+
+    interno = Internos.objects.get(pk=id)
+    internof = Internosf(instance=interno)
+    einicial, created = Einicial.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    situacionfamiliar, created = SituacionFamiliar.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    cfisicas, created = Cfisicas.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    cmentales, created = Cmentales.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    crelaciones, created = Crelaciones.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    tratamientos, created = Tratamientos.objects.get_or_create(
+        expediente=interno.numeroexpediente,
+        clinica=clinica_actual
+    )
+
+    intresponsablef = IntResponsablef(instance=interno)
+
+    einicialf=Einicialf(instance=einicial)
+    situacionfamiliarf=SituacionFamiliarf(instance=situacionfamiliar)
+    cfisicasf=Cfisicasf(instance=cfisicas)
+    cmentalesf=Cmentalesf(instance=cmentales)
+    crelacionesf=Crelacionesf(instance=crelaciones)
+    tratamientosf=Tratamientosf(instance=tratamientos)
+
+    camposei = []
+    for field in einicialf:
+        try:
+            verbose = einicialf.instance._meta.get_field(field.name).verbose_name
+        except:
+            # Si no existe en el modelo, usa el label del form
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        if hasattr(einicialf.instance, metodo_display):
+            valor = getattr(einicialf.instance, metodo_display)()
+        else:
+            valor = getattr(einicialf.instance, field.name, None)
+
+        # limpieza básica
+        if valor is None or valor == "":
+            valor = "-"
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        if verbose != "No.Expediente" and  valor != "-" and verbose !="Clinica" :
+           camposei.append({
+            'label': field.label,
+            'verbose': str(verbose).title(),
+            'valor': valor
+        })
+
+    campossf = []
+
+    for field in situacionfamiliarf:
+        try:
+            verbose = situacionfamiliarf.instance._meta.get_field(field.name).verbose_name
+        except:
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        metodo = getattr(situacionfamiliarf.instance, metodo_display, None)
+
+        if callable(metodo):
+            valor = metodo()
+        else:
+            valor = getattr(situacionfamiliarf.instance, field.name, None)
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        # vacíos
+        if valor is None or valor == "":
+            valor = "-"
+
+        if verbose != "No.Expediente" and verbose != "Clinica":
+            campossf.append({
+                'label': field.label,
+                'verbose': str(verbose).capitalize(),
+                'valor': valor
+            })
+
+
+
+    camposcf = []
+
+    for field in cfisicasf:
+        try:
+            verbose = cfisicasf.instance._meta.get_field(field.name).verbose_name
+        except:
+            # Si no existe en el modelo, usa el label del form
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        if hasattr(cfisicasf.instance, metodo_display):
+            valor = getattr(cfisicasf.instance, metodo_display)()
+        else:
+            valor = getattr(cfisicasf.instance, field.name, None)
+
+        # limpieza básica
+        if valor is None or valor == "":
+            valor = "-"
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        if verbose!="No.Expediente" and verbose !="Clinica":
+           camposcf.append({
+            'label': field.label,
+            'verbose': str(verbose).capitalize(),
+            'valor': valor
+        })
+
+    camposcm = []
+    for field in cmentalesf:
+        try:
+            verbose = cmentalesf.instance._meta.get_field(field.name).verbose_name
+        except:
+            # Si no existe en el modelo, usa el label del form
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        if hasattr(cmentalesf.instance, metodo_display):
+            valor = getattr(cmentalesf.instance, metodo_display)()
+        else:
+            valor = getattr(cmentalesf.instance, field.name, None)
+
+        # limpieza básica
+        if valor is None or valor == "":
+            valor = "-"
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        if verbose != "No.Expediente" and verbose !="Clinica":
+           camposcm.append({
+            'label': field.label,
+            'verbose': str(verbose).capitalize(),
+            'valor': valor
+        })
+
+    camposcr = []
+
+    for field in crelacionesf:
+        try:
+            verbose = crelacionesf.instance._meta.get_field(field.name).verbose_name
+        except:
+            # Si no existe en el modelo, usa el label del form
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        if hasattr(crelacionesf.instance, metodo_display):
+            valor = getattr(crelacionesf.instance, metodo_display)()
+        else:
+            valor = getattr(crelacionesf.instance, field.name, None)
+
+        # limpieza básica
+        if valor is None or valor == "":
+            valor = "-"
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        if verbose != "No.Expediente" and verbose !="Clinica":
+           camposcr.append({
+             'label': field.label,
+            'verbose': str(verbose).capitalize(),
+            'valor': valor
+        })
+
+    campostr = []
+    for field in tratamientosf:
+        try:
+            verbose = tratamientosf.instance._meta.get_field(field.name).verbose_name
+        except:
+            # Si no existe en el modelo, usa el label del form
+            verbose = field.label
+
+        metodo_display = f"get_{field.name}_display"
+
+        if hasattr(tratamientosf.instance, metodo_display):
+            valor = getattr(tratamientosf.instance, metodo_display)()
+        else:
+            valor = getattr(tratamientosf.instance, field.name, None)
+
+        # limpieza básica
+        if valor is None or valor == "":
+            valor = "-"
+
+        # booleanos
+        if isinstance(valor, bool):
+            valor = "Sí" if valor else "No"
+
+        if verbose != "No.Expediente" and verbose !="Clinica" and verbose != "Consejero":
+           campostr.append({
+            'label': field.label,
+            'verbose': str(verbose).capitalize(),
+            'valor': valor
+           })
+
+
+    return render(request, 'print_entrevista.html', {
+        'internof': internof,
+        'camposei': camposei,
+        'campossf': campossf,
+        'camposcf': camposcf,
+        'camposcm': camposcm,
+        'camposcr': camposcr,
+        'campostr': campostr,
+    })
+

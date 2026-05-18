@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Expediente Clínico</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+    font-family: Arial;
+    font-size: 12px;
+    color: #000;
+}
+
+.header {
+    text-align: center;
+    border-bottom: 3px solid #000;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.section {
+    margin-top: 20px;
+}
+
+.section-title {
+    background: #e9ecef;
+    font-weight: bold;
+    padding: 6px;
+    border-left: 5px solid #0d6efd;
+    margin-bottom: 10px;
+}
+
+.row-item {
+    margin-bottom: 5px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+</style>
+</head>
+
+<body>
+{% load custom_filters %}
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h5>EXPEDIENTE CLÍNICO DEL USUARIO</h5>
+        <p>Centro de Rehabilitación</p>
+    </div>
+
+    <!-- BOTÓN -->
+    <div class="text-end no-print mb-2">
+        <button onclick="window.print()" class="btn btn-primary btn-sm">
+            Imprimir
+        </button>
+    </div>
+
+    <!-- ========================= -->
+    <!-- DATOS GENERALES -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">I. DATOS GENERALES</div>
+
+        <div class="row">
+
+        {% for field in internof %}
+        <div class="col-6 row-item">
+          <span class="label">{{ field.label }}:</span>
+          {{ internof|valor_editado:field.name }}
+        </div>
+        {% endfor %}
+         </div>
+        </div>
+
+    <!-- ========================= -->
+    <!-- RESPONSABLE -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">II. RESPONSABLE</div>
+
+        <div class="row">
+            {% for field in intresponsablef %}
+            <div class="col-6 row-item">
+                <span class="label">{{ field.label }}:</span>
+                {{ intresponsablef|valor_editado:field.name }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- DEPENDIENTES -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">III. DEPENDIENTES</div>
+
+        <div class="row">
+            {% for field in intdependientesf %}
+            <div class="col-6 row-item">
+                <span class="label">{{ field.label }}:</span>
+                 {{ intdependientesf|valor_editado:field.name }}
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- PROCEDENCIA -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">IV. PROCEDENCIA Y CONTEXTO</div>
+
+        <div class="row">
+            {% for field in intprovienef %}
+            <div class="col-6 row-item">
+                <span class="label">{{ field.label }}:</span>
+                 {{ intprovienef|valor_editado:field.name }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- HISTORIAL MÉDICO -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">V. HISTORIAL MÉDICO</div>
+
+        <div class="row">
+            <div class="col-4">Físicas: {{ intprovienef.fisicas.value|yesno:"Sí,No" }}</div>
+            <div class="col-4">Psiquiátricas: {{ intprovienef.psiquiatricas.value|yesno:"Sí,No" }}</div>
+            <div class="col-4">Contagiosas: {{ intprovienef.contagiosas.value|yesno:"Sí,No" }}</div>
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- CONSUMO -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">VI. CONSUMO DE SUSTANCIAS</div>
+
+        <div class="row">
+            <div class="col-4">Alcohol: {{ intprovienef.alcohol.value|yesno:"Sí,No" }}</div>
+            <div class="col-4">Marihuana: {{ intprovienef.marihuana.value|yesno:"Sí,No" }}</div>
+            <div class="col-4">Cocaína: {{ intprovienef.cocaina.value|yesno:"Sí,No" }}</div>
+            <div class="col-4">Cristal: {{ intprovienef.cristal.value|yesno:"Sí,No" }}</div>
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- FINANCIERO -->
+    <!-- ========================= -->
+    <div class="section">
+        <div class="section-title">VII. INFORMACIÓN ADMINISTRATIVA</div>
+
+        <div class="row">
+            <div class="col-4">Aportación Total: {{ intprovienef.aportaciontotal.value }}</div>
+            <div class="col-4">Aportación Inicial: {{ intprovienef.aportacioninicial.value }}</div>
+            <div class="col-4">Saldo: {{ intprovienef.saldo.value }}</div>
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- FIRMAS -->
+    <!-- ========================= -->
+    <div class="row mt-5">
+        <div class="col-6 text-center">
+            ___________________________<br>
+            Firma del Usuario
+        </div>
+        <div class="col-6 text-center">
+            ___________________________<br>
+            Firma del Responsable
+        </div>
+    </div>
+
+</div>
+
+<script>
+window.onload = function() {
+    window.print();
+}
+</script>
+
+</body>
+</html>
