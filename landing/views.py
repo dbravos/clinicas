@@ -44,7 +44,7 @@ Email: {lead.email}
 Teléfono: {lead.telefono}
                 """,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=["dbrasan@gmail.com"],
+                recipient_list=["info@freshstart.mx"],
                 fail_silently=False,
             )
 
@@ -53,6 +53,20 @@ Teléfono: {lead.telefono}
 
     else:
         form = LeadForm()
+
+    try:
+        send_mail(
+            subject="Nuevo Lead FreshStart",
+            message="Prueba",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=["info@freshstart.mx"],
+            fail_silently=False,
+        )
+        print("EMAIL ENVIADO")
+    except Exception as e:
+        print("ERROR:", e)
+
+
 
     return render(request, 'landing/home.html', {
         'form': form,
