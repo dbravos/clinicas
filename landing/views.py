@@ -18,6 +18,7 @@ def get_client_ip(request):
     print("IP REAL:", ip)
 
     return ip
+
 def get_city(ip):
 
     if ip in ['127.0.0.1', '::1']:
@@ -126,6 +127,8 @@ Ubicación: {ciudad}
     # ===========================
     if not request.session.get('visit_logged'):
 
+        request.session['visit_logged'] = True
+
         try:
 
             ip = get_client_ip(request)
@@ -134,11 +137,11 @@ Ubicación: {ciudad}
             send_mail(
                 subject="Nueva visita a FreshStart",
                 message=f"""
-Nueva visita detectada
+    Nueva visita detectada
 
-IP: {ip}
-Ubicación: {ciudad}
-Ruta: {request.path}
+    IP: {ip}
+    Ubicación: {ciudad}
+    Ruta: {request.path}
                 """,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=["info@freshstart.mx"],
@@ -146,8 +149,6 @@ Ruta: {request.path}
             )
 
             print("VISITA REGISTRADA")
-
-            request.session['visit_logged'] = True
 
         except Exception as e:
 
