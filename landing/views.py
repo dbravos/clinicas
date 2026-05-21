@@ -7,7 +7,6 @@ import requests
 
 
 def get_client_ip(request):
-
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 
     if x_forwarded_for:
@@ -18,6 +17,7 @@ def get_client_ip(request):
     print("IP REAL:", ip)
 
     return ip
+
 
 def get_city(ip):
 
@@ -30,6 +30,9 @@ def get_city(ip):
             timeout=1
         )
 
+        if r.status_code != 200:
+            return "Ubicación no disponible"
+
         data = r.json()
 
         ciudad = data.get("city", "")
@@ -41,12 +44,44 @@ def get_city(ip):
 
         return "Ubicación no disponible"
 
-    except:
+    except Exception as e:
+        print("ERROR GEO:", e)
         return "Ubicación no disponible"
+
 
 def home(request):
 
     mensaje = None
+
+    # ===========================
+    # REGISTRAR VISITA
+    # ===========================
+    if not request.session.get('visit_logged'):
+
+        try:
+            ip = get_client_ip(request)
+            ciudad = get_city(ip)
+
+            send_mail(
+                subject="Nueva visita a FreshStart",
+                message=f"""
+Nueva visita detectada
+
+IP: {ip}
+Ubicación: {ciudad}
+Ruta: {request.path}
+                """,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=["info@freshstart.mx"],
+                fail_silently=False,
+            )
+
+            print("VISITA REGISTRADA")
+
+            request.session['visit_logged'] = True
+
+        except Exception as e:
+            print("ERROR VISITA:", e)
 
     # ===========================
     # FORMULARIO DEMO
@@ -64,6 +99,7 @@ def home(request):
 
             try:
 
+                # Correo al prospecto
                 send_mail(
                     subject="Gracias por solicitar una demo - FreshStart",
                     message=f"""
@@ -81,6 +117,7 @@ Equipo FreshStart
                     fail_silently=False,
                 )
 
+                # Correo interno
                 send_mail(
                     subject="Nuevo Lead FreshStart",
                     message=f"""
@@ -104,7 +141,6 @@ Ubicación: {ciudad}
                 mensaje = "Gracias. Te contactaremos pronto."
 
             except Exception as e:
-
                 print("ERROR SMTP:", e)
                 mensaje = f"Error enviando correo: {e}"
 
@@ -121,38 +157,6 @@ Ubicación: {ciudad}
 
     else:
         form = LeadForm()
-
-    # ===========================
-    # REGISTRAR VISITA
-    # ===========================
-    if not request.session.get('visit_logged'):
-
-        request.session['visit_logged'] = True
-
-        try:
-
-            ip = get_client_ip(request)
-            ciudad = get_city(ip)
-
-            send_mail(
-                subject="Nueva visita a FreshStart",
-                message=f"""
-    Nueva visita detectada
-
-    IP: {ip}
-    Ubicación: {ciudad}
-    Ruta: {request.path}
-                """,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=["info@freshstart.mx"],
-                fail_silently=False,
-            )
-
-            print("VISITA REGISTRADA")
-
-        except Exception as e:
-
-            print("ERROR VISITA:", e)
 
     return render(request, 'landing/home.html', {
         'form': form,
