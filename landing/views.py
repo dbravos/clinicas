@@ -18,7 +18,6 @@ def get_client_ip(request):
 
     return ip
 
-
 def get_city(ip):
 
     if ip in ['127.0.0.1', '::1']:
@@ -27,20 +26,25 @@ def get_city(ip):
     try:
         r = requests.get(
             f"https://ipapi.co/{ip}/json/",
-            timeout=1
+            timeout=5
         )
+
+        print("STATUS:", r.status_code)
+        print("DATA:", r.text)
 
         if r.status_code != 200:
             return "Ubicación no disponible"
 
         data = r.json()
 
-        ciudad = data.get("city", "")
-        region = data.get("region", "")
-        pais = data.get("country_name", "")
+        ciudad = data.get("city")
+        region = data.get("region")
+        pais = data.get("country_name")
 
-        if ciudad:
-            return f"{ciudad}, {region}, {pais}"
+        partes = [p for p in [ciudad, region, pais] if p]
+
+        if partes:
+            return ", ".join(partes)
 
         return "Ubicación no disponible"
 
@@ -53,23 +57,26 @@ def home(request):
 
     mensaje = None
 
-    # ===========================
-    # REGISTRAR VISITA
-    # ===========================
     if not request.session.get('visit_logged'):
 
-        try:
-            ip = get_client_ip(request)
-            ciudad = get_city(ip)
+        request.session['visit_logged'] = True
 
+        ip = get_client_ip(request)
+
+        try:
+            ciudad = get_city(ip)
+        except:
+            ciudad = "Ubicación no disponible"
+
+        try:
             send_mail(
                 subject="Nueva visita a FreshStart",
                 message=f"""
-Nueva visita detectada
+    Nueva visita detectada
 
-IP: {ip}
-Ubicación: {ciudad}
-Ruta: {request.path}
+    IP: {ip}
+    Ubicación: {ciudad}
+    Ruta: {request.path}
                 """,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=["info@freshstart.mx"],
@@ -77,8 +84,6 @@ Ruta: {request.path}
             )
 
             print("VISITA REGISTRADA")
-
-            request.session['visit_logged'] = True
 
         except Exception as e:
             print("ERROR VISITA:", e)
