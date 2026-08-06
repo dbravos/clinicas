@@ -41,9 +41,9 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('login/', login_clinica, name='login_clinica'),
+    path('', login_clinica, name='login_clinica'),
     path('dashboard/', dashboard, name='dashboard'),
-    path('', include('landing.urls')),  # Landing en la raíz
+#    path('', include('landing.urls')),  # Landing en la raíz
     path('menuprincipal/', primermenu, name='Menu principal'),
     path('listaint/',listaint,name='listaint'),
     path('agregainterno/',agregainterno,name='agregainterno'),

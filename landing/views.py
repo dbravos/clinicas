@@ -57,7 +57,7 @@ def home(request):
 
     mensaje = None
 
-    if not request.session.get('visit_logged'):
+    if not request.session.get('visit_logged') :
 
         request.session['visit_logged'] = True
 
