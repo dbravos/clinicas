@@ -134,6 +134,10 @@ class DatosGrales(models.Model):
     cargouno=models.CharField(max_length=128,verbose_name='Cargo uno',null=True,blank=True)
     funcionariodos=models.CharField(max_length=128,verbose_name='Funcionario dos',null=True,blank=True)
     cargodos=models.CharField(max_length=128,verbose_name='Cargo dos',null=True,blank=True)
+    capacidadhospedaje = models.SmallIntegerField(
+        default=0,
+        verbose_name='Capacidad maxima de hospedaje'
+    )
 
     logo_url = models.URLField(
         verbose_name="URL del Logo ",

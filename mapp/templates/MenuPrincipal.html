@@ -124,6 +124,7 @@
                         <a href="{% url 'captura_pagos' %}" class="nav-link text-white"><i class="bi bi-cash-coin me-2"></i>Captura de cuotas</a>
                         <a href="{% url 'lista_recibos' %}" class="nav-link text-white"><i class="bi bi-receipt me-2"></i>Recibos</a>
                         <a href="{% url 'menu_reportes' %}" class="nav-link text-white"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes</a>
+                        <a href="{% url 'dashboard' %}" class="nav-link text-white"><i class="bi bi-file-earmark-bar-graph me-2"></i>Dashboard Clinico</a>
                     </div>
                 </div>
             </div>
@@ -371,7 +372,7 @@
             .finally(() => {
                 // CAMBIO AQUÍ: Forzamos la recarga al Dashboard.
                 // Al recargar, como el sessionStorage está vacío, el modal se abrirá solo.
-                window.location.href = "{% url 'dashboard' %}";
+                window.location.href = "{% url 'login_usuarios' %}";
             });
         }
 

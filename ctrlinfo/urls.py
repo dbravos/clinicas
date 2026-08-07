@@ -33,7 +33,7 @@ from mapp.views import  primermenu,listaint, registro, datosgrales, grabadatosgr
                         cerrar_sesion,imprime_contrato,imprime_solicitud,imprime_aviso,login_clinica,dashboard,salidas,\
                         seguimiento,listaSesionesS,capturaSesionS,reporte_internos,captura_pagos,guardar_pago,imprimir_recibo_pdf,\
                         lista_recibos,cancelar_recibo,menu_reportes,reporte_cuotas_por_recibir,reporte_cuotas_recibidas,\
-                        imprimir_datos,imprimir_entrevista
+                        imprimir_datos,imprimir_entrevista,login_usuarios
 
 
 
@@ -43,6 +43,7 @@ urlpatterns = [
 
     path('', login_clinica, name='login_clinica'),
     path('dashboard/', dashboard, name='dashboard'),
+    path('login_usuarios/', login_usuarios, name='login_usuarios'),
 #    path('', include('landing.urls')),  # Landing en la raíz
     path('menuprincipal/', primermenu, name='Menu principal'),
     path('listaint/',listaint,name='listaint'),

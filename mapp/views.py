@@ -2935,9 +2935,9 @@ def login_clinica(request):
                     # GUARDAR en sesión
                     request.session['clinica_actual'] = clinica.clinica
                     request.session['clinica_nombre'] = clinica.nombre
-                #    request.session['ffazzuorrtt'] = clinica.password
 
-                    return redirect('dashboard')
+
+                    return redirect('login_usuarios')
                 else:
                     form.add_error('password', 'Contraseña incorrecta')
             except Clinicas.DoesNotExist:
@@ -2949,7 +2949,7 @@ def login_clinica(request):
 
 
 
-def dashboard(request):
+def login_usuarios(request):
     # 1. Seguridad: Si no han entrado a la clínica, mandar al login
 
     # 2. Obtener el ID de la clínica de la sesión
@@ -2977,7 +2977,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from datetime import datetime
 
-def dashboard_balin(request):
+def dashboard(request):
 
     if 'clinica_actual' not in request.session:
         return redirect('login_clinica')
@@ -2989,10 +2989,11 @@ def dashboard_balin(request):
     ).order_by('nombre')
 
     internos = Internos.objects.filter(clinica=clinica_nombre)
+    datosgrales = DatosGrales.objects.get(clinica=clinica_nombre)
 
     # KPIs
     activos = internos.filter(fsalidareal__isnull=True).count()
-    capacidad = 35
+    capacidad = datosgrales.capacidadhospedaje
     disponible = capacidad - activos
     ocupacion = int((activos / capacidad) * 100) if capacidad > 0 else 0
 

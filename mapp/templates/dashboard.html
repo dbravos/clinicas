@@ -7,16 +7,61 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-body { background:#0f172a; color:white; }
-.card { background:#1e293b; border-radius:16px; }
-.kpi { font-size:2rem; font-weight:800; }
+body{
+    background:#0f172a;
+    color:#f8fafc;
+}
+
+.card{
+    background:#1e293b;
+    border:1px solid #334155;
+    border-radius:16px;
+    color:#f8fafc;
+    box-shadow:0 .5rem 1rem rgba(0,0,0,.25);
+}
+
+.card h5{
+    color:#38bdf8;
+    font-weight:600;
+}
+
+.kpi{
+    font-size:2rem;
+    font-weight:800;
+    color:#ffffff;
+}
+
+.table{
+    margin-bottom:0;
+}
+
+.table-dark{
+    --bs-table-bg:#1e293b;
+    --bs-table-striped-bg:#273549;
+    --bs-table-hover-bg:#334155;
+    --bs-table-border-color:#475569;
+    --bs-table-color:#f8fafc;
+}
+
+.badge-activo{
+    background:#16a34a;
+}
+
+.badge-egresado{
+    background:#64748b;
+}
 </style>
 </head>
 
 <body>
-
+<div class="d-flex align-items-center mb-4">
+<a href="{% url 'Menu principal' %}" class="btn btn-outline-light me-6">
+    <i class="bi bi-arrow-left-circle "></i>
+    Regresar al menú
+</a>
+</div>
 <div class="container py-4">
 
 <h2 class="mb-4">Dashboard Clínico</h2>
@@ -51,37 +96,36 @@ body { background:#0f172a; color:white; }
 
 <div class="card p-4 mt-4">
     <h5>Internos recientes</h5>
+<table class="table table-dark table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Estatus</th>
+            <th>Ingreso</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in recientes %}
+        <tr>
+            <td>{{ i.nombrecompleto }}</td>
+            <td>
+                {% if not i.fsalidareal %}
+                    <span class="badge badge-activo">Activo</span>
+                {% else %}
+                    <span class="badge badge-egresado">Egresado</span>
+                {% endif %}
+            </td>
+            <td>{{ i.fechaingreso }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    <table class="table table-dark">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Estatus</th>
-                <th>Ingreso</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in recientes %}
-            <tr>
-                <td>{{ i.nombrecompleto }}</td>
-                <td>
-                    {% if not i.fsalidareal %}
-                        Activo
-                    {% else %}
-                        Egresado
-                    {% endif %}
-                </td>
-                <td>{{ i.fechaingreso }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
 </div>
 
 <script>
-
 new Chart(document.getElementById('chart1'), {
     type: 'line',
     data: {
@@ -89,23 +133,77 @@ new Chart(document.getElementById('chart1'), {
         datasets: [{
             label: 'Ingresos',
             data: {{ data|safe }},
-            borderColor: '#38bdf8'
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13,110,253,0.15)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.35
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#f8fafc',
+                    font: {
+                        size: 13
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#f8fafc'
+                },
+                grid: {
+                    color: '#334155'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#f8fafc'
+                },
+                grid: {
+                    color: '#334155'
+                }
+            }
+        }
     }
 });
 
 new Chart(document.getElementById('chart2'), {
     type: 'doughnut',
     data: {
-        labels: ['Ocupado','Disponible'],
+        labels: ['Ocupado', 'Disponible'],
         datasets: [{
             data: [{{ activos }}, {{ disponible }}],
-            backgroundColor: ['#22c55e','#334155']
+            backgroundColor: [
+                '#198754',   // Verde Bootstrap
+                '#ffc107'    // Amarillo Bootstrap
+            ],
+            borderColor:  '#1e293b',
+            borderWidth: 2
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#f8fafc',
+                    font: {
+                        size: 13
+                    },
+                    padding: 20
+                }
+            }
+        }
     }
 });
-
 </script>
-
 </body>
 </html>

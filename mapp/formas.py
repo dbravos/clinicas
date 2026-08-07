@@ -148,13 +148,14 @@ class DatosGralesf(forms.ModelForm):
         es_admin = False
 
         # Validamos que exista el dato y que sea igual al rol de administrador
-        if self.permisos_usuario and self.permisos_usuario == 'admin':
+        if self.permisos_usuario and self.permisos_usuario == 'ADMIN':
             es_admin = True
 
         # 3. Si no es admin, borramos el campo
         if not es_admin:
             self.fields.pop('password', None)
             self.fields.pop('clinica', None)
+            self.fields.pop('capacidadMaxima',None)
 
 
 from django import forms
