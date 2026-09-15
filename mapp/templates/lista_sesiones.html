@@ -1,11 +1,12 @@
 {% extends "dgenerales.html" %}
 <body>
 {% block content %}
+{% load ayudas_tag %}
 
 
 <div class="container-fluid px-4 py-3">
     <!-- Encabezado y barra de navegación -->
-
+{% ayuda "notas_evolucion_consejeria" %}
 <!-- <nav class="navbar sticky-top navbar-expand-lg bg-light mb-4 rounded shadow-sm" style="border: 1px solid #d1d7dc;"> -->
     <div class="container-fluid">
         <div class="card shadow-sm">
@@ -68,7 +69,14 @@
                                 <td>
                              <a href="{% url 'capturaSesion_con_id' tipo_sesion=tipo_sesion  accion='editar' id=interno.numeroexpediente no_sesion=s.pk %}"
                                            class="btn btn-sm btn-primary">
+
+                                           {% if s.status == 0 %}
                                             <i class="bi bi-pencil"></i> Editar
+                                           {% else %}
+                                            <i class="bi bi-eye"  title="Consultar"></i> Consultar
+                                           {% endif %}
+
+
                                         </a>
                                 </td>
                             </tr>

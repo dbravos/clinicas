@@ -2,12 +2,14 @@
 <body>
 {% block content %}
 
+{% load ayudas_tag %}
 
 <div class="container-fluid px-4 py-3">
     <!-- Encabezado y barra de navegación -->
 
 <!-- <nav class="navbar sticky-top navbar-expand-lg bg-light mb-4 rounded shadow-sm" style="border: 1px solid #d1d7dc;"> -->
     <div class="container-fluid">
+        {% ayuda "notas_evolucion_psicologica" %}
         <div class="card shadow-sm">
             <div class="card-header">
         <!-- Contenedor para el título, siempre a la izquierda -->

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 {% load static %}
+<link rel="stylesheet"  href="{% static 'css/ayuda.css' %}">
+{% load ayudas_tag %}
+
+
 
 <head>
     <meta charset="UTF-8">
@@ -99,8 +103,10 @@
     </button>
 
     <div class="sidebar bg-dark text-white p-0" id="sidebar">
+
         <!-- HEADER -->
         <div class="sidebar-header text-center py-4 bg-primary">
+
             <h3 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Freshstart</h3>
             <small class="text-white-50">v1.0.0</small>
         </div>
@@ -114,11 +120,17 @@
             </div>
             <!-- ADMINISTRACIÓN -->
             <div class="accordion-item bg-dark border-0">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmin">
-                        <i class="bi bi-clipboard2-data me-3"></i><span>Administración</span>
-                    </button>
-                </h2>
+
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-dark text-white" type="button"
+            data-bs-toggle="collapse" data-bs-target="#collapseAdmin">
+            <i class="bi bi-clipboard2-data me-3">
+            </i>
+            <span>Administración</span> </button>
+        </h2>
+
+
+
                 <div id="collapseAdmin" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
                     <div class="accordion-body bg-secondary bg-opacity-10 p-0">
                         <a href="{% url 'captura_pagos' %}" class="nav-link text-white"><i class="bi bi-cash-coin me-2"></i>Captura de cuotas</a>
@@ -132,7 +144,7 @@
             <div class="accordion-item bg-dark border-0">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUtils">
-                        <i class="bi bi-tools me-3"></i><span>Utilerias</span>
+                        <i class="bi bi-tools me-3"></i><span>Configuracion</span>
                     </button>
                 </h2>
                 <div id="collapseUtils" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
@@ -160,9 +172,12 @@
         </div>
     </div>
 
+    <div class="ayuda-menu-principal">
+    {% ayuda "menu-principal" %}
+    </div>
+
     <!-- 4. CONTENIDO -->
     <main>
-
 
         <!-- ========================================== -->
 
@@ -180,6 +195,8 @@
         </div>
 
         <div class="main-container">
+
+
             {% block content %} {% endblock %}
         </div>
     </main>
@@ -227,8 +244,8 @@
 
     <script>
         // CONFIGURACIÓN DE TIEMPO
-        const MINUTOS_TIMEOUT_JS = 5;
-        const INTERVALO_PING_SERVIDOR = 5;
+        const MINUTOS_TIMEOUT_JS = 15;
+        const INTERVALO_PING_SERVIDOR = 15;
         let temporizadorInactividad;
         let ultimoPing = Date.now();
         let globalAuthModal = null;

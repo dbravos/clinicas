@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- BOTÓN DE AYUDA -->
+
+<div class="ayuda-container">
+
+    <button
+        type="button"
+        class="btn-ayuda"
+        data-bs-toggle="modal"
+        data-bs-target="#{{ ayuda_id }}"
+        title="{{ ayuda.tooltip }}"
+        aria-label="{{ ayuda.tooltip }}">
+
+        ?
+
+    </button>
+
+</div>
+
+<div class="modal fade"
+     id="{{ ayuda_id }}"
+     tabindex="-1"
+     aria-labelledby="{{ ayuda_id }}Label"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="{{ ayuda_id }}Label">
+
+                    <span class="icono-ayuda">?</span>
+
+                    {{ ayuda.titulo }}
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="ayuda-contenido">
+
+                    {{ ayuda.contenido|safe }}
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cerrar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

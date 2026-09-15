@@ -367,7 +367,7 @@
 
             <div class="btn-container">
                 <button type="submit">Guardar Receta</button>
-                <button type="button" id="btnPrintCurrent" class="btn-print">Imprimir Receta Actual</button>
+             <!--   <button type="button" id="btnPrintCurrent" class="btn-print">Imprimir Receta Actual</button> -->
             </div>
         </form>
 
@@ -382,251 +382,649 @@
     <!-- Sección para impresión -->
     <div id="printSection" class="print-section" style="display: none;"></div>
 
-    <script>
-        // Historial almacenado en el campo del modelo Django
-        let historialRecetas = [];
-        const expedienteActual = "{{ interno.numeroexpediente }}";
+  <script>
 
-        // Referencias a elementos del DOM
-        const recetaf = document.getElementById('recetaf');
-        const historialRecetasContainer = document.getElementById('historialRecetas');
-        const historialField = document.getElementById('historial');
-        const fechaInput = document.getElementById('fecha');
-        const btnPrintCurrent = document.getElementById('btnPrintCurrent');
-        const printSection = document.getElementById('printSection');
+    // ============================================================
+    // HISTORIAL DE RECETAS
+    // ============================================================
 
-        // Establecer fecha actual por defecto
-        const today = new Date();
-        fechaInput.value = today.toISOString().split('T')[0];
+    let historialRecetas = [];
 
-        // Cargar historial existente desde el campo del modelo
-        function cargarHistorialDesdeModelo() {
-            const historialTexto = historialField.value;
-            if (historialTexto && historialTexto.trim() !== '') {
-                try {
-                    historialRecetas = JSON.parse(historialTexto);
-                } catch (e) {
-                    console.error('Error al parsear historial:', e);
-                    historialRecetas = [];
-                }
+    const expedienteActual = "{{ interno.numeroexpediente }}";
+
+
+    // ============================================================
+    // REFERENCIAS A ELEMENTOS DEL DOM
+    // ============================================================
+
+    const recetaf = document.getElementById('recetaf');
+    const historialRecetasContainer = document.getElementById('historialRecetas');
+    const historialField = document.getElementById('historial');
+    const fechaInput = document.getElementById('fecha');
+    const btnPrintCurrent = document.getElementById('btnPrintCurrent');
+    const printSection = document.getElementById('printSection');
+
+
+    // ============================================================
+    // OBTENER FECHA LOCAL ACTUAL
+    // SIN USAR UTC / toISOString()
+    // ============================================================
+
+    function obtenerFechaLocal() {
+
+        const fecha = new Date();
+
+        const year = fecha.getFullYear();
+        const month = String(fecha.getMonth() + 1).padStart(2, '0');
+        const day = String(fecha.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+
+    // Establecer fecha actual por defecto
+    fechaInput.value = obtenerFechaLocal();
+
+
+    // ============================================================
+    // CARGAR HISTORIAL EXISTENTE DESDE EL MODELO
+    // ============================================================
+
+    function cargarHistorialDesdeModelo() {
+
+        const historialTexto = historialField.value;
+
+        if (historialTexto && historialTexto.trim() !== '') {
+
+            try {
+
+                historialRecetas = JSON.parse(historialTexto);
+
+            } catch (e) {
+
+                console.error('Error al parsear historial:', e);
+
+                historialRecetas = [];
             }
-            actualizarHistorial();
         }
 
-        // Event Listeners
-        document.getElementById('peso').addEventListener('input', calcularIMC);
-        document.getElementById('talla').addEventListener('input', calcularIMC);
-        btnPrintCurrent.addEventListener('click', imprimirRecetaActual);
+        actualizarHistorial();
+    }
 
-        // Evento para enviar el formulario
-        recetaf.addEventListener('submit', function(e) {
-            // Prevenir envío normal para procesar datos primero
-            e.preventDefault();
 
-            // Validar campos requeridos
-            if (!document.getElementById('receta').value) {
-                alert('Por favor, ingrese la receta médica');
-                return;
-            }
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
 
-            // Agregar receta actual al historial
-            agregarAlHistorial();
+    document.getElementById('peso').addEventListener(
+        'input',
+        calcularIMC
+    );
 
-            // Actualizar campo historial para Django
-            historialField.value = JSON.stringify(historialRecetas);
+    document.getElementById('talla').addEventListener(
+        'input',
+        calcularIMC
+    );
 
-            // Enviar formulario
-            this.submit();
-        });
 
-        // Función para obtener datos del formulario
-        function obtenerDatosFormulario() {
-            return {
-                expediente: expedienteActual,
-                fecha: fechaInput.value,
-                ta: document.getElementById('ta').value,
-                fr: document.getElementById('fr').value,
-                rc: document.getElementById('rc').value,
-                temperatura: document.getElementById('temperatura').value,
-                peso: document.getElementById('peso').value,
-                talla: document.getElementById('talla').value,
-                imc: document.getElementById('imc').value,
-                alergias: document.getElementById('alergias').value,
-                diagnostico: document.getElementById('diagnostico').value,
-                receta: document.getElementById('receta').value,
-                medico: document.getElementById('medico').value,
-                nombremedico: document.getElementById('nombremedico').value
+    // El botón de imprimir actualmente está comentado.
+    // Por eso comprobamos que exista antes de agregar el evento.
 
-            };
+    if (btnPrintCurrent) {
+
+        btnPrintCurrent.addEventListener(
+            'click',
+            imprimirRecetaActual
+        );
+    }
+
+
+    // ============================================================
+    // ENVIAR FORMULARIO
+    // ============================================================
+
+    recetaf.addEventListener('submit', function(e) {
+
+        // Evitar envío normal para procesar primero el historial
+        e.preventDefault();
+
+
+        // Validar receta
+        if (!document.getElementById('receta').value) {
+
+            alert('Por favor, ingrese la receta médica');
+
+            return;
         }
 
-        // Función para agregar al historial
-        function agregarAlHistorial() {
-            const formData = obtenerDatosFormulario();
 
-            // Agregar al historial
-            historialRecetas.unshift(formData);
+        // Agregar receta actual al historial
+        agregarAlHistorial();
 
-            // Limpiar campos del formulario (excepto expediente)
-            document.getElementById('ta').value = '';
-            document.getElementById('fr').value = '';
-            document.getElementById('rc').value = '';
-            document.getElementById('temperatura').value = '';
-            document.getElementById('peso').value = '';
-            document.getElementById('talla').value = '';
+
+        // Guardar historial dentro del campo que recibe Django
+        historialField.value = JSON.stringify(historialRecetas);
+
+
+        // Enviar formulario al servidor
+        this.submit();
+
+    });
+
+
+    // ============================================================
+    // OBTENER DATOS DEL FORMULARIO
+    // ============================================================
+
+    function obtenerDatosFormulario() {
+
+        return {
+
+            expediente: expedienteActual,
+
+            fecha: fechaInput.value,
+
+            ta: document.getElementById('ta').value,
+
+            fr: document.getElementById('fr').value,
+
+            rc: document.getElementById('rc').value,
+
+            temperatura:
+                document.getElementById('temperatura').value,
+
+            peso:
+                document.getElementById('peso').value,
+
+            talla:
+                document.getElementById('talla').value,
+
+            imc:
+                document.getElementById('imc').value,
+
+            alergias:
+                document.getElementById('alergias').value,
+
+            diagnostico:
+                document.getElementById('diagnostico').value,
+
+            receta:
+                document.getElementById('receta').value,
+
+            medico:
+                document.getElementById('medico').value,
+
+            nombremedico:
+                document.getElementById('nombremedico').value
+
+        };
+    }
+
+
+    // ============================================================
+    // AGREGAR RECETA AL HISTORIAL
+    // ============================================================
+
+    function agregarAlHistorial() {
+
+        const formData = obtenerDatosFormulario();
+
+
+        // Agregar la receta al principio del historial
+        historialRecetas.unshift(formData);
+
+
+        // Limpiar campos del formulario
+        document.getElementById('ta').value = '';
+
+        document.getElementById('fr').value = '';
+
+        document.getElementById('rc').value = '';
+
+        document.getElementById('temperatura').value = '';
+
+        document.getElementById('peso').value = '';
+
+        document.getElementById('talla').value = '';
+
+        document.getElementById('imc').value = '';
+
+        document.getElementById('alergias').value = '';
+
+        document.getElementById('diagnostico').value = '';
+
+        document.getElementById('receta').value = '';
+
+
+        // Restablecer fecha actual
+        fechaInput.value = obtenerFechaLocal();
+
+    }
+
+
+    // ============================================================
+    // CALCULAR IMC
+    // ============================================================
+
+    function calcularIMC() {
+
+        const peso =
+            parseFloat(
+                document.getElementById('peso').value
+            );
+
+        const talla =
+            parseFloat(
+                document.getElementById('talla').value
+            );
+
+
+        if (peso && talla && talla > 0) {
+
+            const imc =
+                peso / (talla * talla);
+
+            document.getElementById('imc').value =
+                imc.toFixed(2);
+
+        } else {
+
             document.getElementById('imc').value = '';
-            document.getElementById('alergias').value = '';
-            document.getElementById('diagnostico').value = '';
-            document.getElementById('receta').value = '';
+        }
+    }
 
 
-            // Restablecer fecha actual
-            fechaInput.value = today.toISOString().split('T')[0];
+    // ============================================================
+    // FORMATEAR FECHA PARA MOSTRAR
+    // NO USAR new Date("YYYY-MM-DD")
+    // ============================================================
+
+    function formatearFecha(fecha) {
+
+        if (!fecha) {
+            return '';
         }
 
-        // Función para calcular IMC
-        function calcularIMC() {
-            const peso = parseFloat(document.getElementById('peso').value);
-            const talla = parseFloat(document.getElementById('talla').value);
 
-            if (peso && talla && talla > 0) {
-                const imc = peso / (talla * talla);
-                document.getElementById('imc').value = imc.toFixed(2);
-            } else {
-                document.getElementById('imc').value = '';
-            }
+        const partes = fecha.split('-');
+
+
+        if (partes.length !== 3) {
+            return fecha;
         }
 
-        // Función para actualizar la visualización del historial
-        function actualizarHistorial() {
-            // Limpiar el contenedor
-            historialRecetasContainer.innerHTML = '';
 
-            // Si no hay historial, mostrar mensaje
-            if (historialRecetas.length === 0) {
-                historialRecetasContainer.innerHTML = '<div class="no-history">No hay recetas registradas en el historial</div>';
-                return;
-            }
+        const year = partes[0];
+        const month = partes[1];
+        const day = partes[2];
 
-            // Crear elementos para cada registro en el historial
-            historialRecetas.forEach((registro, index) => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
 
-                // Formatear la fecha para mostrar
-                const fechaObj = new Date(registro.fecha);
-                const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
+        return `${day}/${month}/${year}`;
+    }
 
-                // Crear contenido del historial
-                historyItem.innerHTML = `
-                    <div class="history-date">${fechaFormateada}</div>
-                    <div class="history-content">
-                        <div class="history-field"><strong>TA:</strong> ${registro.ta || 'No registrado'}</div>
-                        <div class="history-field"><strong>FR:</strong> ${registro.fr || 'No registrado'}</div>
-                        <div class="history-field"><strong>RC:</strong> ${registro.rc || 'No registrado'}</div>
-                        <div class="history-field"><strong>Temperatura:</strong> ${registro.temperatura || 'No registrado'}</div>
-                        <div class="history-field"><strong>Peso:</strong> ${registro.peso || 'No registrado'}</div>
-                        <div class="history-field"><strong>Talla:</strong> ${registro.talla || 'No registrado'}</div>
-                        <div class="history-field"><strong>IMC:</strong> ${registro.imc || 'No registrado'}</div>
-                        <div class="history-field"><strong>Alergias:</strong> ${registro.alergias || 'No registrado'}</div>
+
+    // ============================================================
+    // FORMATEAR FECHA PARA IMPRESIÓN
+    // ============================================================
+
+    function formatearFechaLarga(fecha) {
+
+        if (!fecha) {
+            return '';
+        }
+
+
+        const partes = fecha.split('-');
+
+
+        if (partes.length !== 3) {
+            return fecha;
+        }
+
+
+        const year = partes[0];
+        const month = parseInt(partes[1], 10);
+        const day = parseInt(partes[2], 10);
+
+
+        const meses = [
+
+            'enero',
+            'febrero',
+            'marzo',
+            'abril',
+            'mayo',
+            'junio',
+            'julio',
+            'agosto',
+            'septiembre',
+            'octubre',
+            'noviembre',
+            'diciembre'
+
+        ];
+
+
+        return `${day} de ${meses[month - 1]} de ${year}`;
+    }
+
+
+    // ============================================================
+    // ACTUALIZAR VISUALIZACIÓN DEL HISTORIAL
+    // ============================================================
+
+    function actualizarHistorial() {
+
+        // Limpiar contenedor
+        historialRecetasContainer.innerHTML = '';
+
+
+        // Si no hay historial
+        if (historialRecetas.length === 0) {
+
+            historialRecetasContainer.innerHTML =
+                '<div class="no-history">' +
+                'No hay recetas registradas en el historial' +
+                '</div>';
+
+            return;
+        }
+
+
+        // Recorrer historial
+        historialRecetas.forEach(function(registro, index) {
+
+            const historyItem =
+                document.createElement('div');
+
+            historyItem.className =
+                'history-item';
+
+
+            // Formatear fecha SIN conversión UTC
+            const fechaFormateada =
+                formatearFecha(registro.fecha);
+
+
+            // Crear contenido
+            historyItem.innerHTML = `
+
+                <div class="history-date">
+                    ${fechaFormateada}
+                </div>
+
+                <div class="history-content">
+
+                    <div class="history-field">
+                        <strong>TA:</strong>
+                        ${registro.ta || 'No registrado'}
                     </div>
-                    <div class="history-field"><strong>Diagnóstico:</strong> ${registro.diagnostico || 'No registrado'}</div>
-                    <div class="history-field"><strong>Receta:</strong> ${registro.receta || 'No registrado'}</div>
-                    <div class="history-field"><strong>Medico:</strong> ${registro.medico || 'No registrado'}</div>
-                    <div class="history-field"><strong>Nombre del medico:</strong> ${registro.nombremedico || 'No registrado'}</div>
-                    <div class="history-actions">
-                        <button class="btn-history btn-print" onclick="imprimirRecetaDesdeHistorial(${index})">Imprimir</button>
+
+                    <div class="history-field">
+                        <strong>FR:</strong>
+                        ${registro.fr || 'No registrado'}
                     </div>
-                `;
 
-                historialRecetasContainer.appendChild(historyItem);
-            });
-        }
+                    <div class="history-field">
+                        <strong>RC:</strong>
+                        ${registro.rc || 'No registrado'}
+                    </div>
 
-        // Función para imprimir receta actual
-        function imprimirRecetaActual() {
-            const formData = obtenerDatosFormulario();
-            imprimirReceta(formData);
-        }
+                    <div class="history-field">
+                        <strong>Temperatura:</strong>
+                        ${registro.temperatura || 'No registrado'}
+                    </div>
 
-        // Función para imprimir receta desde el historial
-        function imprimirRecetaDesdeHistorial(index) {
-            const registro = historialRecetas[index];
-            imprimirReceta(registro);
-        }
+                    <div class="history-field">
+                        <strong>Peso:</strong>
+                        ${registro.peso || 'No registrado'}
+                    </div>
 
-        // Función para imprimir receta
-        function imprimirReceta(datos) {
-            // Validar que haya datos de receta
-            if (!datos.receta) {
-                alert('No hay receta para imprimir');
-                return;
-            }
+                    <div class="history-field">
+                        <strong>Talla:</strong>
+                        ${registro.talla || 'No registrado'}
+                    </div>
 
-            // Formatear la fecha
-            const fechaObj = new Date(datos.fecha);
-            const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
+                    <div class="history-field">
+                        <strong>IMC:</strong>
+                        ${registro.imc || 'No registrado'}
+                    </div>
 
-            // Crear contenido para impresión
-            const printContent = `
-                <div class="prescription-header">
-                    <h1>Receta Médica</h1>
-                    <p><strong>Expediente:</strong> ${datos.expediente}</p>
-                    <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+                    <div class="history-field">
+                        <strong>Alergias:</strong>
+                        ${registro.alergias || 'No registrado'}
+                    </div>
+
                 </div>
 
-                <div class="prescription-data">
-                    <div class="prescription-field"><strong>TA (Tensión Arterial):</strong> ${datos.ta || 'No registrado'}</div>
-                    <div class="prescription-field"><strong>FR (Frecuencia Respiratoria):</strong> ${datos.fr || 'No registrado'}</div>
-                    <div class="prescription-field"><strong>RC (Ritmo Cardíaco):</strong> ${datos.rc || 'No registrado'}</div>
-                    <div class="prescription-field"><strong>Temperatura:</strong> ${datos.temperatura || 'No registrado'}</div>
-                    <div class="prescription-field"><strong>Peso:</strong> ${datos.peso || 'No registrado'} kg</div>
-                    <div class="prescription-field"><strong>Talla:</strong> ${datos.talla || 'No registrado'} m</div>
-                    <div class="prescription-field"><strong>IMC (Índice de Masa Corporal):</strong> ${datos.imc || 'No registrado'}</div>
-                    <div class="prescription-field"><strong>Alergias:</strong> ${datos.alergias || 'No registrado'}</div>
+                <div class="history-field">
+                    <strong>Diagnóstico:</strong>
+                    ${registro.diagnostico || 'No registrado'}
                 </div>
 
-                <div class="prescription-field"><strong>Diagnóstico:</strong> ${datos.diagnostico || 'No registrado'}</div>
-
-                <div class="prescription-receta">
-                    <h2>Receta Médica:</h2>
-                    <p>${datos.receta.replace(/\n/g, '<br>')}</p>
+                <div class="history-field">
+                    <strong>Receta:</strong>
+                    ${registro.receta || 'No registrado'}
                 </div>
 
-                <div class="prescription-footer">
-                    <p>_________________________</p>
-                    <div class="prescription-field">${datos.nombremedico|| 'No registrado'}</div>
-
-                    <p>Firma del Médico</p>
+                <div class="history-field">
+                    <strong>Medico:</strong>
+                    ${registro.medico || 'No registrado'}
                 </div>
+
+                <div class="history-field">
+                    <strong>Nombre del medico:</strong>
+                    ${registro.nombremedico || 'No registrado'}
+                </div>
+
+                <div class="history-actions">
+
+                    <button
+                        class="btn-history btn-print"
+                        onclick="imprimirRecetaDesdeHistorial(${index})">
+
+                        Imprimir
+
+                    </button>
+
+                </div>
+
             `;
 
-            // Insertar contenido en la sección de impresión
-            printSection.innerHTML = printContent;
-            printSection.style.display = 'block';
 
-            // Imprimir
-            window.print();
+            historialRecetasContainer.appendChild(
+                historyItem
+            );
 
-            // Ocultar la sección de impresión después de imprimir
-            setTimeout(() => {
-                printSection.style.display = 'none';
-            }, 100);
+        });
+
+    }
+
+
+    // ============================================================
+    // IMPRIMIR RECETA ACTUAL
+    // ============================================================
+
+    function imprimirRecetaActual() {
+
+        const formData =
+            obtenerDatosFormulario();
+
+        imprimirReceta(formData);
+    }
+
+
+    // ============================================================
+    // IMPRIMIR RECETA DESDE HISTORIAL
+    // ============================================================
+
+    function imprimirRecetaDesdeHistorial(index) {
+
+        const registro =
+            historialRecetas[index];
+
+        imprimirReceta(registro);
+    }
+
+
+    // ============================================================
+    // IMPRIMIR RECETA
+    // ============================================================
+
+    function imprimirReceta(datos) {
+
+        // Validar receta
+        if (!datos.receta) {
+
+            alert('No hay receta para imprimir');
+
+            return;
         }
 
-        // Inicializar al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
+
+        // Formatear fecha SIN UTC
+        const fechaFormateada =
+            formatearFechaLarga(datos.fecha);
+
+
+        // Crear contenido para impresión
+        const printContent = `
+
+            <div class="prescription-header">
+
+                <h1>Receta Médica</h1>
+
+                <p>
+                    <strong>Expediente:</strong>
+                    ${datos.expediente}
+                </p>
+
+                <p>
+                    <strong>Fecha:</strong>
+                    ${fechaFormateada}
+                </p>
+
+            </div>
+
+
+            <div class="prescription-data">
+
+                <div class="prescription-field">
+                    <strong>TA (Tensión Arterial):</strong>
+                    ${datos.ta || 'No registrado'}
+                </div>
+
+                <div class="prescription-field">
+                    <strong>FR (Frecuencia Respiratoria):</strong>
+                    ${datos.fr || 'No registrado'}
+                </div>
+
+                <div class="prescription-field">
+                    <strong>RC (Ritmo Cardíaco):</strong>
+                    ${datos.rc || 'No registrado'}
+                </div>
+
+                <div class="prescription-field">
+                    <strong>Temperatura:</strong>
+                    ${datos.temperatura || 'No registrado'}
+                </div>
+
+                <div class="prescription-field">
+                    <strong>Peso:</strong>
+                    ${datos.peso || 'No registrado'} kg
+                </div>
+
+                <div class="prescription-field">
+                    <strong>Talla:</strong>
+                    ${datos.talla || 'No registrado'} m
+                </div>
+
+                <div class="prescription-field">
+                    <strong>IMC (Índice de Masa Corporal):</strong>
+                    ${datos.imc || 'No registrado'}
+                </div>
+
+                <div class="prescription-field">
+                    <strong>Alergias:</strong>
+                    ${datos.alergias || 'No registrado'}
+                </div>
+
+            </div>
+
+
+            <div class="prescription-field">
+
+                <strong>Diagnóstico:</strong>
+
+                ${datos.diagnostico || 'No registrado'}
+
+            </div>
+
+
+            <div class="prescription-receta">
+
+                <h2>Receta Médica:</h2>
+
+                <p>
+                    ${datos.receta.replace(/\n/g, '<br>')}
+                </p>
+
+            </div>
+
+
+            <div class="prescription-footer">
+
+                <p>_________________________</p>
+
+                <div class="prescription-field">
+                    ${datos.nombremedico || 'No registrado'}
+                </div>
+
+                <p>Firma del Médico</p>
+
+            </div>
+
+        `;
+
+
+        // Insertar contenido
+        printSection.innerHTML =
+            printContent;
+
+
+        printSection.style.display =
+            'block';
+
+
+        // Imprimir
+        window.print();
+
+
+        // Ocultar después
+        setTimeout(function() {
+
+            printSection.style.display =
+                'none';
+
+        }, 100);
+
+    }
+
+
+    // ============================================================
+    // INICIALIZAR AL CARGAR LA PÁGINA
+    // ============================================================
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function() {
+
             cargarHistorialDesdeModelo();
-        });
-    </script>
+
+        }
+    );
+
+</script>
 
 
 </body>
