@@ -1,7 +1,8 @@
 {% extends "dgenerales.html" %}
-
+{% load ayudas_tag %}
 {% block content %}
 <div class="container mt-4">
+    {% ayuda "lista_tareas" %}
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -65,12 +66,12 @@
                                                title="Ver tarea">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="{{ tarea.imagen_tarea_url }}"
+                                        <!--    <a href="{{ tarea.imagen_tarea_url }}"
                                                download
                                                class="btn btn-outline-success"
                                                title="Descargar">
                                                 <i class="bi bi-download"></i>
-                                            </a>
+                                            </a> -->
                                             {% endif %}
                                             <button type="button"
                                                     class="btn btn-outline-danger"

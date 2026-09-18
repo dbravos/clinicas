@@ -240,6 +240,48 @@ AYUDAS = {
   """
     },
 
+    "lista_tareas": {
+        "titulo": "Lista tareas escaneadas",
+        "tooltip": "Despliega las tareas que han sido escaneadas y se han subido a la nube",
+        "contenido": """
+
+     <h6>¿Qué puedes hacer?</h6>
+    <ul>Esta pantalla nos enlista las tareas que han sido escaneadas y subido a la nube.
+       <li>En el renglon/registro existen los campos de :</li>
+       <li>Fecha y hora en que se subio a la nube.</li>
+       <li>Nombre del archivo</li>
+       <li>hay 2 botones, esta el de visualizar y borre o eliminacion de la tarea en la nube.</li>
+      
+      </ul>
+
+
+
+    <p>
+        Revisa la información antes de seleccionar
+        el botón Guardar.
+    </p>
+"""
+    },
+   "escanear_tarea": {
+        "titulo": "Escanear Tareas",
+        "tooltip": "Esta opcion nos permite subir a la nube una tarea previamente escaneada",
+        "contenido": """
+
+     <h6>¿Qué puedes hacer?</h6>
+    <p>Esta pantalla nos permite subir a la nube un archivo que contenga una tarea del interno.
+       Este archivo debe contener una tarea previamente escaneada
+     
+      </p>
+
+
+
+    <p>
+        Revisa la información antes de seleccionar
+        el botón Guardar.
+    </p>
+"""
+    },
+
 }
 
 
