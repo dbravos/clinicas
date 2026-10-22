@@ -1,0 +1,1004 @@
+{% extends "dgenerales.html" %}
+{% block patient_content %}
+{% load forms_tags %}
+{% load riesgos %}
+
+<!-- ESTILOS PERSONALIZADOS -->
+<style>
+    :root {
+        --primary-color: var(--fs-green-ink);       /* Azul moderno */
+        --primary-light: var(--fs-green-soft);       /* Azul muy claro fondo */
+        --text-dark: var(--fs-ink);           /* Gris oscuro texto */
+        --text-muted: var(--fs-muted);          /* Gris suave */
+        --border-color: var(--fs-border);        /* Borde sutil */
+        --success-bg: #dcfce7; --success-text: #166534;
+        --warning-bg: #fef9c3; --warning-text: #854d0e;
+        --danger-bg: #fee2e2;  --danger-text: #991b1b;
+        --sidebar-width: 280px;
+    }
+
+    body {
+        background-color: var(--fs-subtle);
+        color: var(--text-dark);
+        font-family: var(--fs-font-body);
+    }
+
+    /* --- Header del Paciente --- */
+    .patient-header {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        position: sticky;
+        top: 60px; /* Ajusta según tu navbar principal */
+        z-index: 100;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .patient-header .title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .patient-badge {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* --- Layout Principal --- */
+    .layout-container {
+        display: flex;
+        gap: 20px;
+        padding: 0 20px 40px 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* --- Sidebar de Navegación --- */
+    .sidebar-menu {
+        width: var(--sidebar-width);
+        flex-shrink: 0;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        height: calc(100vh - 160px);
+        position: sticky;
+        top: 140px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .nav-pills .nav-link {
+        color: var(--text-muted);
+        font-weight: 500;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        transition: all 0.2s;
+        text-align: left;
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        line-height: 1.4;
+    }
+
+    .nav-pills .nav-link .num-badge {
+        background: var(--fs-border);
+        color: var(--text-muted);
+        min-width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .nav-pills .nav-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-pills .nav-link.active .num-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    /* --- Área de Contenido --- */
+    .content-area {
+        flex-grow: 1;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        padding: 30px;
+        min-height: calc(100vh - 160px);
+    }
+
+    /* --- Tarjetas de Preguntas --- */
+    .question-card {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        margin-bottom: 24px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .question-header {
+        background: var(--fs-subtle);
+        padding: 15px 20px;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-dark);
+    }
+
+    .question-body {
+        padding: 20px;
+    }
+
+    /* --- Radio Buttons Mejorados (Estilo Tarjeta) --- */
+    .custom-options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+    .radio-card-wrapper {
+        position: relative;
+    }
+
+    .radio-card-wrapper input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .radio-card-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 100%;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Estado Seleccionado */
+    .radio-card-wrapper input[type="radio"]:checked + .radio-card-label {
+        background-color: var(--primary-light);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        font-weight: 600;
+        box-shadow: 0 0 0 2px var(--primary-color) inset;
+    }
+
+    .radio-card-wrapper input[type="radio"]:hover + .radio-card-label {
+        background-color: var(--fs-subtle);
+        border-color: var(--fs-border-strong);
+    }
+
+    /* --- Alertas Informativas --- */
+    .info-callout {
+        background-color: var(--fs-green-soft);
+        border-left: 4px solid var(--primary-color);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: #1e3a8a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-callout.warning {
+        background-color: #fffbeb;
+        border-left-color: #f59e0b;
+        color: #92400e;
+    }
+
+    /* --- Tabla de Resultados --- */
+    .results-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .results-table th {
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 10px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .results-table td {
+        background: white;
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-table tr td:first-child {
+        border-left: 1px solid var(--border-color);
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+        font-weight: 600;
+    }
+
+    .results-table tr td:last-child {
+        border-right: 1px solid var(--border-color);
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+
+/* --- CORRECCIÓN TABLA DE RESULTADOS --- */
+    .results-table {
+        table-layout: fixed; /* Fuerza a la tabla a respetar anchos */
+    }
+
+    /* Columna de interpretación (la última) */
+    .results-table td:last-child {
+        font-size: 0.75rem;     /* Letra más pequeña */
+        line-height: 1.2;       /* Menos espacio entre líneas */
+        width: 35%;             /* Ocupa el 35% del ancho total */
+        white-space: normal;    /* Permite que el texto baje de renglón */
+        color: var(--fs-muted);         /* Gris suave para lectura */
+    }
+
+
+    /* Badges de Riesgo */
+    .risk-badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-align: center;
+        min-width: 40px;
+        display: inline-block;
+    }
+    .risk-low { background: var(--success-bg); color: var(--success-text); }
+    .risk-med { background: var(--warning-bg); color: var(--warning-text); }
+    .risk-high { background: var(--danger-bg); color: var(--danger-text); }
+
+    /* Scrollbars finos */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--fs-border-strong); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fs-muted); }
+
+    /* --- CORRECCIÓN DE DESBORDAMIENTO DE TEXTO (RIESGOS) --- */
+
+    /* 1. Truco vital para layouts con Flexbox */
+    .content-area {
+        min-width: 0; /* Permite que el contenedor se encoja y fuerce el salto de línea */
+        overflow-x: hidden; /* Evita scroll horizontal innecesario */
+    }
+
+    /* 2. Forzar que el texto de Riesgos baje de renglón */
+    #v-riesgos .tab-content ul li,
+    #v-riesgos .tab-content p,
+    #v-riesgos .tab-content h5 {
+        white-space: normal !important; /* Obliga al texto a dar salto de línea */
+        overflow-wrap: break-word;      /* Rompe palabras si son más largas que la pantalla */
+        word-wrap: break-word;          /* Soporte para navegadores viejos */
+        max-width: 100%;                /* Asegura que no exceda el ancho de la tarjeta */
+    }
+
+    /* 3. Ajuste extra para móviles en la lista de pestañas de riesgos */
+    #riesgosTab .nav-link {
+        white-space: nowrap; /* Los títulos de las pestañas (Tabaco, Alcohol) sí deben ir en una línea */
+    }
+
+
+
+</style>
+
+<!-- MENSAJES FLOTANTES -->
+{% if messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- HEADER FLOTANTE -->
+<div class="patient-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="title">Cuestionario ASSIST</h1>
+        <small class="text-muted">Entrevista de Detección de Consumo</small>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <div class="patient-badge">
+            <i class="bi bi-folder"></i> EXP: {{ interno.numeroexpediente }}
+        </div>
+        <div class="patient-badge" style="background: var(--fs-subtle); color: var(--text-dark);">
+            <i class="bi bi-person"></i> {{ interno.nombrecompleto }}
+        </div>
+        <a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-return-left"></i> Salir
+        </a>
+    </div>
+</div>
+
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="layout-container">
+
+    <!-- 1. SIDEBAR DE NAVEGACIÓN -->
+    <div class="sidebar-menu">
+        <h6 class="text-uppercase text-muted fw-bold px-3 mt-2 mb-3" style="font-size: 0.75rem;">Secciones</h6>
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link active" id="v-cuales-tab" data-bs-toggle="pill" data-bs-target="#v-cuales" type="button" role="tab">
+               <span class="num-badge">1</span> Consumo en la vida
+            </button>
+            <button class="nav-link" id="v-frecuencia-tab" data-bs-toggle="pill" data-bs-target="#v-frecuencia" type="button" role="tab">
+               <span class="num-badge">2</span> Frecuencia (3 meses)
+            </button>
+            <button class="nav-link" id="v-deseo-tab" data-bs-toggle="pill" data-bs-target="#v-deseo" type="button" role="tab">
+               <span class="num-badge">3</span> Deseo de consumo
+            </button>
+            <button class="nav-link" id="v-problemas-tab" data-bs-toggle="pill" data-bs-target="#v-problemas" type="button" role="tab">
+                <span class="num-badge">4</span> Problemas derivados
+            </button>
+            <button class="nav-link" id="v-dejado-tab" data-bs-toggle="pill" data-bs-target="#v-dejado" type="button" role="tab">
+               <span class="num-badge">5</span> Impacto funcional
+            </button>
+            <button class="nav-link" id="v-preocupacion-tab" data-bs-toggle="pill" data-bs-target="#v-preocupacion" type="button" role="tab">
+               <span class="num-badge">6</span> Preocupación ajena
+            </button>
+            <button class="nav-link" id="v-reducir-tab" data-bs-toggle="pill" data-bs-target="#v-reducir" type="button" role="tab">
+                <span class="num-badge">7</span> Intentos de control
+            </button>
+            <button class="nav-link" id="v-inyectada-tab" data-bs-toggle="pill" data-bs-target="#v-inyectada" type="button" role="tab">
+               <span class="num-badge">8</span> Vía inyectada
+            </button>
+             <button class="nav-link" id="v-resultado-tab" data-bs-toggle="pill" data-bs-target="#v-resultado" type="button" role="tab">
+               <span class="num-badge">9</span> Resultados
+            </button>
+             <button class="nav-link" id="v-riesgos-tab" data-bs-toggle="pill" data-bs-target="#v-riesgos" type="button" role="tab">
+               <span class="num-badge">10</span> Info de Riesgos
+            </button>
+        </div>
+
+        <div class="mt-4 px-2">
+            <button form="assist-form" type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                <i class="bi bi-save me-2"></i> Guardar Todo
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. ÁREA DE FORMULARIO -->
+    <div class="content-area">
+        <form id="assist-form" action="{% url 'assist' id=interno.pk %}" method="POST">
+            {% csrf_token %}
+            {{assistf.nombreconsejero.as_hidden}}
+            {{assistf.consejero.as_hidden}}
+            {{assistf.expediente.as_hidden}}
+            {{assistf.clinica.as_hidden}}
+
+            <div class="tab-content" id="v-pills-tabContent">
+
+                <!-- PREGUNTA 1 -->
+                <div class="tab-pane fade show active" id="v-cuales" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">1. Consumo a lo largo de la vida</h3>
+
+                    <div class="info-callout">
+                        <i class="bi bi-info-circle-fill fs-4"></i>
+                        <div>
+                            <strong>Instrucción:</strong> Pregunte sobre el consumo alguna vez en la vida (sin receta médica). Si todas son negativas, pregunte: "¿Ni siquiera en la escuela?".
+                        </div>
+                    </div>
+
+                    {% for i in "123456789" %}
+                        {% with field_name="p1s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header d-flex justify-content-between">
+                                    <span>{{ campo.label }}</span>
+                                </div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio"
+                                                   name="{{ campo.name }}"
+                                                   id="{{ choice.id_for_label }}"
+                                                   value="{{ choice.data.value }}"
+                                                   {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">
+                                                {{ choice.choice_label }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+
+                    <div class="question-card border-primary bg-light">
+                        <div class="question-body">
+                            <label class="form-label fw-bold">Otras sustancias:</label>
+                            {{ assistf.asistotras }}
+                            <div class="mt-3 custom-options-grid">
+                                {% for choice in assistf.p1s10 %}
+                                <div class="radio-card-wrapper">
+                                    <input type="radio" name="{{ assistf.p1s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                    <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREGUNTA 2 -->
+                <div class="tab-pane fade" id="v-frecuencia" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">2. Frecuencia (Últimos 3 meses)</h3>
+                    <div class="info-callout warning">
+                        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        <div>
+                            Si la respuesta es "NUNCA" en todas, pase a la pregunta 6. Si hubo consumo, continúe con preguntas 3, 4 y 5.
+                        </div>
+                    </div>
+
+                    {% for i in "123456789" %}
+                        {% with field_name="p2s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+
+                    <div class="mb-3">
+                        <label>Otras sustancias:</label> {{ assistf.asistotras2 }}
+                        <div class="mt-2 custom-options-grid">
+                            {% for choice in assistf.p2s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p2s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+<!-- PREGUNTA 3: DESEO -->
+                <div class="tab-pane fade" id="v-deseo" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">3. Deseo de Consumo</h3>
+
+                    {% for i in "123456789" %}
+                        {% with field_name="p3s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <label class="fw-bold">Otras sustancias:</label> {{ assistf.asistotras3 }}
+                        <div class="mt-2 custom-options-grid">
+                             {% for choice in assistf.p3s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p3s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREGUNTA 4: PROBLEMAS -->
+                <div class="tab-pane fade" id="v-problemas" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">4. Problemas de Salud/Sociales</h3>
+                    {% for i in "123456789" %}
+                        {% with field_name="p4s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <label class="fw-bold">Otras sustancias:</label> {{ assistf.asistotras4 }}
+                         <div class="mt-2 custom-options-grid">
+                             {% for choice in assistf.p4s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p4s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREGUNTA 5: DEJADO -->
+                <div class="tab-pane fade" id="v-dejado" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">5. Dejó obligaciones</h3>
+                    {% for i in "123456789" %}
+                        {% with field_name="p5s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <label class="fw-bold">Otras sustancias:</label> {{ assistf.asistotras5 }}
+                         <div class="mt-2 custom-options-grid">
+                             {% for choice in assistf.p5s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p5s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREGUNTA 6: PREOCUPACION -->
+                <div class="tab-pane fade" id="v-preocupacion" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">6. Preocupación de otros</h3>
+                    {% for i in "123456789" %}
+                        {% with field_name="p6s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <label class="fw-bold">Otras sustancias:</label> {{ assistf.asistotras6 }}
+                         <div class="mt-2 custom-options-grid">
+                             {% for choice in assistf.p6s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p6s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREGUNTA 7: REDUCIR -->
+                <div class="tab-pane fade" id="v-reducir" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">7. Intentos de reducir</h3>
+                    {% for i in "123456789" %}
+                        {% with field_name="p7s"|add:i %}
+                            {% get_form_field assistf field_name as campo %}
+                            {% if campo %}
+                            <div class="question-card">
+                                <div class="question-header">{{ campo.label }}</div>
+                                <div class="question-body">
+                                    <div class="custom-options-grid">
+                                        {% for choice in campo %}
+                                        <div class="radio-card-wrapper">
+                                            <input type="radio" name="{{ campo.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                            <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <label class="fw-bold">Otras sustancias:</label> {{ assistf.asistotras7 }}
+                         <div class="mt-2 custom-options-grid">
+                             {% for choice in assistf.p7s10 %}
+                            <div class="radio-card-wrapper">
+                                <input type="radio" name="{{ assistf.p7s10.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- PREGUNTA 8 (Inyectada) -->
+                <div class="tab-pane fade" id="v-inyectada" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">8. Consumo vía inyectada</h3>
+
+                    <div class="question-card">
+                        <div class="question-header">{{ assistf.p8s1.label }}</div>
+                        <div class="question-body">
+                            <div class="custom-options-grid">
+                                {% for choice in assistf.p8s1 %}
+                                <div class="radio-card-wrapper">
+                                    <input type="radio" name="{{ assistf.p8s1.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                    <label for="{{ choice.id_for_label }}" class="radio-card-label">{{ choice.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-callout mt-4">
+                        <i class="bi bi-activity fs-4"></i>
+                        <div>
+                            <strong>Hábitos de inyección (últimos 3 meses):</strong> Solo si respondió afirmativamente arriba.
+                        </div>
+                    </div>
+
+                    <div class="question-card border-warning">
+                        <div class="question-body">
+                            {% for choice in assistf.habitosinyectarse %}
+                            <div class="d-flex align-items-center mb-3 p-2 border rounded hover-bg-light">
+                                <div class="me-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="{{ assistf.habitosinyectarse.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <label for="{{ choice.id_for_label }}" class="mb-0 fw-bold" style="cursor: pointer;">{{ choice.choice_label }}</label>
+                                    <small class="d-block text-muted">
+                                        {% if forloop.counter == 1 %}
+                                            4 días/mes promedio. Requiere intervención breve.
+                                        {% else %}
+                                            Más de 4 días/mes. Requiere tratamiento intensivo.
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESULTADOS (TABLA MEJORADA) -->
+                <div class="tab-pane fade" id="v-resultado" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">Puntuación y Riesgo</h3>
+
+                    <div class="table-responsive">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Sustancia</th>
+                                    <th class="text-center">Puntaje</th>
+                                    <th class="text-center">Nivel de Riesgo</th>
+                                    <th>Interpretación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in "1,2,3,4,5,6,7,8,9,10"|split:"," %}
+                                    {% get_form_field assistf "puntos"|add:i as campo %}
+                                    {% with puntos=campo.value|default:0|add:0 %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ campo.label }}</div>
+                                            {% if forloop.counter == 10 %}<small class="text-muted">{{ assistf.asistotras1.value }}</small>{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fs-5 fw-bold">{{ puntos }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if puntos <= 3 %}
+                                                <span class="risk-badge risk-low">Bajo</span>
+                                            {% elif puntos <= 26 %}
+                                                <span class="risk-badge risk-med">Moderado</span>
+                                            {% else %}
+                                                <span class="risk-badge risk-high">Alto</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted d-block line-height-sm">
+                                                0-3: No intervención<br>
+                                                4-26: Intervención Breve<br>
+                                                27+: Tratamiento Intensivo
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+<!-- INFO RIESGOS (COMPLETO) -->
+                <div class="tab-pane fade" id="v-riesgos" role="tabpanel">
+                    <h3 class="mb-4 fw-bold text-primary">Información Clínica y Riesgos</h3>
+
+                    <!-- MENU DE PESTAÑAS (Con scroll horizontal si es necesario) -->
+                    <div class="border-bottom">
+                        <ul class="nav nav-tabs border-0 flex-nowrap" style="overflow-x: auto; white-space: nowrap;" id="riesgosTab" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabaco-panel" type="button">Tabaco</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#alcohol-panel" type="button">Alcohol</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cannabis-panel" type="button">Cannabis</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cocaina-panel" type="button">Cocaína</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#estimulantes-panel" type="button">Estimulantes</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#inhalantes-panel" type="button">Inhalantes</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sedantes-panel" type="button">Sedantes</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#alucinogenos-panel" type="button">Alucinógenos</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#opiaceos-panel" type="button">Opiáceos</button></li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content border border-top-0 p-4 rounded-bottom bg-white shadow-sm">
+
+                        <!-- TABACO -->
+                        <div class="tab-pane fade show active" id="tabaco-panel">
+                             {% with nivel=assistf.puntos1.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados al Tabaco:</h5>
+                             <ul class="text-muted small">
+                                <li>Envejecimiento prematuro y arrugas en la piel.</li>
+                                <li>Condición física inferior y recuperación lenta.</li>
+                                <li>Infecciones respiratorias, asma, enfermedades crónicas (enfisema).</li>
+                                <li>Alta presión sanguínea, diabetes, enfermedades cardíacas.</li>
+                                <li>Cáncer de pulmón, vejiga, mama, boca, garganta y esófago.</li>
+                             </ul>
+                        </div>
+
+                        <!-- ALCOHOL -->
+                        <div class="tab-pane fade" id="alcohol-panel">
+                             {% with nivel=assistf.puntos2.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados al Alcohol:</h5>
+                             <ul class="text-muted small">
+                                <li>Resacas, conducta violenta, accidentes.</li>
+                                <li>Envejecimiento prematuro, problemas digestivos (úlceras, hígado).</li>
+                                <li>Ansiedad, depresión, problemas familiares y laborales.</li>
+                                <li>Daño cerebral permanente, pérdida de memoria.</li>
+                                <li>Cáncer de boca, enfermedad del páncreas.</li>
+                             </ul>
+                        </div>
+
+                         <!-- CANNABIS -->
+                         <div class="tab-pane fade" id="cannabis-panel">
+                             {% with nivel=assistf.puntos3.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados al Cannabis:</h5>
+                             <ul class="text-muted small">
+                                 <li>Problemas de atención y motivación.</li>
+                                 <li>Ansiedad, paranoia, pánico, depresión.</li>
+                                 <li>Asma, bronquitis, enfermedades cardíacas.</li>
+                                 <li>Psicosis (especialmente con historial de esquizofrenia).</li>
+                                 <li>Cáncer de vías respiratorias.</li>
+                             </ul>
+                        </div>
+
+                        <!-- COCAINA -->
+                        <div class="tab-pane fade" id="cocaina-panel">
+                             {% with nivel=assistf.puntos4.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a la Cocaína:</h5>
+                             <ul class="text-muted small">
+                                <li>Dificultad para dormir, taquicardia, pérdida de peso.</li>
+                                <li>Ansiedad intensa, cambios de humor, manías, paranoia.</li>
+                                <li>Conducta agresiva y violenta.</li>
+                                <li>Psicosis tras consumo repetido.</li>
+                                <li>Muerte repentina por fallo cardiovascular.</li>
+                             </ul>
+                        </div>
+
+                        <!-- ESTIMULANTES -->
+                        <div class="tab-pane fade" id="estimulantes-panel">
+                             {% with nivel=assistf.puntos5.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a Estimulantes (Anfetaminas):</h5>
+                             <ul class="text-muted small">
+                                <li>Insomnio, pérdida de apetito, deshidratación.</li>
+                                <li>Tensión mandibular, dolores musculares.</li>
+                                <li>Ansiedad, pánico, agitación, agresión.</li>
+                                <li>Daño cerebral permanente, daño hepático.</li>
+                                <li>Hemorragia cerebral, fallo cardíaco.</li>
+                             </ul>
+                        </div>
+
+                        <!-- INHALANTES -->
+                        <div class="tab-pane fade" id="inhalantes-panel">
+                             {% with nivel=assistf.puntos6.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a Inhalantes:</h5>
+                             <ul class="text-muted small">
+                                <li>Síntomas gripales, sangrado nasal, náusea.</li>
+                                <li>Desorientación, visión borrosa, pérdida de coordinación.</li>
+                                <li>Pérdida de memoria, confusión, depresión.</li>
+                                <li>Daño orgánico (corazón, pulmones, hígado, riñones).</li>
+                                <li>Muerte súbita por insuficiencia cardíaca.</li>
+                             </ul>
+                        </div>
+
+                        <!-- SEDANTES -->
+                        <div class="tab-pane fade" id="sedantes-panel">
+                             {% with nivel=assistf.puntos7.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a Sedantes:</h5>
+                             <ul class="text-muted small">
+                                <li>Aletargamiento, mareo, confusión.</li>
+                                <li>Dificultad de concentración y memoria.</li>
+                                <li>Ansiedad de rebote, depresión.</li>
+                                <li>Tolerancia y dependencia rápida.</li>
+                                <li>Sobredosis letal si se mezcla con alcohol.</li>
+                             </ul>
+                        </div>
+
+                        <!-- ALUCINOGENOS -->
+                        <div class="tab-pane fade" id="alucinogenos-panel">
+                             {% with nivel=assistf.puntos8.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a Alucinógenos:</h5>
+                             <ul class="text-muted small">
+                                <li>Alteraciones visuales/auditivas, conducta impredecible.</li>
+                                <li>Insomnio, náusea, taquicardia.</li>
+                                <li>Ansiedad, pánico, paranoia ("mal viaje").</li>
+                                <li>Flashbacks (visiones retrospectivas).</li>
+                                <li>Desencadenante de problemas mentales latentes.</li>
+                             </ul>
+                        </div>
+
+                        <!-- OPIACEOS -->
+                        <div class="tab-pane fade" id="opiaceos-panel">
+                             {% with nivel=assistf.puntos9.value|nivel_riesgo %}
+                             <div class="alert {% if nivel == 'Alto' %}alert-danger{% elif nivel == 'Medio' %}alert-warning{% else %}alert-success{% endif %} mb-3">
+                                <strong>Nivel de Riesgo Actual: {{ nivel }}</strong>
+                             </div>
+                             {% endwith %}
+                             <h5 class="text-dark fw-bold">Riesgos asociados a Opiáceos:</h5>
+                             <ul class="text-muted small">
+                                <li>Náusea, estreñimiento, aletargamiento.</li>
+                                <li>Pérdida de interés sexual, impotencia.</li>
+                                <li>Problemas laborales, legales y económicos graves.</li>
+                                <li>Alta dependencia y síndrome de abstinencia severo.</li>
+                                <li>Sobredosis y muerte por paro respiratorio.</li>
+                             </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </form> <!-- Aquí cierra tu form original -->
+
+
+        </form>
+    </div>
+</div>
+
+<footer class="text-center py-4 text-muted border-top bg-white">
+    <small>Entrevista realizada por: <strong>{{ assistf.instance.nombreconsejero }}</strong></small>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Lógica para replicar el texto de "Otras" en todos los tabs
+    const campoPrincipal = document.querySelector('[name="asistotras"]');
+    if (campoPrincipal) {
+        campoPrincipal.addEventListener('input', function() {
+            let val = this.value;
+            if (val) val = val.charAt(0).toUpperCase() + val.slice(1);
+
+            // Busca los inputs de "otras" en las otras preguntas (asumiendo nombres similares)
+            // Nota: Dependiendo de cómo Django nombre tus campos, ajusta el selector
+            document.querySelectorAll('input[name^="asistotras"]').forEach(input => {
+                if (input !== campoPrincipal) {
+                    input.value = val;
+                }
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}

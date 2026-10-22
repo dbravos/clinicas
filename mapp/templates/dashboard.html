@@ -1,0 +1,197 @@
+{% extends "MenuPrincipal.html" %}
+{% load humanize %}
+
+{% block title %}Inicio{% endblock %}
+{% block page_title %}Inicio{% endblock %}
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ clinica_nombre|default:"Panel de la clínica" }}</h1>
+        <p>{% if es_admin %}Resumen de ocupación e ingresos.{% else %}Resumen de ocupación de la clínica.{% endif %}</p>
+    </div>
+    {% if puede_gestionar_internos %}
+    <div class="page-actions">
+        <a href="{% url 'agregainterno' %}" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>Nuevo interno</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if agenda_pendientes %}
+<a href="{% url 'agenda' %}" class="alert alert-warning d-flex align-items-center gap-2 text-decoration-none mb-3">
+    <i class="bi bi-calendar-event fs-5"></i>
+    <span class="flex-grow-1">
+        <strong>{{ agenda_pendientes }} interno{{ agenda_pendientes|pluralize }} por atender</strong>
+        hoy o con sesión vencida{% if not es_admin %} en tu agenda{% endif %}.
+    </span>
+    <span class="fw-semibold">Ver agenda <i class="bi bi-arrow-right"></i></span>
+</a>
+{% endif %}
+
+<!-- Indicadores: cuatro para administradores (incluye ingresos), tres para el resto -->
+<div class="row g-3 mb-3">
+    <div class="{% if es_admin %}col-6 col-xl-3{% else %}col-12 col-sm-4{% endif %}">
+        <div class="card kpi-card">
+            <div class="kpi-body">
+                <div class="kpi-text">
+                    <div class="kpi-label">Internos activos</div>
+                    <div class="kpi-value">{{ activos }}</div>
+                    <div class="kpi-hint">{{ total_internos }} expediente{{ total_internos|pluralize }} en total</div>
+                </div>
+                <span class="kpi-icon"><i class="bi bi-people"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="{% if es_admin %}col-6 col-xl-3{% else %}col-12 col-sm-4{% endif %}">
+        <div class="card kpi-card">
+            <div class="kpi-body">
+                <div class="kpi-text">
+                    <div class="kpi-label">Camas disponibles</div>
+                    {% if capacidad %}
+                        <div class="kpi-value">{{ disponible }}</div>
+                        <div class="kpi-hint">de {{ capacidad }} de capacidad</div>
+                    {% else %}
+                        <div class="kpi-value text-muted">—</div>
+                        <div class="kpi-hint"><a href="{% url 'datosgrales' %}">Configurar capacidad</a></div>
+                    {% endif %}
+                </div>
+                <span class="kpi-icon"><i class="bi bi-door-open"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="{% if es_admin %}col-6 col-xl-3{% else %}col-12 col-sm-4{% endif %}">
+        <div class="card kpi-card">
+            <div class="kpi-body">
+                <div class="kpi-text">
+                    <div class="kpi-label">Ocupación</div>
+                    <div class="kpi-value">{% if capacidad %}{{ ocupacion }}%{% else %}<span class="text-muted">—</span>{% endif %}</div>
+                    {% if capacidad %}
+                    <div class="progress mt-2" style="height: 6px;" role="progressbar" aria-label="Ocupación" aria-valuenow="{{ ocupacion }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar {% if ocupacion >= 90 %}bg-danger{% elif ocupacion >= 75 %}bg-warning{% endif %}" style="width: {{ ocupacion }}%"></div>
+                    </div>
+                    {% endif %}
+                </div>
+                <span class="kpi-icon"><i class="bi bi-pie-chart"></i></span>
+            </div>
+        </div>
+    </div>
+    {% if es_admin %}
+    <div class="col-6 col-xl-3">
+        <div class="card kpi-card">
+            <div class="kpi-body">
+                <div class="kpi-text">
+                    <div class="kpi-label">Ingresos del mes</div>
+                    <div class="kpi-value">${{ ingresos_mes|floatformat:2|intcomma }}</div>
+                    <div class="kpi-hint">Aportaciones registradas</div>
+                </div>
+                <span class="kpi-icon"><i class="bi bi-cash-stack"></i></span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-3">
+    {% if es_admin %}
+    <!-- Ingresos (solo administradores) -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="card-title-sm mb-3">Ingresos de los últimos 6 meses</h2>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartIngresos" aria-label="Gráfica de ingresos por mes" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Sin gráfica de ingresos: los ingresos recientes ocupan su lugar -->
+    <div class="col-lg-8">
+        {% include "includes/dashboard_recientes.html" %}
+    </div>
+    {% endif %}
+
+    <!-- Accesos rápidos -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="card-title-sm mb-3">Accesos rápidos</h2>
+                <ul class="section-links">
+                    <li><a href="{% url 'listaint' %}"><span><i class="bi bi-people me-2 text-muted"></i>Ver internos</span></a></li>
+                    {% if puede_gestionar_internos %}<li><a href="{% url 'agregainterno' %}"><span><i class="bi bi-person-plus me-2 text-muted"></i>Registrar ingreso</span></a></li>{% endif %}
+                    <li><a href="{% url 'listaSesionesGrupales' %}"><span><i class="bi bi-people-fill me-2 text-muted"></i>Sesiones grupales</span></a></li>
+                    {% if 'ADMIN' in permisos or 'OFICINA' in permisos %}
+                    <li><a href="{% url 'captura_pagos' %}"><span><i class="bi bi-cash-coin me-2 text-muted"></i>Registrar cuota</span></a></li>
+                    <li><a href="{% url 'lista_recibos' %}"><span><i class="bi bi-receipt me-2 text-muted"></i>Consultar recibos</span></a></li>
+                    <li><a href="{% url 'menu_reportes' %}"><span><i class="bi bi-file-earmark-bar-graph me-2 text-muted"></i>Reportes</span></a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% if es_admin %}
+    <div class="col-12">
+        {% include "includes/dashboard_recientes.html" %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if es_admin %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    // Colores de la gráfica tomados de los tokens de marca (app.css)
+    const estilos = getComputedStyle(document.documentElement);
+    const token = (nombre, respaldo) => estilos.getPropertyValue(nombre).trim() || respaldo;
+    const verde = token('--fs-green', '#6CCD95');
+    const verdeHover = token('--fs-green-hover', '#58BE83');
+    const textoSecundario = token('--fs-muted', '#5E6E66');
+    const borde = token('--fs-border', '#DCE6DF');
+
+    Chart.defaults.font.family = token('--fs-font-body', 'Inter, sans-serif');
+
+    new Chart(document.getElementById('chartIngresos'), {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Ingresos',
+                data: {{ data|safe }},
+                backgroundColor: verde,
+                hoverBackgroundColor: verdeHover,
+                borderRadius: 6,
+                maxBarThickness: 42
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' $' + ctx.parsed.y.toLocaleString('es-MX', { minimumFractionDigits: 2 })
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: textoSecundario } },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: borde },
+                    border: { display: false },
+                    ticks: {
+                        color: textoSecundario,
+                        precision: 0,
+                        callback: v => '$' + Number(v).toLocaleString('es-MX')
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

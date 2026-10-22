@@ -1,0 +1,15 @@
+Django>=4.2.5
+psycopg2-binary
+gunicorn
+whitenoise
+python-dotenv
+dj-database-url
+django-money
+Pillow>=10.0.0
+pypdf==4.2
+reportlab==4.0.4
+requests==2.31.0
+cloudinary==1.36.0
+django-cloudinary-storage==0.3.0
+num2words==0.5.13
+django-simple-history

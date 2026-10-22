@@ -1,0 +1,16 @@
+<DOCTYPE html>
+<html>
+<head>
+    <title>Detalle del registro</title>
+</head>
+<body>
+    <h1>Detalle del Registro</h1>
+    {%  if interno %}
+        <p>{{interno.id}}</p>
+        <p>{{interno.numeroexpediente}}</p>
+        <p>{{interno.nombrecompleto}}}}</p>
+    {% else %}
+         <p> No se encontro ese numero de expediente </p>
+    {% endif %}
+</body>
+</html>

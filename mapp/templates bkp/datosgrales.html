@@ -1,0 +1,78 @@
+{% extends "MenuPrincipal.html" %}
+{% block content %}
+{%load forms_tags%}
+<div class="container py-4">
+  <!-- Cabecera mejorada -->
+  <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+    <i class="fas fa-hospital-alt fa-xl text-primary me-3"></i>
+    <h1 class="h4 mb-0 fw-bold text-gray-800">Datos Generales de la Clínica</h1>
+  </div>
+
+  <!-- Formulario mejor estructurado -->
+  <div class="card border-0 shadow-sm rounded-lg">
+    <div class="card-body p-4">
+      <form method="post" action="{% url 'grabadatosgrales' %}">
+        {% csrf_token %}
+
+        <!-- Diseño de 1 columna con buen espaciado -->
+        <div class="row">
+          {% for field in datosgralesf %}
+          <div class="col-10 mb-4">
+            <div class="form-group">
+              <!-- Label claro -->
+              <label for="{{ field.id_for_label }}" class="form-label fw-semibold  text-gray-700 mx-2">
+                {{ field.label }}
+              </label>
+
+              <!-- Campo con espacio adecuado -->
+              {{ field|add_class:"form-control form-control-lg" }}
+
+              <!-- Mensaje de ayuda opcional -->
+              {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Botón con mejor diseño -->
+        <div class="d-grid d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+          <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+            <i class="fas fa-save me-2"></i>
+            Guardar Información
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Estilos optimizados -->
+<style>
+  .form-control-lg {
+    padding: 0.8rem 1rem;
+    border: 1px solid #e0e0e0;
+    transition: border-color 0.2s;
+  }
+
+  .form-control-lg:focus {
+    border-color: #4a6cf7;
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+  }
+
+  .card {
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .form-label {
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+  }
+
+  body {
+    background-color: #f8f9fa;
+  }
+</style>
+{% endblock %}

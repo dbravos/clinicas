@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>FreshStart | Software para Clínicas de Rehabilitación</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google Font: Plus Jakarta Sans (Tipografía moderna y limpia) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --primary-color: #2563eb; /* Azul vibrante */
+            --primary-dark: #1e40af;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fff;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- Navbar Estilo Vidrio --- */
+        .navbar {
+            padding: 15px 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- Botones --- */
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            border: 2px solid #e2e8f0;
+            color: var(--text-dark);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--text-dark);
+            background-color: var(--text-dark);
+            color: white;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            padding: 160px 0 100px 0;
+            background: radial-gradient(circle at top right, #eff6ff, #fff);
+            position: relative;
+        }
+
+        .hero h1 {
+            font-weight: 800;
+            font-size: 3.5rem;
+            line-height: 1.1;
+            color: var(--text-dark);
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .mockup-img {
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 8px solid #fff;
+            transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+            transition: transform 0.5s ease;
+        }
+
+        .mockup-container:hover .mockup-img {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+        }
+
+        /* --- Cards de Características --- */
+        .feature-card {
+            padding: 40px 30px;
+            border-radius: 24px;
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            border-color: transparent;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* --- Pricing --- */
+        .pricing-section {
+            background-color: var(--text-dark);
+            color: white;
+            padding: 100px 0;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 50px;
+            color: white;
+        }
+
+        .pricing-price {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        .check-list li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            color: #cbd5e1;
+        }
+
+        .check-list i {
+            color: #4ade80; /* Verde neón */
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* --- Modal --- */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .modal-header { border-bottom: none; padding: 30px 30px 10px; }
+        .modal-body { padding: 10px 30px 40px; }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        .form-control:focus {
+            background-color: #fff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        /* --- Footer --- */
+        .footer {
+            padding: 50px 0;
+            border-top: 1px solid #e2e8f0;
+            color: var(--text-muted);
+        }
+
+        /* Mobile */
+        @media (max-width: 991px) {
+            .hero { padding-top: 120px; text-align: center; }
+            .hero h1 { font-size: 2.5rem; }
+            .mockup-img { transform: none; margin-top: 40px; }
+        }
+    </style>
+</head>
+
+<!-- WHATSAPP FLOTANTE PRO -->
+<div class="whatsapp-container">
+    <div class="whatsapp-tooltip">
+        ¿Necesitas información?
+    </div>
+    <a href="https://wa.me/526642631741?text=Hola,%20quiero%20información%20sobre%20FreshStart%20para%20mi%20clínica."
+       target="_blank"
+       class="whatsapp-float">
+        <i class="bi bi-whatsapp"></i>
+    </a>
+</div>
+
+<style>
+.whatsapp-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.whatsapp-tooltip {
+    background: white;
+    color: #0f172a;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    animation: fadeInUp 0.6s ease;
+}
+
+.whatsapp-float {
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+    color: white;
+    text-decoration: none;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* En móvil que no ocupe mucho espacio */
+@media (max-width: 768px) {
+    .whatsapp-tooltip {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+</style>
+
+
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-heart-pulse-fill me-2"></i>FreshStart
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center gap-3">
+                <li class="nav-item">
+                    <a href="/login/" class="btn btn-outline-custom">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#demoModal">
+                        Solicitar Demo
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- MENSAJES FLOTANTES -->
+{% if mensaje %}
+<div class="position-fixed top-0 start-50 translate-middle-x mt-5 pt-5" style="z-index: 1060;">
+    <div class="alert alert-success shadow-lg rounded-pill px-5 border-0">
+        <i class="bi bi-check-circle-fill me-2"></i> {{ mensaje }}
+    </div>
+</div>
+{% endif %}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold border border-primary border-opacity-25">
+                    🚀 Sistema #1 para Clínicas
+                </span>
+                <h1>Digitaliza y Profesionaliza tu Clínica de Rehabilitación</h1>
+                <p class="mt-3 mb-5">
+                    Control total de expedientes, evaluaciones automatizadas, finanzas y seguimiento terapéutico en una sola plataforma segura.
+                </p>
+
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                    <button class="btn btn-primary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#demoModal">
+                        Agendar Demostración
+                    </button>
+                    <!-- Enlace que baja suavemente a la sección de video -->
+                    <a href="#video-demo" class="btn btn-outline-custom btn-lg border-0 bg-white shadow-sm">
+                        <i class="bi bi-play-circle-fill me-2 text-primary"></i> Ver Video
+                    </a>
+                </div>
+
+                <div class="mt-5 d-flex align-items-center gap-3 text-muted small justify-content-center justify-content-lg-start">
+                    <div class="d-flex">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <span>Confianza de clínicas en México</span>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mockup-container">
+                <!-- Imagen Placeholder: Reemplazar con captura real de FreshStart -->
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop"
+                     class="img-fluid mockup-img"
+                     alt="Dashboard FreshStart">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CARACTERÍSTICAS -->
+<section class="section py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase ls-1">Características</h6>
+            <h2 class="fw-bold display-6">Todo lo que necesitas en un solo lugar</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="bi bi-folder2-open"></i></div>
+                    <h4>Expedientes Digitales</h4>
+                    <p class="text-muted mt-3">
+                        Centraliza la información de tus internos. Historia clínica, documentos legales y bitácoras accesibles en segundos.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="bi bi-clipboard-check"></i></div>
+                    <h4>Evaluaciones Inteligentes</h4>
+                    <p class="text-muted mt-3">
+                        Tamizajes y pruebas psicológicas automatizadas que generan reportes y resultados de progreso al instante.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="bi bi-wallet2"></i></div>
+                    <h4>Control Financiero</h4>
+                    <p class="text-muted mt-3">
+                        Gestiona cuotas voluntarias, genera recibos PDF automáticos y visualiza reportes de ingresos para una administración transparente.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- SECCIÓN VIDEO DEMO -->
+<section id="video-demo" class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Mira FreshStart en acción</h2>
+                    <p class="text-muted">Conoce cómo simplificar la gestión de tu centro</p>
+                </div>
+
+                <!-- CONTENEDOR DEL VIDEO CORREGIDO -->
+                <!-- CONTENEDOR DEL VIDEO -->
+<div class="ratio ratio-16x9 shadow-lg rounded-4 overflow-hidden bg-dark" style="border: 4px solid white;">
+    <iframe
+    src="https://www.youtube.com/embed/J3Somj7aFvE?rel=0&modestbranding=1&origin={{ request.scheme }}://{{ request.get_host }}"
+    title="Demo FreshStart"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen>
+</iframe>
+</div>
+                <!-- FIN CONTENEDOR VIDEO -->
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- PRICING -->
+<section class="pricing-section">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0">
+                <h2 class="fw-bold display-5 mb-4">Inversión simple, resultados gigantes.</h2>
+                <p class="lead text-white-50">
+                    Sin costos ocultos. Dedícate a rehabilitar, nosotros nos encargamos de la tecnología.
+                </p>
+                <hr class="border-white opacity-25 my-4">
+                <p class="text-white-50">
+                    <i class="bi bi-shield-check text-success me-2"></i> Datos encriptados y seguros<br>
+                    <i class="bi bi-cloud-check text-success me-2"></i> Copias de seguridad diarias
+                </p>
+            </div>
+<!-- PRICING -->
+<section class="pricing-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold display-5">Planes diseñados para tu clínica</h2>
+            <p class="text-white-50">Empieza fácil, crece sin límites</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- PLAN BÁSICO -->
+            <div class="col-lg-6">
+                <div class="card pricing-card text-center h-100">
+                    <div class="badge bg-light text-dark rounded-pill mb-3 px-3 py-2">
+                        BÁSICO
+                    </div>
+
+                    <h3 class="fw-bold pricing-price">$1,200</h3>
+                    <p class="text-white-50">MXN / mes</p>
+
+                    <ul class="list-unstyled mt-4 mb-4 text-start check-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Hasta 30 internos</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 2 usuarios</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Expedientes digitales</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Control básico</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Soporte limitado</li>
+                    </ul>
+
+                    <button class="btn btn-light w-100 fw-bold text-primary rounded-pill"
+                        data-bs-toggle="modal" data-bs-target="#demoModal">
+                        Empezar
+                    </button>
+                </div>
+            </div>
+
+            <!-- PLAN PROFESIONAL (DESTACADO) -->
+            <div class="col-lg-6">
+                <div class="card pricing-card text-center h-100 border border-primary"
+                     style="transform: scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+
+                    <div class="badge bg-primary rounded-pill mb-3 px-3 py-2">
+                        MÁS POPULAR
+                    </div>
+
+                    <h3 class="fw-bold pricing-price">$2,500</h3>
+                    <p class="text-white-50">MXN / mes</p>
+
+                    <ul class="list-unstyled mt-4 mb-4 text-start check-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Internos ilimitados</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Usuarios ilimitados</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Evaluaciones automatizadas</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Reportes y métricas</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Recibos PDF</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Soporte prioritario</li>
+                    </ul>
+
+                    <button class="btn btn-primary-custom w-100 rounded-pill"
+                        data-bs-toggle="modal" data-bs-target="#demoModal">
+                        Elegir Plan
+                    </button>
+                </div>
+            </div>
+<!-- PLAN PREMIUM -->
+
+
+    </div>
+</section>
+
+    </div>
+</section>
+<!-- FOOTER PROFESIONAL -->
+<footer class="footer bg-white">
+    <div class="container py-5">
+        <div class="row g-4">
+
+            <!-- Columna 1: Marca -->
+            <div class="col-lg-4">
+                <h5 class="fw-bold mb-3 text-dark">
+                    <i class="bi bi-heart-pulse-fill text-primary me-2"></i>FreshStart
+                </h5>
+                <p class="text-muted small">
+                    Plataforma especializada en la gestión digital de clínicas y centros de rehabilitación.
+                    Desarrollado por <strong>Soluciones Digitales</strong>.
+                </p>
+                <p class="text-muted small mb-0">
+                    Tijuana, Baja California, México.
+                </p>
+            </div>
+
+            <!-- Columna 2: Enlaces -->
+            <div class="col-lg-4">
+                <h6 class="fw-bold mb-3">Enlaces</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <a href="/" class="text-muted text-decoration-none">Inicio</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#video-demo" class="text-muted text-decoration-none">Ver Demo</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="/login/" class="text-muted text-decoration-none">Acceso Clientes</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-muted text-decoration-none">Aviso de Privacidad</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Contacto -->
+            <div class="col-lg-4">
+                <h6 class="fw-bold mb-3">Contacto</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li class="mb-2">
+                        <i class="bi bi-envelope-fill me-2 text-primary"></i>
+                        <a href="mailto:info@freshstart.mx" class="text-muted text-decoration-none">
+                            info@freshstart.mx
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-telephone-fill me-2 text-primary"></i>
+                        <a href="tel:+526649796859" class="text-muted text-decoration-none">
+                            664-979-6859
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
+                        Tijuana, Baja California
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Línea inferior -->
+        <hr class="my-4">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+            <div>
+                © 2026 Soluciones Digitales. Todos los derechos reservados.
+            </div>
+            <div>
+                FreshStart - Software para Clínicas de Rehabilitación
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- MODAL FORMULARIO -->
+<div class="modal fade" id="demoModal" tabindex="-1" aria-labelledby="demoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="demoModalLabel">Solicitar Acceso Demo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4 small">Déjanos tus datos y te contactaremos para configurar tu cuenta.</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Nombre Completo</label>
+                            {{ form.nombre }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Correo Electrónico</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Nombre de la Clínica</label>
+                            {{ form.clinica }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Teléfono / WhatsApp</label>
+                            {{ form.telefono }}
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-custom w-100 py-3">
+                                Enviar Solicitud
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script para estilizar formulario Django automáticamente -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var inputs = document.querySelectorAll('#demoModal input, #demoModal select, #demoModal textarea');
+        inputs.forEach(function(input) {
+            input.classList.add('form-control');
+        });
+    });
+</script>
+
+</body>
+</html>

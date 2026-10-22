@@ -1,0 +1,52 @@
+
+ {% load forms_tags %}
+         <div class="tab-pane  " id="consecuenciascontinuacion">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;background-color:silver;">
+                <div class="row align-items-center ">
+                    <div class="col-5 d-flex flex-wrap" style="margin-top:0.5rem">Ejemplo de consecuencias adversas</div>
+                    <div class="col-2 ">Lo ha presentado en el ultimo año?</div>
+                    <div class="col-5 " style="text-align:center;">Que tanto le ha afectado en su vida?</div>
+             </div> <!-- se cierra linea -->
+             </div> <!--se cierra container -->
+
+
+              <div class="row align-items-center"> <!-- inicia seccion de problemas mentales -->
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-right:10rem;margin-left:0.75rem;margin-top:0.25rem;color:white">Problemas mentales</div>
+              </div>
+            {% for i in "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18"|split:"," %}
+            {% get_form_field cmentalesf "p"|add:i as campo %}
+            {% get_form_field cmentalesf "p"|add:i|add:"a" as campoa %}
+
+            {% if campo and campoa %}
+                 <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">{{ campo.label }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in campo %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+
+                  <div class="col-5">
+                  {% for choice in campoa %}
+                <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ campoa.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+             </div>
+              </div>
+            {% endif %}
+            {% endfor %}
+
+
+            </div> <!-- termina seccion de problemas mentales -->

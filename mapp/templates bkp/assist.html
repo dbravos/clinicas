@@ -1,0 +1,80 @@
+{% extends "dgenerales.html" %}
+
+
+{%block content%}
+<nav class="navbar sticky-top navbar-expand-lg navbar-light" style="background-color:#e0e6e5;border:1px solid silver;  border-radius: 8px;">
+
+    <ul class="nav nav-pills me-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="#datosgenerales">Datos generales</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#responsable">Responsable</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#dependientes">Dependientes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#proviene">Proviene</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#enfermedades">Enfermedades y sustancias</a>
+        </li>
+    </ul>
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=seleccionar" style="color:#0597f9;">Regresar</a>
+        </li>
+    </ul>
+
+
+</nav>
+
+<div class="container">
+
+    <form  method="post">
+        {% csrf_token %}
+
+        <!-- Seccion de los Datos Generales del INterno -->
+        <section id="datosgenerales">
+            <h3>Datos del interno</h3>
+             <div class="etiqueta" style="font-size:20px;font-weigth:bold" : >
+                <label>Expediente : </label>
+                 <span>{{interno.numeroexpediente}}</span>
+            </div>
+            <div class="etiqueta"  style="font-size:20px;font-weigth:bold">
+                <label>Nombre : </label>
+                <span>{{interno.nombrecompleto}}</span>
+            </div>
+
+
+
+            {%for field in assistf%}
+            {% if 'opciones-radio' in field.field.widget.attrs.class %}
+            <div class="opciones-radio">
+                <div class="etiqueta">
+                    <label for="{{field.id_for_label}}">{{ field.label }}</label>
+                    <span> {{ field }} </span>
+                </div>
+
+            </div>
+            {%else%}
+            <div class="etiqueta">
+                <label for="{{field.id_for_label}}">{{ field.label }}</label>
+             <span >{{field}} </span>
+            </div>
+            {%endif%}
+            {%endfor%}
+
+
+
+        </section>
+
+
+
+    </form>
+</div>
+{% endblock%}
+
+
+

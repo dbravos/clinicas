@@ -1,0 +1,518 @@
+<!-- datosgrales.html -->
+{% extends "MenuPrincipal.html" %}
+<body>
+{% block content %}
+{%load forms_tags%}
+
+ <div class="interno-container">
+  <div class="sticky-top bg-white" style="z-index: 1020; top: 0;">
+      <div class="interno-tabs">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" data-bs-toggle="tab" href="#datosgenerales" role="tab">
+             Datos generales
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#responsable" role="tab">
+            Responsable y dependientes
+          </a>
+        </li>
+
+         <li class="nav-item" role="presentation">
+          <a class="nav-link" data-bs-toggle="tab" href="#proviene" role="tab">
+             Proviene, Historial medico y sustancias que consume
+          </a>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+
+
+
+    {% if interno and interno.pk %}
+    <form action="{% url 'grabainterno' id=interno.pk %} " method="post">
+        {% csrf_token %}
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="datosgenerales" role="tabpanel">
+  <!-- Card Principal -->
+
+              <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                    <i class="fas fa-user me-1"></i>Datos del interno
+                    </h3>
+                </div>
+
+           <div class="card-body  pe-0">
+              <div class="row mx-0">
+              {% for field in internof %}
+                 <div class="col-md-6 ps-0">
+              {% if 'opciones-radio' in field.field.widget.attrs.class %}
+              <div class="form-group mb-1">
+                 <label class="form-label fw-bold d-block mb-2">{{ field.label }}</label>
+              <div class="btn-group btn-group-toggle w-100" style="max-width: 100%; overflow-x: auto;" data-toggle="buttons">
+                   {% for choice in field %}
+                <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}" style="white-space: nowrap;font-size:0.75rem">
+                   {{ choice.tag }}
+                   {{ choice.choice_label }}
+                </label>
+                   {% endfor %}
+                </div>
+              </div>
+              {% else %}
+              <div class="form-group mb-1">
+                 <label for="{{ field.id_for_label }}" class="form-label fw-bold d-block mb-1">
+                 {{ field.label }}
+                 </label>
+                 {{ field|add_class:"form-control w-100" }}
+               </div>
+           {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Campos adicionales - Mismo estilo con margen reducido -->
+      <div class="row mx-0">
+        <div class="col-md-6 ps-0">
+          <div class="form-group mb-1 ps-0">
+            <label for="{{ intprovienef.numeroreuniones.id_for_label }}" class="form-label fw-bold d-block mb-1">
+              {{ intprovienef.numeroreuniones.label }}
+            </label>
+            {{ intprovienef.numeroreuniones }}
+          </div>
+        </div>
+
+        <div class="col-md-6 ps-0 ">
+          <div class="form-group mb-1 ps-0">
+            <label for="{{ intprovienef.diversasactividades.id_for_label }}" class="form-label fw-bold d-block mb-1">
+              {{ intprovienef.diversasactividades.label }}
+            </label>
+            {{ intprovienef.diversasactividades }}
+          </div>
+        </div>
+
+        <div class="col-md-6 ps-0">
+          <div class="form-group mb-1 ps-0">
+            <label for="{{ intprovienef.duracion.id_for_label }}" class="form-label fw-bold d-block mb-1">
+              {{ intprovienef.duracion.label }}
+            </label>
+            {{ intprovienef.duracion }}
+          </div>
+        </div>
+
+        <div class="col-md-6 ps-0">
+          <div class="form-group mb-1 ps-0">
+            <label for="{{ intprovienef.aportaciontotal.id_for_label }}" class="form-label fw-bold d-block mb-1">
+              {{ intprovienef.aportaciontotal.label }}
+            </label>
+            {{ intprovienef.aportaciontotal }}
+          </div>
+        </div>
+
+        <div class="col-md-6 ps-0">
+          <div class="form-group mb-1 ps-0">
+            <label for="{{ intprovienef.aportacioninicial.id_for_label }}" class="form-label fw-bold d-block mb-1">
+              {{ intprovienef.aportacioninicial.label }}
+            </label>
+            {{ intprovienef.aportacioninicial }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+           </div>
+          <div class="tab-pane fade" id="responsable" role="tabpanel">
+  <!-- Card Principal Compacta -->
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white py-2"> <!-- Header más compacto -->
+      <h3 class="card-title mb-0 h5"> <!-- Título más pequeño -->
+        <i class="fas fa-user-tie me-1"></i>Responsable
+      </h3>
+    </div>
+
+    <div class="card-body p-3"> <!-- Padding reducido -->
+
+        <div class="row g-2"> <!-- Espacio entre filas reducido -->
+          {% for field in intresponsablef %}
+          <div class="col-md-6">
+            {% if 'opciones-radio' in field.field.widget.attrs.class %}
+            <!-- Grupo de radio buttons compacto -->
+            <div class="form-group mb-2"> <!-- Margen inferior reducido -->
+              <label class="form-label fw-bold d-block mb-1 small">{{ field.label }}</label> <!-- Label más pequeño -->
+              <div class="ps-1"> <!-- Padding izquierdo mínimo -->
+                {% for choice in field %}
+                <div class="form-check py-1"> <!-- Espaciado vertical reducido -->
+                  {{ choice.tag }}
+                  <label class="form-check-label small" for="{{ choice.id_for_label }}"> <!-- Texto más pequeño -->
+                    {{ choice.choice_label }}
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <!-- Campo normal compacto -->
+            <div class="form-group mb-2"> <!-- Margen inferior reducido -->
+              <label for="{{ field.id_for_label }}" class="form-label fw-bold d-block mb-1 "> <!-- Label más pequeño -->
+                {{ field.label }}
+              </label>
+              {{ field|add_class:"form-control w-100" }} <!-- Input más compacto -->
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+    </div>
+  </div>
+
+        <!-- Seccion de Los Dependientes -->
+
+  <!-- Tarjeta Principal -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-primary text-white py-3">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-users me-2"></i> Dependientes
+      </h5>
+    </div>
+
+    <div class="card-body">
+      <!-- Sección de Dependientes -->
+      <div class="row g-3">
+        <!-- Campo: Padres -->
+        <div class="col-md-6 col-lg-3">
+          <div class="form-group mb-3">
+            <div class="form-check form-switch">
+              {{ intdependientesf.dpadres|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{ intdependientesf.dpadres.id_for_label }}">
+                <i class="fas fa-user-friends me-1"></i> {{ intdependientesf.dpadres.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo: Cónyuge -->
+        <div class="col-md-6 col-lg-3">
+          <div class="form-group mb-3">
+            <div class="form-check form-switch">
+              {{ intdependientesf.dconyugue|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{ intdependientesf.dconyugue.id_for_label }}">
+                <i class="fas fa-user-friends me-1"></i> {{ intdependientesf.dconyugue.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo: Hijos -->
+        <div class="col-md-6 col-lg-3">
+          <div class="form-group mb-3">
+            <div class="form-check form-switch">
+              {{ intdependientesf.dhijos|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{ intdependientesf.dhijos.id_for_label }}">
+                <i class="fas fa-child me-1"></i> {{ intdependientesf.dhijos.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo: Otros -->
+        <div class="col-md-6 col-lg-3">
+          <div class="form-group mb-3">
+            <div class="form-check form-switch">
+              {{ intdependientesf.dotros|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{ intdependientesf.dotros.id_for_label }}">
+                <i class="fas fa-users me-1"></i> {{ intdependientesf.dotros.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Comentarios -->
+      <div class="mt-4 pt-3 border-top">
+        <h5 class="text-primary mb-3">
+          <i class="fas fa-comment-dots me-2"></i> Comentarios
+        </h5>
+        <div class="form-group">
+          {{ intdependientesf.comentarios|add_class:"form-control" }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          <div class="tab-pane fade" id="proviene" role="tabpanel">
+  <!-- Sección de Datos del Interno - Diseño Mejorado -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white py-3">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-info-circle me-2"></i> Información de Procedencia
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Campo: Proviene -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{intproviene.proviene.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-map-marker-alt me-1"></i> {{ intprovienef.proviene.label }}
+            </label>
+            {{ intprovienef.proviene|add_class:"form-select" }}
+          </div>
+        </div>
+
+        <!-- Campo: Proviene Otro -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{intproviene.provieneotro.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-edit me-1"></i> {{ intprovienef.provieneotro.label }}
+            </label>
+            {{ intprovienef.provieneotro|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Campo: Acude con -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{intproviene.acudecon.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-user-friends me-1"></i> {{ intprovienef.acudecon.label }}
+            </label>
+            {{ intprovienef.acudecon|add_class:"form-select" }}
+          </div>
+        </div>
+
+        <!-- Campo: Acude Otro -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{intproviene.acudeotro.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-edit me-1"></i> {{ intprovienef.acudeotro.label }}
+            </label>
+            {{ intprovienef.acudeotro|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Campos: Medicinas -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <div class="form-check form-switch">
+              {{ intprovienef.tomamedicinas|add_class:"form-check-input" }}
+              <label class="form-check-label fw-bold" for="{{intproviene.tomamedicinas.id_for_label}}">
+                <i class="fas fa-pills me-1"></i> {{ intprovienef.tomamedicinas.label}}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="{{intproviene.especifique.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-comment-medical me-1"></i> {{ intprovienef.especifique.label }}
+            </label>
+            {{ intprovienef.especifique|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Enfermedades -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white py-3">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-heartbeat me-2"></i> Historial Médico
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Checkboxes de Enfermedades -->
+        <div class="col-md-6 col-lg-3">
+          <div class="form-check form-switch">
+            {{ intprovienef.embarazo|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.embarazo.id_for_label}}">
+              <i class="fas fa-baby me-1"></i> {{intprovienef.embarazo.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="form-check form-switch">
+            {{ intprovienef.psiquiatricas|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.psiquiatricas.id_for_label}}">
+              <i class="fas fa-brain me-1"></i> {{intprovienef.psiquiatricas.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="form-check form-switch">
+            {{ intprovienef.fisicas|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.fisicas.id_for_label}}">
+              <i class="fas fa-wheelchair me-1"></i> {{intprovienef.fisicas.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="form-check form-switch">
+            {{ intprovienef.contagiosas|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.contagiosas.id_for_label}}">
+              <i class="fas fa-virus me-1"></i> {{intprovienef.contagiosas.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="form-check form-switch">
+            {{ intprovienef.basiloscopia|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.basiloscopia.id_for_label}}">
+              <i class="fas fa-microscope me-1"></i> {{intprovienef.basiloscopia.label}}
+            </label>
+          </div>
+        </div>
+
+        <!-- Campo: Otras Enfermedades -->
+        <div class="col-12 mt-3">
+          <div class="form-group">
+            <label for="{{intproviene.enfermedadesotro.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-plus-circle me-1"></i> {{intprovienef.enfermedadesotro.label}}
+            </label>
+            {{ intprovienef.enfermedadesotro|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Sustancias -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white py-3">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-syringe me-2"></i> Consumo de Sustancias
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Checkboxes de Sustancias -->
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.alcohol|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.alcohol.id_for_label}}">
+              <i class="fas fa-wine-glass-alt me-1"></i> {{intprovienef.alcohol.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.anfetaminas|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.anfetaminas.id_for_label}}">
+              <i class="fas fa-tablets me-1"></i> {{intprovienef.anfetaminas.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.secantes|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.secantes.id_for_label}}">
+              <i class="fas fa-prescription-bottle-alt me-1"></i> {{intprovienef.secantes.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.marihuana|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.marihuana.id_for_label}}">
+              <i class="fas fa-cannabis me-1"></i> {{intprovienef.marihuana.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.rohypnol|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.rohypnol.id_for_label}}">
+              <i class="fas fa-capsules me-1"></i> {{intprovienef.rohypnol.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.analgesicos|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.analgesicos.id_for_label}}">
+              <i class="fas fa-pills me-1"></i> {{intprovienef.analgesicos.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.disolventes|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.disolventes.id_for_label}}">
+              <i class="fas fa-flask me-1"></i> {{intprovienef.disolventes.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.cocaina|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.cocaina.id_for_label}}">
+              <i class="fas fa-smoking me-1"></i> {{intprovienef.cocaina.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.opio|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.opio.id_for_label}}">
+              <i class="fas fa-prescription-bottle me-1"></i> {{intprovienef.opio.label}}
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="form-check form-switch">
+            {{ intprovienef.cristal|add_class:"form-check-input" }}
+            <label class="form-check-label fw-bold" for="{{intproviene.cristal.id_for_label}}">
+              <i class="fas fa-vial me-1"></i> {{intprovienef.cristal.label}}
+            </label>
+          </div>
+        </div>
+
+        <!-- Campo: Por cuál ingresa -->
+        <div class="col-12 mt-3">
+          <div class="form-group">
+            <label for="{{intproviene.porcualingresa.id_for_label}}" class="form-label fw-bold">
+              <i class="fas fa-sign-in-alt me-1"></i> {{ intprovienef.porcualingresa.label }}
+            </label>
+            {{ intprovienef.porcualingresa|add_class:"form-control" }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-save">
+        <i class="bi bi-save"></i> Guardar
+      </button>
+      </div>
+        </div>
+    </form>
+    {% endif%}
+</div>
+
+<button onclick="location.href='{% url 'consentimiento' id=interno.pk %}' "
+        type="button">Imprime Carta consentimiento</button>
+{% endblock %}
+</body>
+
+
+

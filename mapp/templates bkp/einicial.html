@@ -1,0 +1,1327 @@
+    {% extends "dgenerales.html" %}
+
+
+    <body>
+
+    {%block content%}
+
+    {% load forms_tags %}
+    <div>
+        <p style="font-size:15px;color:black;font-weigth:bold;text-align:right"> Entrevista Inicial</p>
+        <form action="{% url 'grabaeinicial'  id=interno.pk %} " method="POST">
+
+              {% if messages %}
+               <div class="messages">
+               {% for message in messages %}
+               <div class="alert alert-{{ message.tags }}  alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+               </div>
+              {% endfor %}
+               </div>
+              {% endif %}
+
+            {% csrf_token %}
+        <div style="background-color:white;color:black;">
+                <h4 style="text-align :left;">Datos del interno</h4>
+                 <div style="text-align:left;font-size:15px;font-weigth:bold;" : >
+                    <label>Expediente : </label>
+                     <span>{{interno.numeroexpediente}}</span>
+                </div>
+                <div  style="font-size:20px;font-weigth:bold;text-align:left;">
+                    <label>Nombre : </label>
+                    <span>{{interno.nombrecompleto}}</span>
+                </div>
+        </div>
+     <div class="sticky-top bg-white py-2 border-bottom" style="z-index: 1020;">
+    <div class="d-flex overflow-auto">
+        <ul class="nav nav-tabs flex-nowrap" style="background-color: #f8f9fa;" role="tablist">
+            <!-- Pestaña 1 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" data-bs-toggle="tab" href="#sustanciasqueconsume" role="tab" aria-current="page" aria-selected="true">
+                    <i class="bi bi-capsule me-1"></i> Consumo de sustancias
+                </a>
+            </li>
+
+            <!-- Pestaña 2 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#sustanciascontinuacion" role="tab" aria-selected="false">
+                    <i class="bi bi-capsule-pill me-1"></i> Consumo (continuación)
+                </a>
+            </li>
+
+            <!-- Pestaña 3 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#disposicionalcambio" role="tab" aria-selected="false">
+                    <i class="bi bi-arrow-repeat me-1"></i> Disposición al cambio
+                </a>
+            </li>
+
+            <!-- Pestaña 4 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#situacionsocialfamiliar" role="tab" aria-selected="false">
+                    <i class="bi bi-people me-1"></i> Situación social-familiar
+                </a>
+            </li>
+
+            <!-- Pestaña 5 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#situacionsociofamiliar" role="tab" aria-selected="false">
+                    <i class="bi bi-people-fill me-1"></i> Situación socio-familiar (cont.)
+                </a>
+            </li>
+
+            <!-- Pestaña 6 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#laboralfisicaymental" role="tab" aria-selected="false">
+                    <i class="bi bi-briefcase me-1"></i> Área laboral y física
+                </a>
+            </li>
+
+            <!-- Pestaña 7 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#problemas-fisicos" role="tab" aria-selected="false">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Consecuencias fisicas
+                </a>
+            </li>
+
+            <!-- Pestaña 8 -->
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-bs-toggle="tab" href="#problemas-mentales" role="tab" aria-selected="false">
+                    <i class="bi bi-emoji-frown me-1"></i> Consecuencias mentales
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+            <div class="tab-content border-top-0 border rounded-bottom ">
+
+                 <div class="tab-pane fade active" id="sustanciasqueconsume" role="tabpanel">
+
+                <table class="table table-hover table-responsive">
+                    <thead>
+                    <tr>
+                        <th width="10%" >Sustacia </th>
+                        <th width="5%"></th>
+                        <th width="20%" >{{einicialf.forma1.label}}</th>
+                        <th width="25%" >{{einicialf.frecuencia1.label}}</th>
+                        <th width="20%" >{{einicialf.cantidad1.label}}</th>
+                        <th width="15%" >{{einicialf.edad1.label}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <th >{{einicialf.consumo1.label}} </th>
+                      <td >
+                          <div class="form-check form-switch">{{einicialf.consumo1}}</div>
+                      </td>
+                      <td > {{einicialf.forma1}}</td>
+                      <td> {{einicialf.frecuencia1}}</td>
+                      <td> {{einicialf.cantidad1}}</td>
+                      <td> {{einicialf.edad1}}</td>
+                    </tr>
+                    <tr>
+                      <th>{{einicialf.consumo2.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo2}}</div>
+                      </td>
+                      <td> {{einicialf.forma2}}</td>
+                      <td> {{einicialf.frecuencia2}}</td>
+                      <td> {{einicialf.cantidad2}}</td>
+                      <td> {{einicialf.edad2}}</td>
+                    </tr>
+
+                    <tr>
+                      <th>{{einicialf.consumo3.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo3}}</div>
+                      </td>
+                      <td> {{einicialf.forma3}}</td>
+                      <td> {{einicialf.frecuencia3}}</td>
+                      <td> {{einicialf.cantidad3}}</td>
+                      <td> {{einicialf.edad3}}</td>
+                    </tr>
+
+                     <tr>
+                      <th>{{einicialf.consumo4.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo4}}</div>
+                      </td>
+                      <td> {{einicialf.forma4}}</td>
+                      <td> {{einicialf.frecuencia4}}</td>
+                      <td> {{einicialf.cantidad4}}</td>
+                      <td> {{einicialf.edad4}}</td>
+                    </tr>
+                    <tr>
+                      <th>{{einicialf.consumo5.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo5}}</div>
+                      </td>
+                      <td> {{einicialf.forma5}}</td>
+                      <td> {{einicialf.frecuencia5}}</td>
+                      <td> {{einicialf.cantidad5}}</td>
+                      <td> {{einicialf.edad5}}</td>
+                    </tr>
+
+                    <tr>
+                      <th>{{einicialf.consumo6.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo6}}</div>
+                      </td>
+                      <td> {{einicialf.forma6}}</td>
+                      <td> {{einicialf.frecuencia6}}</td>
+                      <td> {{einicialf.cantidad6}}</td>
+                      <td> {{einicialf.edad6}}</td>
+                    </tr>
+                    <tr>
+                      <th>{{einicialf.consumo7.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo7}}</div>
+                      </td>
+                      <td> {{einicialf.forma7}}</td>
+                      <td> {{einicialf.frecuencia7}}</td>
+                      <td> {{einicialf.cantidad7}}</td>
+                      <td> {{einicialf.edad7}}</td>
+                    </tr>
+                    <tr>
+                      <th>{{einicialf.consumo8.label}} </th>
+                      <td>
+                          <div class="foprm-check form-switch">{{einicialf.consumo8}}</div>
+                      </td>
+                      <td> {{einicialf.forma8}}</td>
+                      <td> {{einicialf.frecuencia8}}</td>
+                      <td> {{einicialf.cantidad8}}</td>
+                      <td> {{einicialf.edad8}}</td>
+                    </tr>
+
+                    <tr>
+                      <th>{{einicialf.consumo9.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo9}}</div>
+                      </td>
+                      <td> {{einicialf.forma9}}</td>
+                      <td> {{einicialf.frecuencia9}}</td>
+                      <td> {{einicialf.cantidad9}}</td>
+                      <td> {{einicialf.edad9}}</td>
+                    </tr>
+                    <tr>
+                      <th>{{einicialf.consumo10.label}} </th>
+                      <td>
+                          <div class="form-check form-switch">{{einicialf.consumo10}}</div>
+                      </td>
+                      <td> {{einicialf.forma10}}</td>
+                      <td> {{einicialf.frecuencia10}}</td>
+                      <td> {{einicialf.cantidad10}}</td>
+                      <td> {{einicialf.edad10}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style="background-color:white ;border: 1px solid #ccc;border-left-style;hidden;padding: 10px;margin-top: -17px;">
+                     <div class="d-inline-block" style="width: 8%;color:black;">{{einicialf.consumo11.label}}</div>
+                     <div class="d-inline-block form-chec form-switch" style="width: 34%;">{{einicialf.consumo11}}</div>
+                     <div class="d-inline-block" style="width: 21%;">{{einicialf.frecuencia11}}</div>
+                     <div class="d-inline-block" style="width: 20%;">{{einicialf.cantidad11}}</div>
+                     <div class="d-inline-block mb-3" style="width: 13%;">{{einicialf.edad11}}</div>
+                </div>
+                <div style="background-color:white ;border: 1px solid #ccc;padding: 10px;margin-top: -17px;">
+                    <div class="d-inline-block" style="width: 15%;color:black;">{{einicialf.otrassustancias.label}}</div>
+                    <div class="d-inline-block mb-3" style="width: 55%;color:black;">{{einicialf.otrassustancias}}</div>
+
+                </div>
+               </div> <!-- se cierra el tab de sustancias que consume-->
+
+                 <div class="tab-pane fade" role="tabpanel" id="sustanciascontinuacion">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                 <div class="row align-items-center">
+                 <div class="col-2 d-flex flex-wrap p-2">
+                 <div class="d-inline-block " style="color:black;">Principal sustancia</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap p-2">
+                  {% for choice in einicialf.principalsustancia %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+                  <div class="col-5 p-2">
+                         <div class="d-inline-block " style="width:10%;color:black;margin-top:30px;">{{einicialf.otrasustanciap.label}}</div>
+                         <div class="d-inline-block " style="width:80%;color:black;">{{einicialf.otrasustanciap}}</div>
+                  </div>
+                 </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                   <div class="row p-2">
+                        <div class="col-2">
+                        <div class="d-inline-block" style="color:black;">{{einicialf.cantidadpromedio.label}}</div>
+                        </div>
+                        <div class="col-4">
+                        <div class="d-inline-block"  style="color:black;width:100%">{{einicialf.cantidadpromedio}}</div>
+                        </div>
+                        <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.hacecuanto.label}}</div>
+                        </div>
+                       <div class="col-4">
+                        <div class="d-inline-block mb-3" style="width:100%" >{{einicialf.hacecuanto}}</div>
+                       </div>
+                   </div>
+                </div>
+
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                <div class="row align-items-center p-2">
+                <div class="col-2 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">En caso de consumo de alcohol</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap ">
+                  {% for choice in einicialf.cualalcohol %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+
+                  <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.cualdestilado.label}}</div>
+                   </div>
+                   <div class="col-4">
+                        <div class="d-inline-block " style="width:100%" >{{einicialf.cualdestilado}}</div>
+                   </div>
+                </div>
+              </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+                <div class="row align-items-center p-2">
+                <div class="col-2 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">Normalmente consume</div>
+                 </div>
+                 <div class="col-4 d-flex flex-wrap ">
+                  {% for choice in einicialf.normalmentecomo %}
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                      <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                  {% endfor %}
+
+                  </div>
+
+                  <div class="col-2" >
+                        <div class="d-inline-block " style="color:black;" >{{einicialf.enquelugares.label}}</div>
+                   </div>
+                   <div class="col-4">
+                        <div class="d-inline-block " style="width:100%" >{{einicialf.enquelugares}}</div>
+                   </div>
+                </div>
+                <div class="row align-items-center">
+                <div class="col-8 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">Una vez que comienza a consumir puede detenerse voluntariamente?</div>
+                 </div>
+                  <div class="col-4 d-flex flex-wrap p-2">
+                  {% for choice in einicialf.detenervoluntariamente %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                  </div>
+               </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;">
+
+                  <div class="row align-items-center p-2" style="color:black;">
+                 <div class="col-6 d-flex flex-wrap d-inline-block p-2 " style="color:black;margin-top:1rem;">Importe mensual asignado de su sueldo para compra de :</div>
+
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Alcohol
+                  {{einicialf.gastomalcohol}}</div>
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Tabaco
+                  {{einicialf.gastomtabaco}}</div>
+                  <div class="col-2 d-flex flex-wrap d-inline-block">Drogas
+                  {{einicialf.gastomdrogas}}</div>
+                  </div>
+                  </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                    <div class="row align-items-center ">
+                    <h6 style="color:black;background-color:silver;"> De las siguientes situaciones de la vida diaria, cuales lo llevan a consumir (1 el mas frecuente, 8 el menos frecuente)</h6>
+                </div>
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap ">Emociones desagradables (triste ansioso etc.) </div>
+                    {% for choice in einicialf.edesagradables %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" style="background-color:silver;">
+                        <div class="col-4 d-flex flex-wrap p-2">Por alguna enfermedad </div>
+                    {% for choice in einicialf.enfermedad %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap">Emociones agradables (feliz,contento,satisfecho,etc) </div>
+                        {% for choice in einicialf.eagradables %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+
+                    <div class="row align-items-center" style="background-color:silver;">
+                    <div class="col-4 d-flex flex-wrap">Necesidad fisica (sindrome de abstinencia, que su cuerpo necesite la sustancia)</div>
+                    {% for choice in einicialf.necesidadfisica %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" >
+                        <div class="col-4 d-flex flex-wrap">Probando autocontrol (ponerse a prueba sentir que puede controlar y parar su consumo)</div>
+                    {% for choice in einicialf.probando %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" style="background-color:silver;">
+                      <div class="col-4 d-flex flex-wrap">Conflictos con otros (pleitos y problemas con alguna persona)</div>
+                    {% for choice in einicialf.conflictos %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center" >
+                        <div class="col-4 d-flex flex-wrap">Momentos agradables con otros (disfrutar la compañia de otras personas)</div>
+                    {% for choice in einicialf.agradablesotros %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row align-items-center p-2" style="background-color:silver;">
+                        <div class="col-4 d-flex flex-wrap">Presion social</div>
+                        {% for choice in einicialf.presion %}
+                        <div class="col-1 d-flex flex-wrap">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center ">
+                    <h6 style="color:black;background-color:silver;"> De acuerdo con lo siguiente escala señale lo que mejor describa su consumo de alcohol/drogas durante los ultimos 12 meses</h6>
+                </div>
+                <div class="row">
+<div class="col-md-6">
+    <h6>Este es el problema {{ einicialf.tamanoproblema.label }}</h6>
+    <div class="d-flex flex-wrap gap-2">
+        {% for choice in einicialf.tamanoproblema %}
+        <div>
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %} autocomplete="off">
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+                {{ choice.choice_label }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="col-md-6">
+    <h6>{{ einicialf.tamanoproblemad.label }}</h6>
+    <div class="d-flex flex-wrap gap-2">
+        {% for choice in einicialf.tamanoproblemad %}
+        <div>
+            <input type="radio" class="btn-check" name="{{ choice.data.name }}"
+                   id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"
+                   {% if choice.data.selected %}checked{% endif %} autocomplete="off">
+            <label class="btn btn-outline-primary" for="{{ choice.id_for_label }}">
+                {{ choice.choice_label }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+                </div><!-- se cierra row -->
+
+                    <div class="d-inline-block p-3" style="width: 20%;color:black;">{{einicialf.tipoproblema.label}}</div>
+                    <div class="d-inline-block p-3" style="width: 55%;color:black;">{{einicialf.tipoproblema}}</div>
+
+             </div> <!-- se cierra container -->
+             </div> <!-- se cierra tab de sustancias que consume continuacion -->
+
+
+
+                 <div class="tab-pane fade" role="tabpanel" id="disposicionalcambio">
+               <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black">
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Cuanto fue el mayor tiempo que se propuso y logro no consumir alcohol.drogas, (mayor periodo de abstinencia, y si no se lo ha propuesto marque '0':</div>
+                 </div>
+                 <div class="col-2 d-flex flex-wrap ">
+                       {{einicialf.maximotiempo.label}}
+
+                 <div class="d-inline-block" >
+                            {{ einicialf.maximotiempo}}
+                 </div>
+                 </div>
+                <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurriom.label}}
+                       {{ einicialf.cuandoocurriom}}
+                </div>
+                 <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurrioa.label}}
+                       {{ einicialf.cuandoocurrioa}}
+
+                  </div>
+                  </div>
+
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Por que se abstuvo en esa ocasion y que hizo para mantenerse sin consumir</div>
+                 </div>
+                 <div class="col-6 d-flex flex-wrap">
+                    {{einicialf.motivo}}
+                 </div>
+                 </div>
+               </div> <!-- se cierra el container -->
+             <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black">
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >En los ultimos 6 meses cuanto tiempo ha sido el mayor periodo que ha tenido sin consumir</div>
+                 </div>
+                 <div class="col-2 d-flex flex-wrap ">
+                       {{einicialf.mayortiempo.label}}
+                 <div class="d-inline-block" >
+                            {{ einicialf.mayortiempo}}
+                 </div>
+                  </div>
+                <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurriom6.label}}
+                       {{ einicialf.cuandoocurriom6}}
+                </div>
+                 <div class="col-2  d-flex flex-wrap">
+                       {{einicialf.cuandoocurrioa6.label}}
+                       {{ einicialf.cuandoocurrioa6}}
+
+                  </div>
+                  </div>
+
+                 <div class="row align-items-center p-2">
+                 <div class="col-6 d-flex flex-wrap">
+                 <div class="d-inline-block " >Por que se abstuvo en esa ocasion y que hizo para mantenerse sin consumir</div>
+                 </div>
+                 <div class="col-6 d-flex flex-wrap">
+                    {{einicialf.motivo6}}
+                 </div>
+                 </div>
+               </div> <!-- se cierra el container -->
+             <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+               <div class="row align-items-center">
+               <div class="col-6 d-flex flex-wrap p-2">
+               <div class="d-inline-block " style="color:black;">Actualmente que tan importante es para usted el dejar de consumir alcohol/drogas?</div>
+               </div>
+               <div class="col-6 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.quetanimportante %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+
+                  </div>
+                  </div>
+
+                  <div class="row ">
+                  <div class="col-12 d-flex flex-wrap">
+                         <div class="d-inline-block " style="width:80%">En una escala del 1 al 10 (en donde 1 es nada y 10 es mucho) que tan seguro se siente de no consumir alcohol/drogas?</div>
+                         <div class="d-inline-block " style="width:20%">{{einicialf.quetanseguro}}</div>
+                  </div>
+                  </div>
+               <div class="row align-items-center">
+               <div class="col-4 d-flex flex-wrap p-2">
+               <div class="d-inline-block " style="color:black;">En estos momentos usted piensa que </div>
+               </div>
+               <div class="col-8 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.piensaque %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+
+                  </div>
+                </div>
+                 <div class="row align-items-center" style="background-color:silver;">
+                 <div class="col-4 d-flex flex-wrap p-2">
+                   <div class="d-inline-block " >Que tan dispuesto esta para recibir los servicios de internamiento?</div>
+                 </div>
+                  <div class="col-8 d-flex flex-wrap p-2">
+                   {% for choice in einicialf.dispuesto %}
+                   <div class="d-inline-block" style="width:30%;color:black" >
+                        {{ choice.choice_label }}
+                   </div>
+                   <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                   </div>
+                  {% endfor %}
+                   </div>
+                  </div>
+
+                 <div class="row align-items-center" >
+                 <div class="col d-flex flex-wrap bm-2">
+                     <div class="d-inlne-block">Mencione tres principales razones por las cuales es importante dejar de consumir</div>
+                 </div>
+                 </div>
+
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Uno</div>
+                     <div class="d-inline-block" style="width:90%">{{einicialf.razon1}}</div>
+                 </div>
+                 </div>
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Dos</div>
+                     <div class="d-inline-block" style="width:90%">{{einicialf.razon2}}</div>
+                 </div>
+                 </div>
+                 <div class="row">
+                   <div class="col-12 d-flex flex-wrap ">
+                     <div class="d-inline-block " style="width:10%;margin-top:.5rem;">Razon Tres</div>
+                     <div class="d-inline-block" style="width:90%;margin-bottom:1rem">{{einicialf.razon3}}</div>
+                 </div>
+                 </div>
+
+             </div>
+
+
+             </div>  <!-- se cierra el tab de disposicion al cambio-->
+
+                 <div class="tab-pane fade" role="tabpanel" id="situacionsocialfamiliar">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                 <div class="row align-items-center">
+                 <div class="col-12 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:30%;margin-top:20px;">Quienes integran su familia (con quienes tiene mas contacto)</div>
+                     <div class="d-inline-block" style="width:60%;margin-left:1rem">{{situacionfamiliarf.quienesintegran}}</div>
+                 </div>
+                </div>
+                </div>
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center" style="background-color:silver">
+                     <div >A continuacion le voy a mencionar una serie de oraciones que se refieren a aspectos relacionados con su familia, indique que tan de acuerdo esta con lo que cada una de estas indica</div>
+                 </div>
+                <div class="row align-items-center" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap "></div>
+                        <div class="col-8 d-flex flex-wrap " >
+                            <div class="d-line-block" style="width:20%">Totalmente de acuerdo</div>
+                            <div class="d-line-block" style="width:20%">De Acuerdo</div>
+                            <div class="d-line-block" style="width:20%">Neutral (ni de acuerdo ni desacuerdo</div>
+                            <div class="d-line-block" style="width:20%">Desacuerdo</div>
+                            <div class="d-line-block" style="width:20%">Totalmente desacuerdo</div>
+                </div>
+                </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-4 d-flex flex-wrap ">Los miembros de la familia acostumbramos a hacer cosas juntos</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.hacercosasjuntos %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="row align-items-center p-1" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">En mi familia nadie se preocupa por los sentimientos de los demas</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.nadiesepreocupa %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">Mi familia es calida y me brinda apoyo</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.soncalidos %}
+                            <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">En mi familia es importante expresar nuestras opiniones</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.expresaropiniones %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">El ambiente en mi familia usualmente es desagradable</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.esdesagradable %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Mi familia acostubra a hacer actividades en conjunto</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.enconjunto %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1" >
+                        <div class="col-4 d-flex flex-wrap ">Mi familia me escucha</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.meescucha%}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Cuando tengo un problema NO se lo platico a mi familia</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.platicoproblemas %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  >
+                        <div class="col-4 d-flex flex-wrap ">En mi familia expresamos abiertamente nuestro cariño</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.expresamoscarino%}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row align-items-center p-1"  style="background-color:silver">
+                        <div class="col-4 d-flex flex-wrap ">Los conflictos en mi familia nunca se resuelven</div>
+                        <div class="col-8 d-flex flex-wrap">
+                           {% for choice in situacionfamiliarf.nuncaseresuelven %}
+                           <div class="d-line-block" style="width:20%">
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+
+             </div>
+             </div> <!-- aqui se cierra el tab de social-familiar -->
+
+                <div class="tab-pane fade" role="tabpanel" id="situacionsociofamiliar">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+
+                 <div class="row align-items-center">
+                <div class="col-4 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">En los ultimos 12 meses ha tenido un conflico familiar grave?</div>
+                 </div>
+                  <div class="col-3 d-flex flex-wrap p-2">
+                  {% for choice in situacionfamiliarf.conflictograve %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                  <div class="col-5 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Cual :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.cual}}</div>
+                 </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:1rem">Algunas de las personas que se enlistan a continuacion ha consumido alcohol/drogas?</div>
+                    <div class="col-5 d-flex flex-wrap "></div>
+                    <div class="col-3 d-flex flex-wrap" style="margin-bottom:0.5rem;">Tipo de sustancia</div>
+                    <div class="col-4 d-flex flex-wrap" style=";margin-bottom:0.5rem;">El consumo de esa sustancia le ha causado problemas?, cuales?</div>
+                </div> <!-- se cierra otra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Papa</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.papa %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiopapa}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemapapa}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Mama</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.mama %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiomama}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemamama}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Hermano</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.hermano %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiohermano}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemahermano}}</div>
+                </div> <!-- se cierra linea -->
+                 <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Amigo</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.amigo %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumioamigo}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemaamigo}}</div>
+                </div> <!-- se cierra linea -->
+                  <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Pareja</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.pareja %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiopareja}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemapareja}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Familiar</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.familiar %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiofamiliar}}</div>
+                    <div class="col-4 d-flex flex-wrap ">{{situacionfamiliarf.problemafamiliar}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:1rem;margin-top:1rem;">Cuando esta con amigos o familiares estos lo presionan a consumir alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                  {% for choice in situacionfamiliarf.cuandoesta %}
+                   <div class="col-3 d-flex flex-wrap ">
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:80%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+
+                  </div>
+                  {% endfor %}
+
+                </div> <!-- se cierra linea -->
+               <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;margin-top:0.25rem;">Entre sus amigos o familiares, quienes le ayudarian a cambiar el consumo de alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;">{{situacionfamiliarf.ayudarian}}</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-top:0.25rem;font-size:20px;">Administracion de tiempo libre</div>
+                </div>
+                 <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;">Cuanto tiempo dedica a consumir sustancias, y que actividades ha dejado de hacer por consumir?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;">{{situacionfamiliarf.dejadodehacer}}</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;">Que actividades de diversion o entretenimiento que uested realiza estan relacionadas con el consumo de alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;margin-bottom:0.5rem;">{{situacionfamiliarf.relacionadas}}</div>
+                </div>
+                </div> <!-- se cierra container -->
+             </div> <!-- aqui se cierra el tab de social-familiar  continuacion-->
+
+                <div class="tab-pane fade" role="tabpanel" id="laboralfisicaymental">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center ">
+                    <div class="col-10 d-flex flex-wrap" style="margin-top:0.5rem">En los ultimos 12 meses, cuantos dias no trabajo como resultado del consumo de alcohol/drogas (0-365)?</div>
+                    <div class="col-2 d-flex flex-wrap">{{situacionfamiliarf.diasnotrabajados}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center ">
+                    <div class="col-10 d-flex flex-wrap" style="margin-top:0.5rem">En los ultimos 12 meses, cuantas veces perdio el empleo como resultado del consumo de alcohol/drogas?</div>
+                    <div class="col-2 d-flex flex-wrap" style="margin-bottom:.025rem;">{{situacionfamiliarf.vecesperdioempleo}}</div>
+                </div> <!-- se cierra linea -->
+                </div> <!--se cierra container -->
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-top:0.25rem;margin-bottom:0.25rem;font-size:20px;">Salud fisica y mental</div>
+                </div>
+                 <div class="row align-items-center">
+                    <div class="col-4 d-flex flex-wrap" >Durante el ultimo mes a pensado que estaria mejor muerto o ha deseado estar muerto?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3 ">
+                  {% for choice in situacionfamiliarf.mejormuerto %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                  <div class="col-4 d-flex flex-wrap" >En caso afirmativo, durante el ultimo mes ha intentado en suicidarse?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.ultimomesintentado %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                </div> <!-- se cierra linea -->
+                <div class="row align-intens-center" style="margin-top:0.25rem;background-color:silver;">
+               <div class="col-4 d-flex flex-wrap" >Alguna vez en la vida ha intentado en suicidarse?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.haintentado %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                </div> <!-- se cierra linea -->
+               <div class="row align-intens-center" style="margin-top:0.25rem;">
+               <div class="col-4 d-flex flex-wrap" >Presenta alguna enfermedad o padecimiento fisico y/o mental?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.presentaenfermedad %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                  <div class="col-6 d-flex flex-wrap ">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Cual? :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.cualenfermedad}}</div>
+                 </div>
+                </div> <!-- se cierra linea -->
+               <div class="row align-intens-center" style="margin-top:0.25rem;background-color:silver;">
+               <div class="col-4 d-flex flex-wrap" >Esta enfermedad o padecimiento fisico y/o mental fue derivada por el uso de sustancias? </div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.derivadaporuso %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                 </div> <!-- se cierra linea -->
+                <div class="row align-intens-center" style="margin-top:0.25rem;">
+               <div class="col-4 d-flex flex-wrap" style="font-size:12px;">Esta siendo atendido por algun padecimiento fisico y/o mental actualmente incluyendo algun padecimiento psiquiatrico?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3 ">
+                  {% for choice in situacionfamiliarf.siendoatendido %}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                  <div class="col-6 d-flex flex-wrap ">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Cual? :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.cualpadecimiento}}</div>
+                 </div>
+                </div> <!-- se cierra linea -->
+               <div class="row align-intens-center" style="margin-top:0.25rem;background-color:silver;">
+               <div class="col-4 d-flex flex-wrap" >Esta tomando algun medicamento por prescripcion medica o se esta automedicando? </div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.medicado%}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                   <div class="col-6 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Cual? :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.cualmedicina}}</div>
+                 </div>
+                 </div> <!-- se cierra linea -->
+                <div class="row align-intens-center" style="margin-top:0.25rem;">
+               <div class="col-4 d-flex flex-wrap" >En los ultimos 12 meses ha estado internado en algun hospital? </div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.estadointernado%}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+                   <div class="col-6 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Por que? :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.porque}}</div>
+                 </div>
+                 </div> <!-- se cierra linea -->
+                   <div class="row align-intens-center" style="margin-top:0.25rem;background-color:silver;">
+               <div class="col-4 d-flex flex-wrap" >En caso afirmativo, ha sido por problemas con el consumo de alcohol y/o drogas?</div>
+                    <div class="col-2 d-flex flex-wrap gap-2 p-3">
+                  {% for choice in situacionfamiliarf.porconsumo%}
+                       <div class="d-inline-block justify-content-right" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block"  >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                 </div> <!-- se cierra linea -->
+
+
+                </div> <!--se cierra container -->
+                </div> <!--se cierra pestaña laboralfisicay mental -->
+
+               <div class="tab-pane fade" role="tabpanel" id="problemas-fisicos">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;background-color:silver;">
+                <div class="row align-items-center ">
+                    <div class="col-5 d-flex flex-wrap" style="margin-top:0.5rem">Ejemplo de consecuencias adversas</div>
+                    <div class="col-2 ">Lo ha presentado en el ultimo año?</div>
+                    <div class="col-5 " style="text-align:center;">Que tanto le ha afectado en su vida?</div>
+             </div> <!-- se cierra linea -->
+             </div> <!--se cierra container -->
+
+
+              <div class="row align-items-center"> <!-- inicia seccion de problemas fisicos -->
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-right:10rem;margin-left:0.75rem;margin-top:0.25rem;color:white">Problemas de circulacion</div>
+              </div>
+            {% for i in "1,2,3,4,5"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+
+            {% if campo and campoa %}
+                 <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">{{ campo.label }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in campo %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+
+                  <div class="col-5">
+                  {% for choice in campoa %}
+                <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ campoa.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+             </div>
+              </div>
+            {% endif %}
+            {% endfor %}
+
+
+               <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">Otro {{ cfisicasf.fotro }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in cfisicasf.fp6 %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+                 <div class="col-5">
+                  {% for choice in cfisicasf.fp6a %}
+                  <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ cfisicasf.fp6a.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+                  </div>
+
+
+
+                  </div>
+
+               <div class="row align-items-center"> <!-- inicia seccion de problemas digestivos -->
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-right:10rem;margin-left:0.75rem;margin-top:0.25rem;color:white">Problemas digestivos</div>
+              </div>
+            {% for i in "7,8,9,10,11,12,13,14,15,16"|split:"," %}
+            {% get_form_field cfisicasf "fp"|add:i as campo %}
+            {% get_form_field cfisicasf "fp"|add:i|add:"a" as campoa %}
+
+            {% if campo and campoa %}
+                 <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">{{ campo.label }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in campo %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+
+                  <div class="col-5">
+                  {% for choice in campoa %}
+                <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ campoa.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+             </div>
+              </div>
+            {% endif %}
+            {% endfor %}
+
+
+               <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">Otro {{ cfisicasf.fotro1 }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in cfisicasf.fp17 %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+
+
+                <div class="col-5">
+                  {% for choice in cfisicasf.fp17a %}
+                  <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ cfisicasf.fp17a.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+                </div>
+
+               </div>
+            </div> <!-- termina seccion de problemas fisicos -->
+
+               <div class="tab-pane fade" role="tabpanel" id="problemas-mentales">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;background-color:silver;">
+                <div class="row align-items-center ">
+                    <div class="col-5 d-flex flex-wrap" style="margin-top:0.5rem">Ejemplo de consecuencias adversas</div>
+                    <div class="col-2 ">Lo ha presentado en el ultimo año?</div>
+                    <div class="col-5 " style="text-align:center;">Que tanto le ha afectado en su vida?</div>
+             </div> <!-- se cierra linea -->
+             </div> <!--se cierra container -->
+
+
+              <div class="row align-items-center"> <!-- inicia seccion de problemas mentales -->
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-right:10rem;margin-left:0.75rem;margin-top:0.25rem;color:white">Problemas mentales</div>
+              </div>
+            {% for i in "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"|split:"," %}
+            {% get_form_field cmentalesf "p"|add:i as campo %}
+            {% get_form_field cmentalesf "p"|add:i|add:"a" as campoa %}
+
+            {% if campo and campoa %}
+                 <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">{{ campo.label }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                           {% for choice in campo %}
+                            <div class="d-line-block" >
+                           {{ choice.tag }}
+                           {{ choice.choice_label }}
+                           </div>
+                          {% endfor %}
+                 </div>
+
+                  <div class="col-5">
+                  {% for choice in campoa %}
+                <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ campoa.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+             </div>
+              </div>
+            {% endif %}
+            {% endfor %}
+
+            <div class="row align-items-center text-black mb-1">
+                 <div class="col-5">Otro {{ cmentalesf.otro }}</div>
+                <div class="col-2 d-flex flex-wrap gap-3">
+                     {% for choice in cmentalesf.p16 %}
+                     <div class="d-line-block" >
+                     {{ choice.tag }}
+                     {{ choice.choice_label }}
+                     </div>
+                     {% endfor %}
+                 </div>
+                 <div class="col-5">
+                  {% for choice in cmentalesf.p16a %}
+                  <div class="form-check form-check-inline">
+                    <input type="radio"
+                    class="form-check-input"
+                    name="{{ cfisicasf.fp6a.html_name }}"
+                    id="{{ choice.id_for_label }}"
+                    value="{{ choice.data.value }}"
+                    {% if choice.data.selected %}checked{% endif %}>
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+                </div>
+                {% endfor %}
+                  </div>
+
+            </div>
+            </div> <!-- termina seccion de problemas mentales -->
+
+
+            <div class="d-flex justify-content-end">
+                   <button class="btn btn-primary btn-lg" style="align:right;margin-top:10px;margin-bottom:10px;font-size:15px;" type="submit"> Graba</button>
+            </div>
+
+
+            </div>
+            </div>  <!--- se cierra el tab-content -->
+        </form>
+    </div>
+    {% endblock%}
+    </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

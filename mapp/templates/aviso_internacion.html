@@ -1,0 +1,232 @@
+{% extends "dgenerales.html" %}
+
+{% block patient_content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso - {{datosgrales.nombre}}</title>
+    <!-- Incluimos Bootstrap solo si no lo hereda de dgenerales, para que se vea bonito el modal -->
+    <!-- Si ya tienes bootstrap cargado, puedes quitar estas lineas de estilo del modal -->
+    <style>
+        /* TUS ESTILOS ORIGINALES SE MANTIENEN IGUAL */
+        body { font-family: Arial, sans-serif; line-height: 1.3; margin: 0; padding: 15px; color: #000; font-size: 13px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+        .header { display: flex; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .logo-container { flex: 0 0 auto; margin-right: 15px; }
+        .logo { max-width: 100px; height: auto; }
+        .clinic-info { flex: 1; }
+        .organization { font-weight: bold; font-size: 16px; margin-bottom: 3px; }
+        .rfc { font-size: 13px; }
+        .address { font-size: 13px; margin-bottom: 3px; }
+        .date { text-align: right; margin-bottom: 20px; }
+        .recipient { margin-bottom: 20px; }
+        .content { margin-bottom: 20px; }
+        .patient-info, .doctor-info, .family-info { margin-bottom: 15px; }
+        .field-label { font-weight: bold; }
+        .signature { margin-top: 30px; }
+        .signature-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .left-section { text-align: left; flex: 1; }
+        .right-section { text-align: right; flex: 1; }
+        .signature-name { font-weight: bold; margin-top: 20px; margin-bottom: 3px; }
+        .signature-title { font-size: 13px; margin-bottom: 5px; }
+
+        .no-print { text-align: center; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+        .print-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; font-size: 14px; }
+        .close-btn { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; font-size: 14px; }
+
+        /* ESTILOS PARA EL MODAL DE SELECCION */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: white; padding: 25px; border-radius: 8px; width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center;
+        }
+        .form-select-medico {
+            width: 100%; padding: 10px; margin: 15px 0; font-size: 16px;
+            border: 1px solid #ddd; border-radius: 4px;
+        }
+
+        @media print {
+            @page { margin: 10mm; size: letter; }
+            body { padding: 0; margin: 0; font-size: 12px; line-height: 1.2; }
+            .container { padding: 0; max-width: 100%; margin: 0 auto; }
+            /* OCULTAMOS LOS BOTONES Y EL MODAL AL IMPRIMIR */
+            .no-print, .modal-overlay { display: none !important; }
+            .header { border-bottom: 1px solid #000; margin-bottom: 15px; padding-bottom: 8px; }
+            .logo { max-width: 150px; }
+            .header, .signature-content { page-break-inside: avoid; break-inside: avoid-page; }
+            p { margin: 8px 0; }
+        }
+    </style>
+</head>
+<body>
+<!-- MODAL DE SELECCIÓN DE MÉDICO (Mejorado) -->
+    <div id="modalSeleccionMedico" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="bi bi-person-medical"></i> Seleccione el Médico</h3>
+            <p>Por favor indique qué médico firma este documento:</p>
+
+            <select id="selectMedico" class="form-select-medico">
+                <option value="" selected disabled>-- Seleccionar de la lista --</option>
+                {% for m in medicos %}
+                    <option value="{{ m.nombre }}"
+                            data-cedula="{{ m.cedula|default:'N/A' }}"
+                            data-expedida="{{ m.expedidapor|default:'' }}">
+                        {{ m.nombre }}
+                    </option>
+                {% empty %}
+                    <option value="" disabled>No hay médicos registrados</option>
+                {% endfor %}
+            </select>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div style="display: flex; gap: 10px;">
+                <!-- Botón CANCELAR (Rojo) -->
+                <button onclick="cerrarVentana()" class="close-btn" style="flex: 1;">
+                    <i class="bi bi-x-circle"></i> Cancelar / Salir
+                </button>
+
+                <!-- Botón ACEPTAR (Azul) -->
+                <button onclick="aplicarMedico()" class="print-btn" style="flex: 1; margin: 5px 0;">
+                    Aceptar
+                </button>
+            </div>
+
+            {% if not medicos %}
+            <div class="alert alert-warning mt-2" style="font-size: 12px; color: #856404; background-color: #fff3cd; padding: 5px; border-radius: 4px;">
+                ⚠️ No hay médicos dados de alta con el cargo 'Medico'.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="no-print">
+            <button onclick="window.print()" class="print-btn">Imprimir Solicitud</button>
+            <button onclick="cerrarVentana()" class="close-btn">Cerrar</button>
+            <!-- Botón para cambiar médico por si se equivocaron -->
+            <button onclick="mostrarModal()" class="print-btn" style="background:#6c757d;">Cambiar Médico</button>
+        </div>
+
+        <div class="header">
+            <div class="logo-container">
+                {% if datosgrales.logo_url %}
+                    <img src="{{ datosgrales.logo_url }}" alt="Logo" class="logo">
+                {% elif datosgrales.logo_clinica %}
+                    <img src="{{ datosgrales.logo_clinica.url }}" alt="Logo" class="logo">
+                {% else %}
+                    <p>❌ NO hay logo</p>
+                {% endif %}
+            </div>
+
+            <div class="clinic-info">
+                <div class="organization">{{datosgrales.nombre}}</div>
+                <div class="rfc">R.F.C. {{datosgrales.rfc}}</div>
+                <div class="address">{{datosgrales.calleynumero}} {{datosgrales.colonia}}</div>
+                <div class="address">{{datosgrales.ciudad}},{{datosgrales.estado}},{{datosgrales.cp}}, {{datosgrales.pais}} TEL {{datosgrales.telefono}}</div>
+            </div>
+        </div>
+
+        <div class="date">
+            {{datosgrales.ciudad}},{{datosgrales.estado}} a {{ fecha_formateada }}
+        </div>
+
+        <div class="recipient">
+            <strong>AGENCIA DEL MINISTERIO PUBLICO DEL FUERO COMUN</strong><br>
+            <strong>FISCALIA GENERAL DE JUSTICIA DEL ESTADO DE BAJA CALIFORNIA :</strong><br>
+            <strong>PRESENTE</strong>
+        </div>
+
+        <div class="content">
+            <p>Por medio de este conducto le envío un cordial saludo...</p>
+
+            <p style="text-align: center; font-weight: bold;">
+                {{datosgrales.nombre}}<br>
+                Ubicado en: {{datosgrales.calleynumero}} {{datosgrales.colonia}}<br>
+                {{datosgrales.ciudad}},{{datosgrales.estado}}, C.P.{{datosgrales.cp}}<br>
+                Telefono {{datosgrales.telefono}}
+            </p>
+
+            <div class="patient-info">
+                <p><span class="field-label">Datos del paciente ingresado al plantel:</span></p>
+                <p>Nombre completo: {{interno.nombrecompleto}}</p>
+                <p>Edad: {{interno.edad}} años</p>
+                <p>Nacionalidad: MEXICANO</p>
+                <p>Fecha de ingreso: {{ fecha_formateada }}</p>
+            </div>
+
+            <!-- AQUÍ ESTÁ LA SECCIÓN DEL MÉDICO CON LOS IDs PARA JS -->
+            <div class="doctor-info">
+                <p>
+                    El paciente cuenta con la indicacion de un medico de(l) (la) Doctor(a):<br>
+                    Nombre de(l) (la) Doctor(a): <span id="txt_medico_nombre" style="font-weight:bold;">____________________</span><br>
+                    Numero de cedula: <span id="txt_medico_cedula" style="font-weight:bold;">____________________</span><br>
+                    Expedida por: <span id="txt_medico_expedida" style="font-weight:bold;">____________________</span>
+                </p>
+            </div>
+
+            <div class="family-info">
+                <p><span class="field-label">Datos del familiar...</span></p>
+                <p>Nombre completo: {{interno.responsable}}</p>
+                <p>Relacion o parentesco: {{interno.parentesco}}</p>
+                <p>Numero de telefono: {{interno.telefono}} {{interno.rtelefono}}</p>
+            </div>
+
+            <p>Ambas por escrito las cuales fueron recabadas el día {{ fecha_formateada }}...</p>
+            <p>Agradeciendo de antemano todas sus atenciones...</p>
+        </div>
+
+        <div class="signature">
+            <div class="signature-content">
+                <div class="left-section">
+                    <p><strong>ATENTAMENTE</strong></p>
+                    <div class="signature-name">{{datosgrales.responsable}}</div>
+                    <div class="signature-title">{{datosgrales.cargo}}</div>
+                </div>
+                <div class="right-section">
+                    <p>FIRMA DEL FAMILIAR O REPRESENTANTE LEGAL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cerrarVentana() {
+            if (window.history.length > 1) { window.history.back(); }
+            else { window.close(); setTimeout(function() { if (!window.closed) { window.location.href = '/'; } }, 1000); }
+        }
+
+        // Funciones para el Médico
+        function aplicarMedico() {
+            const select = document.getElementById('selectMedico');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (select.value === "") {
+                alert("Por favor seleccione un médico de la lista.");
+                return;
+            }
+
+            // 1. Obtener datos del option seleccionado
+            const nombre = selectedOption.value;
+            const cedula = selectedOption.getAttribute('data-cedula');
+            const expedida = selectedOption.getAttribute('data-expedida');
+
+            // 2. Escribirlos en el documento HTML
+            document.getElementById('txt_medico_nombre').textContent = nombre;
+            document.getElementById('txt_medico_cedula').textContent = cedula;
+            document.getElementById('txt_medico_expedida').textContent = expedida;
+
+            // 3. Ocultar el modal
+            document.getElementById('modalSeleccionMedico').style.display = 'none';
+        }
+
+        function mostrarModal() {
+            document.getElementById('modalSeleccionMedico').style.display = 'flex';
+        }
+    </script>
+</body>
+{% endblock %}

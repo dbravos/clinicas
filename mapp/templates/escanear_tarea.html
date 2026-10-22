@@ -1,0 +1,76 @@
+{% extends "dgenerales.html" %}
+{% load ayudas_tag %}
+{% block ayuda %}{% ayuda "escanear_tarea" %}{% endblock %}
+{% load ayudas_tag %}
+{% block patient_content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-scanner me-2"></i>
+                        Digitalizar Tarea
+                    </h4>
+                    <a href="{% url 'seleccionainterno' id=expediente %}" class="btn btn-light btn-sm">
+                        <i class="bi bi-x-lg"></i> Cerrar
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Info del expediente -->
+                    <div class="alert alert-info">
+                        <strong>Expediente:</strong> {{ expediente }}
+                        <strong>Nombre:</strong> {{ interno.nombrecompleto}}
+                    </div>
+
+                    <!-- Mensajes -->
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- FORMULARIO -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- ✅ SOLO DESCIPCIÓN (como en el formulario) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Descripción de la tarea:</label>
+                            {{ form.descripcion }}
+                        </div>
+
+                        <!-- ✅ INPUT PARA ARCHIVO (igual que en logos) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Archivo escaneado:</label>
+                            <input type="file" class="form-control"
+                                   name="imagen_tarea"
+                                   id="id_imagen_tarea"
+                                   accept="image/*,.pdf">
+                            <div class="form-text">Formatos: JPG, PNG  (máx. 10MB)</div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-save me-2"></i>
+                                Guardar Tarea
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <a href="{% url 'lista_tareas_escaneadas' %}" class="btn btn-outline-info">
+                                <i class="bi bi-list-check me-2"></i> Ver Todas las Tareas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

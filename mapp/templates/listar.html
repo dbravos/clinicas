@@ -1,0 +1,140 @@
+{% extends "MenuPrincipal.html" %}
+{% load ayudas_tag %}
+{% block ayuda %}{% ayuda "internos" %}{% endblock %}
+{% block title %}Internos{% endblock %}
+{% block page_title %}Internos{% endblock %}
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Internos</h1>
+        <p>{{ internos|length }} expediente{{ internos|length|pluralize }} registrado{{ internos|length|pluralize }}</p>
+    </div>
+    <div class="page-actions">
+        {% if puede_gestionar_internos %}
+        <a class="btn btn-soft" href="{% url 'reporte_internos' %}"><i class="bi bi-file-earmark-text me-1"></i>Reporte</a>
+        <a class="btn btn-primary" href="{% url 'agregainterno' %}"><i class="bi bi-person-plus me-1"></i>Nuevo interno</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    {% if internos %}
+    <div class="card-body d-flex flex-wrap gap-2 align-items-center border-bottom">
+        <div class="input-group" style="max-width: 360px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+            <input type="search" id="buscarInterno" class="form-control border-start-0" placeholder="Buscar por nombre, expediente o responsable" aria-label="Buscar interno">
+        </div>
+        <div class="btn-group btn-group-sm ms-md-auto" role="group" aria-label="Filtrar por estatus">
+            <input type="radio" class="btn-check" name="filtroEstatus" id="fTodos" value="todos" checked>
+            <label class="btn btn-outline-primary" for="fTodos">Todos</label>
+            <input type="radio" class="btn-check" name="filtroEstatus" id="fActivos" value="activo">
+            <label class="btn btn-outline-primary" for="fActivos">Activos</label>
+            <input type="radio" class="btn-check" name="filtroEstatus" id="fEgresados" value="egresado">
+            <label class="btn btn-outline-primary" for="fEgresados">Egresados</label>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tablaInternos">
+            <thead>
+                <tr>
+                    <th class="ps-3">Interno</th>
+                    <th class="d-none d-sm-table-cell">Expediente</th>
+                    <th class="d-none d-md-table-cell">Ingreso</th>
+                    <th class="d-none d-sm-table-cell">Estatus</th>
+                    <th class="text-end pe-3 d-none d-sm-table-cell"><span class="visually-hidden">Acciones</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interno in internos %}
+                <tr data-estatus="{% if interno.fsalidareal %}egresado{% else %}activo{% endif %}"
+                    data-buscar="{{ interno.nombrecompleto|lower }} {{ interno.numeroexpediente }} {{ interno.responsable|default:''|lower }}">
+                    <td class="ps-3">
+                        <a href="{% url 'seleccionainterno' id=interno.pk %}" class="d-flex align-items-center gap-2 text-decoration-none">
+                            <span class="avatar">{% if interno.nombrecompleto %}{{ interno.nombrecompleto|slice:":1"|upper }}{% else %}<i class="bi bi-person"></i>{% endif %}</span>
+                            <span class="min-w-0">
+                                <span class="d-block fw-semibold text-body text-truncate">{{ interno.nombrecompleto|default:"Sin nombre capturado" }}</span>
+                                <span class="d-sm-none">{% if interno.fsalidareal %}<span class="badge-status is-discharged">Egresado</span>{% else %}<span class="badge-status is-active">Activo</span>{% endif %}</span>
+                                <span class="d-block small text-muted text-truncate"><span class="d-sm-none">Exp. {{ interno.numeroexpediente }}{% if interno.responsable %} · {% endif %}</span>{% if interno.responsable %}Responsable: {{ interno.responsable }}{% endif %}</span>
+                            </span>
+                        </a>
+                    </td>
+                    <td class="text-muted d-none d-sm-table-cell">{{ interno.numeroexpediente }}</td>
+                    <td class="text-muted d-none d-md-table-cell">{{ interno.fechaingreso|date:"d/m/Y"|default:"—" }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        {% if interno.fsalidareal %}
+                            <span class="badge-status is-discharged">Egresado</span>
+                        {% else %}
+                            <span class="badge-status is-active">Activo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-3 text-nowrap d-none d-sm-table-cell">
+                        <a href="{% url 'seleccionainterno' id=interno.pk %}" class="btn btn-sm btn-primary">Abrir</a>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-soft" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" aria-label="Más acciones">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar"><i class="bi bi-pencil me-2"></i>Editar datos</a></li>
+                                {% if not interno.fsalidareal and puede_gestionar_internos %}
+                                <li><a class="dropdown-item text-danger" href="{% url 'salidas' id=interno.pk %}"><i class="bi bi-box-arrow-right me-2"></i>Registrar salida</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="empty-state d-none" id="sinResultados">
+        <i class="bi bi-search"></i>
+        <h2>Sin resultados</h2>
+        <p class="mb-0">Pruebe con otro nombre o número de expediente.</p>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <h2>Aún no hay internos</h2>
+        <p class="mb-3">Registre el primer ingreso para empezar su expediente.</p>
+        {% if puede_gestionar_internos %}
+        <a class="btn btn-primary btn-sm" href="{% url 'agregainterno' %}"><i class="bi bi-person-plus me-1"></i>Nuevo interno</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const buscar = document.getElementById('buscarInterno');
+        if (!buscar) return;
+        const filas = Array.from(document.querySelectorAll('#tablaInternos tbody tr'));
+        const vacio = document.getElementById('sinResultados');
+        const tabla = document.getElementById('tablaInternos');
+
+        // Quitar acentos para que "maria" encuentre "María"
+        const normalizar = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        filas.forEach(f => f.dataset.buscar = normalizar(f.dataset.buscar));
+
+        function filtrar() {
+            const q = normalizar(buscar.value.trim());
+            const estatus = document.querySelector('input[name="filtroEstatus"]:checked').value;
+            let visibles = 0;
+            filas.forEach(f => {
+                const ok = (!q || f.dataset.buscar.includes(q)) && (estatus === 'todos' || f.dataset.estatus === estatus);
+                f.classList.toggle('d-none', !ok);
+                if (ok) visibles++;
+            });
+            vacio.classList.toggle('d-none', visibles > 0);
+            tabla.classList.toggle('d-none', visibles === 0);
+        }
+
+        buscar.addEventListener('input', filtrar);
+        document.querySelectorAll('input[name="filtroEstatus"]').forEach(r => r.addEventListener('change', filtrar));
+    })();
+</script>
+{% endblock %}

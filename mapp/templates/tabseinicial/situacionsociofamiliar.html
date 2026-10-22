@@ -1,0 +1,165 @@
+   <div class="tab-pane  " id="situacionsociofamiliar">
+                <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;">
+
+                 <div class="row align-items-center">
+                <div class="col-4 d-flex flex-wrap ">
+                 <div class="d-inline-block " style="color:black;">En los ultimos 12 meses ha tenido un conflico familiar grave?</div>
+                 </div>
+                  <div class="col-3 d-flex flex-wrap p-2">
+                  {% for choice in situacionfamiliarf.conflictograve %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                  <div class="col-5 d-flex flex-wrap p-2">
+                     <div class="d-inline-block" style="width:20%;margin-top:15px;">Cual :</div>
+                     <div class="d-inline-block" style="width:70%;margin-left:0.5rem">{{situacionfamiliarf.cual}}</div>
+                 </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:1rem">Algunas de las personas que se enlistan a continuacion ha consumido alcohol/drogas?</div>
+                    <div class="col-5 d-flex flex-wrap "></div>
+                    <div class="col-3 d-flex flex-wrap" style="margin-bottom:0.5rem;">Tipo de sustancia</div>
+                    <div class="col-4 d-flex flex-wrap" style=";margin-bottom:0.5rem;">El consumo de esa sustancia le ha causado problemas?, cuales?</div>
+                </div> <!-- se cierra otra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Papa</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.papa %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiopapa}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemapapa}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Mama</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.mama %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiomama}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemamama}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Hermano</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.hermano %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiohermano}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemahermano}}</div>
+                </div> <!-- se cierra linea -->
+                 <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Amigo</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.amigo %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumioamigo}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemaamigo}}</div>
+                </div> <!-- se cierra linea -->
+                  <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Pareja</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.pareja %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiopareja}}</div>
+                    <div class="col-4 d-flex flex-wrap">{{situacionfamiliarf.problemapareja}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="col-2 d-flex flex-wrap" style="text-align:center;">Familiar</div>
+                    <div class="col-3 d-flex flex-wrap ">
+                  {% for choice in situacionfamiliarf.familiar %}
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:30%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+                  {% endfor %}
+                  </div>
+
+                    <div class="col-3 d-flex flex-wrap">{{situacionfamiliarf.cosumiofamiliar}}</div>
+                    <div class="col-4 d-flex flex-wrap ">{{situacionfamiliarf.problemafamiliar}}</div>
+                </div> <!-- se cierra linea -->
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:1rem;margin-top:1rem;">Cuando esta con amigos o familiares estos lo presionan a consumir alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                  {% for choice in situacionfamiliarf.cuandoesta %}
+                   <div class="col-3 d-flex flex-wrap ">
+                       <div class="d-inline-block justify-content-right" style="width:10%" >
+                        {{ choice.tag }}
+                      </div>
+                      <div class="d-inline-block" style="width:80%;color:black" >
+                            {{ choice.choice_label }}
+                      </div>
+
+                  </div>
+                  {% endfor %}
+
+                </div> <!-- se cierra linea -->
+               <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;margin-top:0.25rem;">Entre sus amigos o familiares, quienes le ayudarian a cambiar el consumo de alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;">{{situacionfamiliarf.ayudarian}}</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-top:0.25rem;font-size:20px;">Administracion de tiempo libre</div>
+                </div>
+                 <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;">Cuanto tiempo dedica a consumir sustancias, y que actividades ha dejado de hacer por consumir?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;">{{situacionfamiliarf.dejadodehacer}}</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="background-color:silver;text-align:center;margin-bottom:0.25rem;">Que actividades de diversion o entretenimiento que uested realiza estan relacionadas con el consumo de alcohol/drogas?</div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="d-inline-block" style="text-align:center;margin-top:0.25rem;margin-bottom:0.5rem;">{{situacionfamiliarf.relacionadas}}</div>
+                </div>
+                </div> <!-- se cierra container -->
+             </div> <!-- aqui se cierra el tab de social-familiar  continuacion-->

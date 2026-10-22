@@ -1,0 +1,216 @@
+{% extends "MenuPrincipal.html" %}
+{% load ayudas_tag %}
+{% comment %}
+    Expediente del interno.
+    Todas las pantallas del interno extienden esta plantilla y llenan
+    {% block patient_content %}; el encabezado y la navegación del
+    expediente quedan siempre visibles.
+{% endcomment %}
+
+{% block title %}{{ interno.nombrecompleto|default:"Expediente" }}{% endblock %}
+{% block page_title %}Expediente{% if interno.numeroexpediente %} {{ interno.numeroexpediente }}{% endif %}{% endblock %}
+{% block ayuda %}{% ayuda "menu_general" %}{% endblock %}
+{% block container_class %}{% endblock %}
+
+{% block content %}
+{% if interno.pk %}
+{% with u=request.resolver_match.url_name %}
+<section class="exp-header" aria-label="Datos del interno">
+    <span class="avatar avatar-lg">
+        {% if interno.nombrecompleto %}{{ interno.nombrecompleto|slice:":1"|upper }}{% else %}<i class="bi bi-person"></i>{% endif %}
+    </span>
+    <div class="min-w-0">
+        <p class="exp-name text-truncate {% if not interno.nombrecompleto %}is-empty{% endif %}">
+            {{ interno.nombrecompleto|default:"Sin nombre capturado" }}
+        </p>
+        <div class="exp-meta">
+            <span>Exp. <strong>{{ interno.numeroexpediente }}</strong></span>
+            {% if interno.edad %}<span><strong>{{ interno.edad }}</strong> años</span>{% endif %}
+            {% if interno.fechaingreso %}<span>Ingreso <strong>{{ interno.fechaingreso|date:"d/m/Y" }}</strong></span>{% endif %}
+            {% if interno.fsalidareal %}
+                <span class="badge-status is-discharged">Egresado {{ interno.fsalidareal|date:"d/m/Y" }}</span>
+            {% else %}
+                <span class="badge-status is-active">Activo</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="exp-actions">
+        {% if puede_gestionar_internos %}
+        <div class="dropdown">
+            <button class="btn btn-soft btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+                <i class="bi bi-printer me-1"></i>Documentos
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><a class="dropdown-item" href="{% url 'consentimiento' id=interno.pk %}"><i class="bi bi-file-earmark-check me-2"></i>Carta de consentimiento</a></li>
+                <li><a class="dropdown-item" href="{% url 'imprime_contrato' id=interno.pk %}"><i class="bi bi-file-earmark-text me-2"></i>Contrato</a></li>
+                <li><a class="dropdown-item" href="{% url 'imprime_solicitud' id=interno.pk %}"><i class="bi bi-file-earmark-medical me-2"></i>Solicitud de internación</a></li>
+                <li><a class="dropdown-item" href="{% url 'imprime_aviso' id=interno.pk %}"><i class="bi bi-megaphone me-2"></i>Aviso de internación</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'imprimir_datos' id=interno.pk %}" target="_blank" rel="noopener"><i class="bi bi-folder2-open me-2"></i>Expediente completo</a></li>
+            </ul>
+        </div>
+        {% if not interno.fsalidareal %}
+        <a class="btn btn-soft btn-sm" href="{% url 'salidas' id=interno.pk %}"><i class="bi bi-box-arrow-right me-1"></i>Registrar salida</a>
+        {% endif %}
+        {% endif %}{# puede_gestionar_internos: documentos y salida solo para ADMIN y OFICINA #}
+        <a class="btn btn-soft btn-sm" href="{% url 'listaint' %}" title="Volver a la lista de internos"><i class="bi bi-x-lg"></i><span class="d-none d-md-inline ms-1">Cerrar</span></a>
+    </div>
+</section>
+
+<nav class="exp-nav" aria-label="Secciones del expediente">
+    <a class="exp-nav-link {% if u == 'seleccionainterno' and not request.GET.opcion %}active{% endif %}" href="{% url 'seleccionainterno' id=interno.pk %}">
+        <i class="bi bi-grid"></i>Resumen
+    </a>
+    <a class="exp-nav-link {% if u == 'seleccionainterno' and request.GET.opcion == 'editar' or u == 'agregainterno' %}active{% endif %}" href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar">
+        <i class="bi bi-person-vcard"></i>Datos generales
+    </a>
+
+    <div class="dropdown">
+        <button class="exp-nav-link dropdown-toggle {% if seccion_expediente == 'evaluaciones' %}active{% endif %}" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+            <i class="bi bi-clipboard2-pulse"></i>Evaluaciones
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if u == 'einicial' %}active{% endif %}" href="{% url 'einicial' id=interno.pk %}"><i class="bi bi-clipboard-plus"></i>Entrevista inicial</a></li>
+            <li><a class="dropdown-item {% if u == 'assist' %}active{% endif %}" href="{% url 'assist' id=interno.pk %}"><i class="bi bi-ui-checks"></i>Cuestionario ASSIST</a></li>
+            <li><a class="dropdown-item {% if u == 'riesgos' %}active{% endif %}" href="{% url 'riesgos' id=interno.pk %}"><i class="bi bi-cup-straw"></i>Cuestionario AUDIT</a></li>
+            <li><a class="dropdown-item {% if u == 'usodrogas' %}active{% endif %}" href="{% url 'usodrogas' id=interno.pk %}"><i class="bi bi-capsule"></i>Uso de drogas</a></li>
+            <li><a class="dropdown-item {% if u == 'marcadores' %}active{% endif %}" href="{% url 'marcadores' id=interno.pk %}"><i class="bi bi-graph-up"></i>Indicadores de dependencia</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item {% if u == 'ansiedad' %}active{% endif %}" href="{% url 'ansiedad' id=interno.pk %}"><i class="bi bi-activity"></i>Síntomas de ansiedad</a></li>
+            <li><a class="dropdown-item {% if u == 'depresion' %}active{% endif %}" href="{% url 'depresion' id=interno.pk %}"><i class="bi bi-cloud-drizzle"></i>Síntomas de depresión</a></li>
+            <li><a class="dropdown-item {% if u == 'psicosis' %}active{% endif %}" href="{% url 'psicosis' id=interno.pk %}"><i class="bi bi-eye"></i>Síntomas de psicosis</a></li>
+            <li><a class="dropdown-item {% if u == 'sdevida' %}active{% endif %}" href="{% url 'sdevida' id=interno.pk %}"><i class="bi bi-emoji-smile"></i>Satisfacción de vida</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="exp-nav-link dropdown-toggle {% if seccion_expediente == 'consejeria' %}active{% endif %}" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+            <i class="bi bi-chat-heart"></i>Consejería
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if u == 'razones' %}active{% endif %}" href="{% url 'razones' id=interno.pk %}"><i class="bi bi-question-circle"></i>Razones de consumo</a></li>
+            <li><a class="dropdown-item {% if u == 'valorizacion' %}active{% endif %}" href="{% url 'valorizacion' id=interno.pk %}"><i class="bi bi-clipboard-data"></i>Reporte de valorización</a></li>
+            <li><a class="dropdown-item {% if u == 'planConsejeria' %}active{% endif %}" href="{% url 'planConsejeria' id=interno.pk %}"><i class="bi bi-signpost-split"></i>Plan de consejería</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'listaSesiones' tipo_sesion='individual' id=interno.numeroexpediente %}"><i class="bi bi-person"></i>Notas de evolución individual</a></li>
+            <li><a class="dropdown-item" href="{% url 'listaSesiones' tipo_sesion='familiar' id=interno.numeroexpediente %}"><i class="bi bi-house-heart"></i>Notas de evolución familiar</a></li>
+            <li><a class="dropdown-item" href="{% url 'listaSesionesGrupales' %}"><i class="bi bi-people"></i>Notas de evolución grupal</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item {% if u == 'escanear_tarea' %}active{% endif %}" href="{% url 'escanear_tarea' %}"><i class="bi bi-camera"></i>Digitalizar tarea</a></li>
+            <li><a class="dropdown-item {% if u == 'lista_tareas_escaneadas' %}active{% endif %}" href="{% url 'lista_tareas_escaneadas' %}"><i class="bi bi-images"></i>Tareas digitalizadas</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="exp-nav-link dropdown-toggle {% if seccion_expediente == 'psicologia' %}active{% endif %}" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+            <i class="bi bi-chat-square-text"></i>Psicología
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if u == 'hojaAtencionPs' %}active{% endif %}" href="{% url 'hojaAtencionPs' id=interno.numeroexpediente %}"><i class="bi bi-file-earmark-person"></i>Hoja de atención psicológica</a></li>
+            <li><a class="dropdown-item {% if u == 'listaSesionesPS' %}active{% endif %}" href="{% url 'listaSesionesPS' id=interno.numeroexpediente %}"><i class="bi bi-journal-text"></i>Notas de evolución psicológica</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="exp-nav-link dropdown-toggle {% if seccion_expediente == 'medico' %}active{% endif %}" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+            <i class="bi bi-heart-pulse"></i>Médico
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if u == 'medicoInicial' %}active{% endif %}" href="{% url 'medicoInicial' id=interno.pk %}"><i class="bi bi-clipboard2-check"></i>Diagnóstico inicial</a></li>
+            <li><a class="dropdown-item {% if u == 'historiaClinica' %}active{% endif %}" href="{% url 'historiaClinica' id=interno.pk %}"><i class="bi bi-journal-medical"></i>Historia clínica</a></li>
+            <li><a class="dropdown-item {% if u == 'emisionDerecetas' %}active{% endif %}" href="{% url 'emisionDerecetas' id=interno.pk %}"><i class="bi bi-prescription2"></i>Emisión de recetas</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="exp-nav-link dropdown-toggle {% if seccion_expediente == 'seguimiento' %}active{% endif %}" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">
+            <i class="bi bi-calendar-check"></i>Seguimiento
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if u == 'seguimiento' %}active{% endif %}" href="{% url 'seguimiento' id=interno.pk %}"><i class="bi bi-chat-dots"></i>Entrevista de seguimiento</a></li>
+            <li><a class="dropdown-item {% if u == 'listaSesionesS' %}active{% endif %}" href="{% url 'listaSesionesS' id=interno.numeroexpediente %}"><i class="bi bi-journal-check"></i>Notas de seguimiento</a></li>
+        </ul>
+    </div>
+</nav>
+{% endwith %}
+{% endif %}
+
+<div class="{% if request.resolver_match.url_name != 'seleccionainterno' or request.GET.opcion %}main-container{% endif %}">
+{% block patient_content %}
+{% if interno.pk %}
+<!-- Resumen del expediente: todas las secciones a un clic -->
+<div class="row g-3">
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-person-vcard"></i></span><h2 class="card-title-sm">Datos del interno</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar">Datos generales</a></li>
+                <li><a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar#responsable">Responsable y dependientes</a></li>
+                <li><a href="{% url 'seleccionainterno' id=interno.pk %}?opcion=editar#proviene">Historial y sustancias</a></li>
+            </ul>
+        </div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-clipboard2-pulse"></i></span><h2 class="card-title-sm">Evaluaciones</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'einicial' id=interno.pk %}">Entrevista inicial</a></li>
+                <li><a href="{% url 'assist' id=interno.pk %}">Cuestionario ASSIST</a></li>
+                <li><a href="{% url 'riesgos' id=interno.pk %}">Cuestionario AUDIT</a></li>
+                <li><a href="{% url 'usodrogas' id=interno.pk %}">Uso de drogas</a></li>
+                <li><a href="{% url 'marcadores' id=interno.pk %}">Indicadores de dependencia</a></li>
+                <li><a href="{% url 'ansiedad' id=interno.pk %}">Síntomas de ansiedad</a></li>
+                <li><a href="{% url 'depresion' id=interno.pk %}">Síntomas de depresión</a></li>
+                <li><a href="{% url 'psicosis' id=interno.pk %}">Síntomas de psicosis</a></li>
+                <li><a href="{% url 'sdevida' id=interno.pk %}">Satisfacción de vida</a></li>
+            </ul>
+        </div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-chat-heart"></i></span><h2 class="card-title-sm">Consejería</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'razones' id=interno.pk %}">Razones de consumo</a></li>
+                <li><a href="{% url 'valorizacion' id=interno.pk %}">Reporte de valorización</a></li>
+                <li><a href="{% url 'planConsejeria' id=interno.pk %}">Plan de consejería</a></li>
+                <li><a href="{% url 'listaSesiones' tipo_sesion='individual' id=interno.numeroexpediente %}">Notas de evolución individual</a></li>
+                <li><a href="{% url 'listaSesiones' tipo_sesion='familiar' id=interno.numeroexpediente %}">Notas de evolución familiar</a></li>
+                <li><a href="{% url 'listaSesionesGrupales' %}">Notas de evolución grupal</a></li>
+                <li><a href="{% url 'escanear_tarea' %}">Digitalizar tarea</a></li>
+                <li><a href="{% url 'lista_tareas_escaneadas' %}">Tareas digitalizadas</a></li>
+            </ul>
+        </div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-chat-square-text"></i></span><h2 class="card-title-sm">Psicología</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'hojaAtencionPs' id=interno.numeroexpediente %}">Hoja de atención psicológica</a></li>
+                <li><a href="{% url 'listaSesionesPS' id=interno.numeroexpediente %}">Notas de evolución psicológica</a></li>
+            </ul>
+        </div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-heart-pulse"></i></span><h2 class="card-title-sm">Médico</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'medicoInicial' id=interno.pk %}">Diagnóstico inicial</a></li>
+                <li><a href="{% url 'historiaClinica' id=interno.pk %}">Historia clínica</a></li>
+                <li><a href="{% url 'emisionDerecetas' id=interno.pk %}">Emisión de recetas</a></li>
+            </ul>
+        </div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card section-card"><div class="card-body">
+            <div class="section-card-head"><span class="kpi-icon"><i class="bi bi-calendar-check"></i></span><h2 class="card-title-sm">Seguimiento</h2></div>
+            <ul class="section-links">
+                <li><a href="{% url 'seguimiento' id=interno.pk %}">Entrevista de seguimiento</a></li>
+                <li><a href="{% url 'listaSesionesS' id=interno.numeroexpediente %}">Notas de seguimiento</a></li>
+            </ul>
+        </div></div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+</div>
+{% endblock %}

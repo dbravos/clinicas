@@ -1,0 +1,660 @@
+/* =====================================================================
+   Fresh Start Manager · Sistema de diseño
+   Una sola fuente de verdad para colores, tipografía y componentes.
+   Se carga después de Bootstrap en MenuPrincipal.html y en la página
+   de acceso (login.html).
+   ===================================================================== */
+
+:root {
+    /* ---------- Paleta de marca ---------- */
+    --fs-green: #6CCD95;          /* verde principal: rellenos, indicadores activos, gráficas */
+    --fs-green-hover: #58BE83;
+    --fs-green-soft: #E3F4EA;     /* fondos suaves: iconos, filas activas */
+    --fs-green-border: #C7E9D5;   /* bordes de elementos sobre verde suave */
+    --fs-green-ink: #2F7A55;      /* verde para texto/enlaces sobre blanco (contraste 5.2:1) */
+    --fs-forest: #233D31;         /* verde bosque: títulos, texto sobre verde, menú lateral */
+    --fs-forest-hover: #2E4E3F;
+    --fs-bg: #F2F7F3;             /* fondo suave de la aplicación */
+    --fs-surface: #FFFFFF;
+
+    /* ---------- Neutros (con matiz verde) ---------- */
+    --fs-ink: var(--fs-forest);   /* títulos */
+    --fs-text: #24302A;           /* texto principal */
+    --fs-muted: #5E6E66;          /* texto secundario (contraste 5:1 sobre blanco) */
+    --fs-border: #DCE6DF;
+    --fs-border-strong: #C3D2C8;
+    --fs-subtle: #F7FAF8;         /* encabezados de tabla, zonas neutras */
+
+    /* ---------- Estados ---------- */
+    --fs-success: #1F7A4D;   --fs-success-soft: #DDF3E6;
+    --fs-warning: #9A5B00;   --fs-warning-soft: #FDF1D8;
+    --fs-danger:  #C0362C;   --fs-danger-soft:  #FCE7E5;
+    --fs-info:    #1F5F8B;   --fs-info-soft:    #E3EFF7;
+
+    /* ---------- Roles semánticos ---------- */
+    --fs-primary: var(--fs-green-ink);        /* acentos de texto, foco, pestaña activa */
+    --fs-primary-rgb: 47, 122, 85;
+    --fs-primary-soft: var(--fs-green-soft);
+    --fs-on-green: var(--fs-forest);          /* texto sobre botones verdes */
+
+    /* ---------- Menú lateral ---------- */
+    --fs-sidebar-bg: var(--fs-forest);
+    --fs-sidebar-text: #CFE0D6;
+    --fs-sidebar-muted: #8FAA9B;
+    --fs-sidebar-hover: rgba(255, 255, 255, 0.06);
+    --fs-sidebar-active: rgba(108, 205, 149, 0.16);
+
+    /* ---------- Tipografía ---------- */
+    --fs-font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --fs-font-display: "Manrope", "Inter", system-ui, sans-serif;
+
+    /* ---------- Espaciado ---------- */
+    --fs-space-1: 0.25rem;
+    --fs-space-2: 0.5rem;
+    --fs-space-3: 0.75rem;
+    --fs-space-4: 1rem;
+    --fs-space-5: 1.5rem;
+    --fs-space-6: 2rem;
+
+    /* ---------- Forma ---------- */
+    --fs-radius: 12px;
+    --fs-radius-sm: 8px;
+    --fs-radius-pill: 999px;
+    --fs-shadow: 0 1px 2px rgba(35, 61, 49, 0.05), 0 1px 3px rgba(35, 61, 49, 0.06);
+    --fs-shadow-lg: 0 12px 32px rgba(35, 61, 49, 0.12);
+    --fs-focus-ring: 0 0 0 0.2rem rgba(108, 205, 149, 0.45);
+
+    --fs-sidebar-width: 260px;
+    --fs-topbar-height: 60px;
+
+    /* ---------- Bootstrap alineado con la marca ---------- */
+    --bs-primary: var(--fs-green-ink);
+    --bs-primary-rgb: var(--fs-primary-rgb);
+    --bs-success: var(--fs-success);
+    --bs-success-rgb: 31, 122, 77;
+    --bs-link-color: var(--fs-green-ink);
+    --bs-link-color-rgb: var(--fs-primary-rgb);
+    --bs-link-hover-color: var(--fs-forest);
+    --bs-link-hover-color-rgb: 35, 61, 49;
+    --bs-body-font-family: var(--fs-font-body);
+    --bs-body-color: var(--fs-text);
+    --bs-body-bg: var(--fs-surface);   /* campos, tarjetas y menús en blanco; el fondo lo pone body.app */
+    --bs-border-color: var(--fs-border);
+    --bs-secondary-bg: #EDF2EE;                /* filas alternas y zonas grises de Bootstrap */
+    --bs-tertiary-bg: var(--fs-subtle);
+    --bs-secondary-color: var(--fs-muted);
+    --bs-border-radius: var(--fs-radius-sm);
+    --bs-border-radius-lg: var(--fs-radius);
+    --bs-focus-ring-color: rgba(108, 205, 149, 0.45);
+}
+
+/* ---------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------- */
+body.app {
+    background: var(--fs-bg);
+    color: var(--fs-text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app h1, .app h2, .app h3, .app h4, .app h5, .app h6 {
+    color: var(--fs-ink);
+    letter-spacing: -0.01em;
+}
+
+/* Títulos y elementos de marca en Manrope */
+.font-display,
+.page-header h1, .app-topbar-title, .kpi-value, .exp-name, .card-title-sm,
+.empty-state h2, .landing h1, .landing h2, .landing h3 {
+    font-family: var(--fs-font-display);
+}
+
+/* Foco visible y consistente para navegación con teclado */
+.app :focus-visible, .landing :focus-visible {
+    outline: 2px solid var(--fs-green-ink);
+    outline-offset: 2px;
+}
+.app .form-control:focus-visible, .app .form-select:focus-visible,
+.landing .form-control:focus-visible { outline: none; }
+
+/* ---------------------------------------------------------------------
+   Logotipo
+   --------------------------------------------------------------------- */
+.brand-logo { display: block; height: auto; max-width: 100%; }
+.brand-logo-sidebar { width: 164px; }          /* horizontal, fondo oscuro */
+.brand-isotipo { display: block; width: auto; height: 28px; }
+
+/* ---------------------------------------------------------------------
+   Estructura: menú lateral + área principal
+   --------------------------------------------------------------------- */
+.app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--fs-sidebar-width);
+    background: var(--fs-sidebar-bg);
+    color: var(--fs-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    z-index: 1030;
+    transition: transform 0.25s ease, filter 0.3s;
+}
+
+.app-sidebar.sidebar-disabled { pointer-events: none; filter: blur(3px); opacity: 0.6; }
+
+.app-brand {
+    display: block;
+    padding: 1.4rem 1.5rem 1.1rem;
+    text-decoration: none;
+}
+.app-brand-clinic {
+    display: block;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--fs-sidebar-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Marca pequeña (isotipo sobre recuadro) usada en espacios reducidos */
+.app-brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: var(--fs-forest);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.app-brand-mark img { width: 22px; height: auto; }
+
+.app-nav { flex: 1; overflow-y: auto; padding: 0.25rem 0.75rem 1rem; }
+.app-nav-section {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fs-sidebar-muted);
+    padding: 1.1rem 0.75rem 0.4rem;
+}
+.app-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    margin-bottom: 2px;
+    border-radius: var(--fs-radius-sm);
+    color: var(--fs-sidebar-text);
+    text-decoration: none;
+    font-size: 0.925rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+.app-nav-link i { font-size: 1.05rem; width: 1.25rem; text-align: center; opacity: 0.85; }
+.app-nav-link:hover { background: var(--fs-sidebar-hover); color: #fff; }
+.app-nav-link.active {
+    background: var(--fs-sidebar-active);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--fs-green);
+}
+.app-nav-link.active i { opacity: 1; color: var(--fs-green); }
+.app-sidebar :focus-visible { outline-color: var(--fs-green); }
+
+.app-user {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.app-user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(108, 205, 149, 0.18);
+    color: var(--fs-green);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.app-user-name { color: #fff; font-weight: 600; font-size: 0.875rem; line-height: 1.2; }
+.app-user-role { color: var(--fs-sidebar-muted); font-size: 0.75rem; }
+.app-user .btn-logout {
+    margin-left: auto;
+    color: var(--fs-sidebar-text);
+    border: 0;
+    background: transparent;
+    padding: 0.35rem 0.5rem;
+    border-radius: var(--fs-radius-sm);
+}
+.app-user .btn-logout:hover { background: rgba(192, 54, 44, 0.2); color: #F8B4AE; }
+
+.app-main {
+    margin-left: var(--fs-sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    height: var(--fs-topbar-height);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 1.5rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(8px);
+    border-bottom: 1px solid var(--fs-border);
+}
+.app-topbar-title { font-size: 1.05rem; font-weight: 700; color: var(--fs-ink); margin: 0; }
+.app-topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.app-topbar .ayuda-container .btn-ayuda {
+    margin: 0;
+    width: 34px; height: 34px;
+    font-size: 1rem;
+    background: var(--fs-green-soft);
+    color: var(--fs-forest);
+    box-shadow: none;
+}
+.app-topbar .ayuda-container .btn-ayuda:hover { background: var(--fs-green); color: var(--fs-on-green); transform: none; }
+
+.sidebar-toggle {
+    border: 1px solid var(--fs-border);
+    background: var(--fs-surface);
+    width: 40px; height: 40px;
+    border-radius: var(--fs-radius-sm);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+    color: var(--fs-ink);
+}
+
+.app-content { flex: 1; padding: 1.5rem; }
+.main-container {
+    background: var(--fs-surface);
+    border: 1px solid var(--fs-border);
+    border-radius: var(--fs-radius);
+    box-shadow: var(--fs-shadow);
+    padding: 1.5rem;
+}
+
+.app-footer {
+    padding: 1rem 1.5rem;
+    font-size: 0.78rem;
+    color: var(--fs-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    justify-content: space-between;
+}
+.app-footer a { color: inherit; text-decoration: none; }
+.app-footer a:hover { color: var(--fs-green-ink); }
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(35, 61, 49, 0.45);
+    z-index: 1025;
+}
+
+@media (max-width: 991.98px) {
+    .app-sidebar { transform: translateX(-100%); }
+    .app-sidebar.active { transform: translateX(0); box-shadow: var(--fs-shadow-lg); }
+    .app-sidebar.active ~ .sidebar-backdrop { display: block; }
+    .app-main { margin-left: 0; }
+    .app-topbar { padding: 0 0.75rem; }
+    .app-content { padding: 0.75rem; }
+    .main-container { padding: 1rem; }
+}
+
+/* Mientras se pide el acceso del operador, el contenido no se lee */
+.is-locked .app-main { filter: blur(6px); pointer-events: none; user-select: none; }
+
+/* Avisos flotantes */
+.app-toasts {
+    position: fixed;
+    top: calc(var(--fs-topbar-height) + 0.75rem);
+    right: 1rem;
+    z-index: 2000;
+    width: min(420px, calc(100% - 2rem));
+    pointer-events: none;
+}
+.app-toasts .alert { pointer-events: auto; box-shadow: var(--fs-shadow-lg); }
+
+/* ---------------------------------------------------------------------
+   Componentes
+   --------------------------------------------------------------------- */
+
+/* Encabezado de página */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+}
+.page-header h1 { font-size: 1.45rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+.page-header p { margin: 0.15rem 0 0; color: var(--fs-muted); font-size: 0.9rem; }
+.page-header .page-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* Tarjetas */
+.app .card {
+    border: 1px solid var(--fs-border);
+    border-radius: var(--fs-radius);
+    box-shadow: var(--fs-shadow);
+}
+.app .card-header { border-bottom-color: var(--fs-border); }
+.card-title-sm { font-size: 0.98rem; font-weight: 700; color: var(--fs-ink); margin: 0; }
+
+/* Indicadores (KPI) */
+.kpi-card { padding: 1.1rem 1.25rem; height: 100%; container-type: inline-size; }
+.kpi-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.kpi-text { flex: 1; min-width: 0; }
+.kpi-label { font-size: 0.8rem; font-weight: 500; color: var(--fs-muted); display: flex; align-items: center; gap: 0.4rem; }
+.kpi-value {
+    /* La cifra se ajusta al ancho de su tarjeta para no chocar con el ícono (p. ej. "$61,000.00") */
+    font-size: clamp(1.25rem, calc((100cqi - 3.5rem) / 6.5), 1.85rem);
+    font-weight: 800; color: var(--fs-ink); line-height: 1.2; margin-top: 0.25rem; letter-spacing: -0.02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kpi-hint { font-size: 0.78rem; color: var(--fs-muted); }
+.kpi-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    background: var(--fs-green-soft); color: var(--fs-green-ink);
+    flex-shrink: 0;
+}
+@media (max-width: 575.98px) {
+    .kpi-card { padding: 0.9rem 1rem; }
+    .kpi-card .kpi-icon { display: none; }
+}
+.app .progress { --bs-progress-bg: var(--fs-green-soft); --bs-progress-bar-bg: var(--fs-green); }
+
+/* ---------- Botones ----------
+   Primario: verde principal con texto bosque (contraste 6:1).
+   Secundario: blanco con borde. Peligro: rojo de Bootstrap ajustado. */
+.app .btn, .landing .btn { font-weight: 600; border-radius: var(--fs-radius-sm); }
+.app .btn-primary, .landing .btn-primary,
+.app .btn-success {
+    --bs-btn-color: var(--fs-on-green);
+    --bs-btn-bg: var(--fs-green);
+    --bs-btn-border-color: var(--fs-green);
+    --bs-btn-hover-color: var(--fs-on-green);
+    --bs-btn-hover-bg: var(--fs-green-hover);
+    --bs-btn-hover-border-color: var(--fs-green-hover);
+    --bs-btn-active-color: var(--fs-on-green);
+    --bs-btn-active-bg: var(--fs-green-hover);
+    --bs-btn-active-border-color: var(--fs-green-hover);
+    --bs-btn-disabled-color: var(--fs-on-green);
+    --bs-btn-disabled-bg: var(--fs-green);
+    --bs-btn-disabled-border-color: var(--fs-green);
+    --bs-btn-focus-shadow-rgb: 108, 205, 149;
+    background: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+}
+.app .btn-primary:hover, .landing .btn-primary:hover, .app .btn-success:hover { background: var(--bs-btn-hover-bg); color: var(--bs-btn-hover-color); }
+.app .btn-outline-primary, .app .btn-outline-success {
+    --bs-btn-color: var(--fs-green-ink);
+    --bs-btn-border-color: var(--fs-green-ink);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--fs-green-ink);
+    --bs-btn-hover-border-color: var(--fs-green-ink);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--fs-forest);
+    --bs-btn-active-border-color: var(--fs-forest);
+}
+.app .btn-danger {
+    --bs-btn-bg: var(--fs-danger);
+    --bs-btn-border-color: var(--fs-danger);
+    --bs-btn-hover-bg: #A42C23;
+    --bs-btn-hover-border-color: #A42C23;
+}
+.app .btn-outline-danger {
+    --bs-btn-color: var(--fs-danger);
+    --bs-btn-border-color: var(--fs-danger);
+    --bs-btn-hover-bg: var(--fs-danger);
+    --bs-btn-hover-border-color: var(--fs-danger);
+}
+.btn-soft {
+    background: var(--fs-surface);
+    border: 1px solid var(--fs-border-strong);
+    color: var(--fs-text);
+}
+.btn-soft:hover { background: var(--fs-subtle); color: var(--fs-ink); border-color: var(--fs-muted); }
+.btn:disabled, .btn.disabled { opacity: 0.55; }
+/* Estado de carga: <button class="btn btn-primary is-loading"> */
+.btn.is-loading { position: relative; color: transparent !important; pointer-events: none; }
+.btn.is-loading::after {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 1rem; height: 1rem; border-radius: 50%;
+    border: 2px solid var(--fs-on-green); border-right-color: transparent;
+    animation: fs-spin 0.7s linear infinite;
+}
+@keyframes fs-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Formularios ---------- */
+.app .form-control, .app .form-select { border-color: var(--fs-border-strong); color: var(--fs-text); }
+.app .form-control::placeholder { color: #8A9A92; }
+.app .form-control:focus, .app .form-select:focus, .app .form-check-input:focus {
+    border-color: var(--fs-green-ink);
+    box-shadow: var(--fs-focus-ring);
+}
+.app .form-control:disabled, .app .form-select:disabled, .app .form-control[readonly] { background-color: var(--fs-subtle); }
+.app .form-control.is-invalid, .app .form-select.is-invalid { border-color: var(--fs-danger); }
+.app .invalid-feedback, .app .errorlist { color: var(--fs-danger); font-size: 0.85rem; }
+.app .form-check-input { border-color: var(--fs-border-strong); }
+.app .form-check-input:checked { background-color: var(--fs-green-ink); border-color: var(--fs-green-ink); }
+.app .form-switch .form-check-input:checked { background-color: var(--fs-green-ink); }
+.app .form-label { font-weight: 500; color: var(--fs-text); }
+.app .input-group-text { background: var(--fs-subtle); border-color: var(--fs-border-strong); color: var(--fs-muted); }
+
+/* ---------- Tablas ---------- */
+.app .table { --bs-table-hover-bg: var(--fs-subtle); --bs-table-striped-bg: var(--fs-subtle); margin-bottom: 0; }
+.app .table > thead th, .app .table > thead.table-light th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fs-muted);
+    background: var(--fs-subtle);
+    border-bottom: 1px solid var(--fs-border);
+    padding-top: 0.75rem; padding-bottom: 0.75rem;
+    white-space: nowrap;
+}
+.app .table > tbody td { vertical-align: middle; border-color: #EDF2EE; }
+
+/* ---------- Alertas ---------- */
+.app .alert, .landing .alert { border-radius: var(--fs-radius-sm); border: 1px solid transparent; }
+.app .alert-success, .landing .alert-success { background: var(--fs-success-soft); color: var(--fs-success); border-color: #BFE5CF; }
+.app .alert-warning, .landing .alert-warning { background: var(--fs-warning-soft); color: var(--fs-warning); border-color: #F5DCA6; }
+.app .alert-danger,  .landing .alert-danger  { background: var(--fs-danger-soft);  color: var(--fs-danger);  border-color: #F5C2BD; }
+.app .alert-info,    .landing .alert-info    { background: var(--fs-info-soft);    color: var(--fs-info);    border-color: #C3DCEC; }
+
+/* ---------- Modales y menús ---------- */
+.app .modal-content { border: 0; border-radius: 14px; box-shadow: var(--fs-shadow-lg); }
+.app .dropdown-menu { border-color: var(--fs-border); border-radius: var(--fs-radius-sm); box-shadow: var(--fs-shadow-lg); }
+.app .dropdown-item:active, .app .dropdown-item.active { background: var(--fs-green-soft); color: var(--fs-forest); }
+
+/* ---------- Insignias de estatus (texto + punto: no dependen solo del color) ---------- */
+.badge-status {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.75rem; font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--fs-radius-pill);
+}
+.badge-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-status.is-active { background: var(--fs-success-soft); color: var(--fs-success); }
+.badge-status.is-discharged { background: #EDF2EE; color: var(--fs-muted); }
+.badge-status.is-pending { background: var(--fs-warning-soft); color: var(--fs-warning); }
+.badge-status.is-overdue { background: var(--fs-danger-soft); color: var(--fs-danger); }
+
+/* Estado vacío */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--fs-muted); }
+.empty-state i { font-size: 2.5rem; color: var(--fs-border-strong); display: block; margin-bottom: 0.75rem; }
+.empty-state h2 { font-size: 1.05rem; font-weight: 700; color: var(--fs-ink); margin-bottom: 0.25rem; }
+
+/* Avatar con iniciales */
+.avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--fs-green-soft); color: var(--fs-forest);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--fs-font-display);
+    font-weight: 800; font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.avatar-lg { width: 52px; height: 52px; font-size: 1.1rem; }
+
+/* Pestañas de Bootstrap con el estilo de la app */
+.app .nav-tabs { border-bottom-color: var(--fs-border); }
+.app .nav-tabs .nav-link { color: var(--fs-muted); font-weight: 500; border: 0; border-bottom: 2px solid transparent; }
+.app .nav-tabs .nav-link:hover { color: var(--fs-ink); border-bottom-color: var(--fs-border-strong); }
+.app .nav-tabs .nav-link.active { color: var(--fs-forest); font-weight: 600; border-bottom-color: var(--fs-green); background: transparent; }
+.app .nav-pills .nav-link.active { background: var(--fs-green-ink); }
+
+/* ---------------------------------------------------------------------
+   Expediente del interno
+   --------------------------------------------------------------------- */
+.exp-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    background: var(--fs-surface);
+    border: 1px solid var(--fs-border);
+    border-radius: var(--fs-radius) var(--fs-radius) 0 0;
+    padding: 1rem 1.25rem;
+}
+.exp-name { font-size: 1.2rem; font-weight: 800; color: var(--fs-ink); margin: 0; line-height: 1.25; letter-spacing: -0.01em; }
+.exp-name.is-empty { color: var(--fs-muted); font-style: italic; font-weight: 500; }
+.exp-meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.83rem; color: var(--fs-muted); margin-top: 0.15rem; }
+.exp-meta strong { color: var(--fs-text); font-weight: 600; }
+.exp-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.exp-nav {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    background: var(--fs-surface);
+    border: 1px solid var(--fs-border);
+    border-top: 0;
+    border-radius: 0 0 var(--fs-radius) var(--fs-radius);
+    padding: 0 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.exp-nav .dropdown { position: static; }
+.exp-nav-link {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.75rem 0.85rem;
+    color: var(--fs-muted);
+    font-size: 0.9rem; font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+}
+.exp-nav-link:hover { color: var(--fs-ink); }
+.exp-nav-link.active { color: var(--fs-forest); font-weight: 600; border-bottom-color: var(--fs-green); }
+.exp-nav-link.active i { color: var(--fs-green-ink); }
+.exp-nav .dropdown-menu {
+    border: 1px solid var(--fs-border);
+    box-shadow: var(--fs-shadow-lg);
+    border-radius: var(--fs-radius);
+    padding: 0.4rem;
+    min-width: 260px;
+}
+.exp-nav .dropdown-item { border-radius: var(--fs-radius-sm); padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+.exp-nav .dropdown-item i { color: var(--fs-muted); width: 1.25rem; display: inline-block; }
+.exp-nav .dropdown-item.active, .exp-nav .dropdown-item:active { background: var(--fs-green-soft); color: var(--fs-forest); font-weight: 600; }
+.exp-nav .dropdown-item.active i { color: var(--fs-green-ink); }
+
+/* Panel de secciones del expediente (vista general) */
+.section-card { height: 100%; }
+.section-card .card-body { padding: 1.1rem 1.25rem; }
+.section-card-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+.section-card-head .kpi-icon { width: 34px; height: 34px; font-size: 1rem; }
+.section-links { list-style: none; padding: 0; margin: 0; }
+.section-links a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.45rem 0.5rem;
+    margin: 0 -0.5rem;
+    border-radius: var(--fs-radius-sm);
+    color: var(--fs-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.section-links a::after { content: "\F285"; font-family: "bootstrap-icons"; color: var(--fs-border-strong); font-size: 0.8rem; }
+.section-links a:hover { background: var(--fs-green-soft); color: var(--fs-forest); }
+.section-links a:hover::after { color: var(--fs-green-ink); }
+
+/* ---------------------------------------------------------------------
+   Compatibilidad: pantallas anteriores con colores propios
+   (azules de Bootstrap, degradados) alineadas con la marca.
+   --------------------------------------------------------------------- */
+.app .bg-gradient-primary { background: var(--fs-forest) !important; }
+.app .bg-primary { background-color: var(--fs-forest) !important; }
+.app .bg-success { background-color: var(--fs-green-ink) !important; }
+.app .bg-dark { background-color: var(--fs-forest) !important; }
+.app .text-primary { color: var(--fs-green-ink) !important; }
+.app .border-primary { border-color: var(--fs-green) !important; }
+.app .badge.bg-primary { background-color: var(--fs-green) !important; color: var(--fs-on-green) !important; }
+body.app { background: var(--fs-bg) !important; }
+
+/* Barras de título heredadas sobre color: el texto siempre en blanco (sin afectar sus botones) */
+.app :is(.bg-primary, .bg-gradient-primary, .bg-success, .bg-dark):not(.badge),
+.app :is(.bg-primary, .bg-gradient-primary, .bg-success, .bg-dark):not(.badge)
+    :is(h1, h2, h3, h4, h5, h6, p, span, small, strong, label, i, .card-title):not(.btn, .btn *, .badge, .badge *) {
+    color: #fff !important;
+}
+/* Etiquetas informativas (p. ej. cargo de un usuario): verde suave en lugar de cian */
+.app .badge.bg-info, .app .badge.text-bg-info { background-color: var(--fs-green-soft) !important; color: var(--fs-forest) !important; }
+.app .text-info { color: var(--fs-info) !important; }
+.app .border-info { border-color: var(--fs-green-border) !important; }
+
+/* Controles nativos (radios y casillas sin estilo de Bootstrap) con el color de marca */
+.app input[type="radio"], .app input[type="checkbox"], .app input[type="range"], .app progress { accent-color: var(--fs-green-ink); }
+
+/* ---------------------------------------------------------------------
+   Impresión: solo el documento, sin la interfaz del sistema
+   --------------------------------------------------------------------- */
+@media print {
+    .app-sidebar, .app-topbar, .app-footer, .app-toasts, .sidebar-backdrop,
+    .exp-header, .exp-nav, .ayuda-container, #authModal, .modal-backdrop {
+        display: none !important;
+    }
+    /* Documentos sobrios: texto en negro, sin los colores de la interfaz */
+    body.app { background: #fff !important; color: #000 !important; --bs-body-color: #000; }
+    .app-main { margin: 0 !important; }
+    .app-content { padding: 0 !important; }
+    .main-container { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+}
+.min-w-0 { min-width: 0; }
+
+/* La tipografía de la app solo en pantalla: los documentos impresos conservan la suya */
+@media screen {
+    body.app { font-family: var(--bs-body-font-family); margin: 0 !important; padding: 0 !important; }
+
+    /* Algunas pantallas traen estilos globales (*, body, h1…): la estructura de la app no los hereda */
+    .app-sidebar, .app-sidebar *, .app-topbar, .app-topbar *, .app-footer, .app-footer *,
+    .exp-header, .exp-header *, .exp-nav, .exp-nav *, #authModal, #authModal * {
+        font-family: var(--bs-body-font-family);
+        box-sizing: border-box;
+    }
+    .app-topbar-title, .exp-name, .exp-header .avatar { font-family: var(--fs-font-display) !important; }
+}
+
+/* Encabezados fijos de las pantallas: pegarse debajo de la barra superior
+   y quedar por debajo de los menús desplegables del expediente */
+.app-content .sticky-top:not(thead) { top: var(--fs-topbar-height); z-index: 1010 !important; }
+.exp-nav .dropdown-menu, .exp-header .dropdown-menu { z-index: 1035; }
+
+/* Opciones de respuesta de los cuestionarios: compactas para que quepan en una fila */
+.severity-options { display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; }
+.severity-options .form-check-inline { margin-right: 0; }
+.severity-options .form-check-label { font-size: 0.9rem; }
+
+/* Que los elementos posicionados dentro de una tabla con scroll no desborden la página */
+.table-responsive { position: relative; }

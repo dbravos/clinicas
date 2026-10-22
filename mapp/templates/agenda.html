@@ -1,0 +1,128 @@
+{% extends "MenuPrincipal.html" %}
+
+{% block title %}Agenda{% endblock %}
+{% block page_title %}Agenda{% endblock %}
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{% if es_admin %}Agenda de la clínica{% else %}Mi agenda{% endif %}</h1>
+        <p>
+            Internos por atender según la fecha de la siguiente sesión que se capturó al cerrar cada sesión.
+            Hoy es {{ hoy|date:"d/m/Y" }}.
+        </p>
+    </div>
+    <div class="page-actions d-print-none">
+        {% if es_admin %}
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <label for="filtroProfesional" class="visually-hidden">Profesional</label>
+            <select id="filtroProfesional" name="profesional" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">Todos los profesionales</option>
+                {% for u in profesionales %}
+                    <option value="{{ u.usuario }}" {% if filtro == u.usuario %}selected{% endif %}>{{ u.nombre }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+        <button type="button" class="btn btn-soft btn-sm" onclick="window.print()"><i class="bi bi-printer me-1"></i>Imprimir</button>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row g-3 mb-3">
+    {% for g in grupos %}
+    <div class="col-6 col-lg-3">
+        <a href="#grupo-{{ g.clave }}" class="card kpi-card text-decoration-none agenda-kpi agenda-{{ g.clave }}">
+            <div class="kpi-label">{{ g.titulo }}</div>
+            <div class="kpi-value">{{ g.citas|length }}</div>
+            <div class="kpi-hint">interno{{ g.citas|length|pluralize }}</div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not total %}
+<div class="card">
+    <div class="empty-state">
+        <i class="bi bi-calendar-check"></i>
+        <h2>No hay internos por atender</h2>
+        <p class="mb-0">
+            {% if es_admin %}No hay sesiones cerradas con próxima fecha{% if filtro %} para este profesional{% endif %}.
+            {% else %}Cuando cierres una sesión y programes la siguiente, el interno aparecerá aquí.{% endif %}
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% for g in grupos %}{% if g.citas %}
+<section class="card mb-3 agenda-grupo" id="grupo-{{ g.clave }}" aria-labelledby="titulo-{{ g.clave }}">
+    <div class="card-body pb-0 d-flex align-items-center gap-2">
+        <h2 class="card-title-sm" id="titulo-{{ g.clave }}">{{ g.titulo }}</h2>
+        <span class="badge-status {% if g.clave == 'vencidas' %}is-overdue{% elif g.clave == 'hoy' %}is-pending{% else %}is-discharged{% endif %}">{{ g.citas|length }}</span>
+    </div>
+    <div class="card-body px-0 pb-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-3">Fecha</th>
+                        <th>Interno</th>
+                        <th class="d-none d-md-table-cell">Sesión</th>
+                        {% if es_admin %}<th class="d-none d-lg-table-cell">Profesional</th>{% endif %}
+                        <th class="text-end pe-3 d-none d-sm-table-cell d-print-none"><span class="visually-hidden">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in g.citas %}
+                    <tr>
+                        <td class="ps-3 text-nowrap">
+                            <span class="fw-semibold"><span class="d-none d-sm-inline">{{ c.dia }}</span><span class="d-sm-none">{{ c.dia_corto }}</span> {{ c.fecha|date:"d/m/Y" }}</span>
+                            <span class="d-block small {% if c.dias < 0 %}text-danger{% else %}text-muted{% endif %}">
+                                {% if c.dias < 0 %}Hace {{ c.dias_abs }} día{{ c.dias_abs|pluralize }}
+                                {% elif c.dias == 0 %}Hoy
+                                {% elif c.dias == 1 %}Mañana
+                                {% else %}En {{ c.dias }} días{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'seleccionainterno' id=c.interno.pk %}" class="fw-semibold text-decoration-none">
+                                {{ c.interno.nombrecompleto|default:"Sin nombre capturado" }}
+                            </a>
+                            <span class="d-block small text-muted">
+                                Exp. {{ c.interno.numeroexpediente }}
+                                <span class="d-md-none"> · {{ c.tipo }}</span>
+                                {% if es_admin %}<span class="d-lg-none"> · {{ c.profesional }}</span>{% endif %}
+                            </span>
+                            <a href="{{ c.url_captura }}" class="d-sm-none d-print-none small fw-semibold">Capturar sesión <i class="bi bi-arrow-right"></i></a>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            {{ c.tipo }}
+                            <span class="d-block small text-muted">Última: sesión {{ c.ultima_sesion }}</span>
+                        </td>
+                        {% if es_admin %}<td class="d-none d-lg-table-cell">{{ c.profesional }}</td>{% endif %}
+                        <td class="text-end pe-3 d-none d-sm-table-cell d-print-none">
+                            <a href="{{ c.url_captura }}" class="btn btn-sm btn-primary text-nowrap">
+                                <i class="bi bi-journal-plus me-1"></i>Capturar sesión
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}{% endfor %}
+
+<style>
+    .agenda-kpi { transition: box-shadow 0.15s; }
+    .agenda-kpi:hover { box-shadow: var(--fs-shadow-lg); }
+    .agenda-vencidas .kpi-value { color: var(--fs-danger); }
+    @media print {
+        .agenda-kpi { box-shadow: none !important; border: 1px solid #999 !important; }
+        .agenda-grupo { break-inside: avoid-page; box-shadow: none !important; }
+        .app .table > thead th { background: #fff !important; }
+    }
+</style>
+{% endblock %}

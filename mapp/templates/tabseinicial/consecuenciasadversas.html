@@ -1,0 +1,53 @@
+{% load forms_tags %}
+<div class="tab-pane" id="consecuenciascontinuacion">
+    <!-- Encabezado -->
+    <div class="container" style="border-style:solid;border-width:1px;border-radius:3px;color:black;background-color:silver;">
+        <div class="row align-items-center">
+            <div class="col-5 d-flex flex-wrap" style="margin-top:0.5rem">Ejemplo de consecuencias adversas</div>
+            <div class="col-2">Lo ha presentado en el último año?</div>
+            <div class="col-5" style="text-align:center;">¿Qué tanto le ha afectado en su vida?</div>
+        </div>
+    </div>
+
+    <!-- Sección de problemas mentales -->
+    <div class="row align-items-center">
+        <div class="d-inline-block" style="background-color:var(--color-fondog);text-align:center;margin-right:10rem;margin-left:0.75rem;margin-top:0.25rem;color:white">
+            Problemas mentales
+        </div>
+    </div>
+
+    {% for i in "1,2,3,4,5"|split:"," %}
+        {% get_form_field cfisicasf "p"|add:i as campo %}
+        {% get_form_field cfisicasf "p"|add:i|add:"a" as campoa %}
+
+        {% if campo and campoa %}
+        <div class="row align-items-center text-black mb-1">
+            <div class="col-5">{{ campo.label }}</div>
+
+            <!-- Campo principal (Sí/No) -->
+            <div class="col-2 d-flex flex-wrap gap-3">
+                {% for choice in campo %}
+                <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                        {{ choice.choice_label }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Campo de afectación -->
+            <div class="col-5">
+                {% for choice in campoa %}
+                <div class="form-check form-check-inline">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                        {{ choice.choice_label }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Start Manager · Software para clínicas de rehabilitación</title>
+    <link rel="icon" type="image/png" href="{% static 'brand/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
+    <meta name="description" content="Fresh Start Manager reúne expedientes, evaluaciones clínicas, notas de evolución, recetas y cuotas voluntarias de tu clínica de rehabilitación en una sola plataforma web.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+
+    <style>
+        body.landing {
+            font-family: var(--bs-body-font-family);
+            color: var(--fs-text);
+            background: #fff;
+            -webkit-font-smoothing: antialiased;
+        }
+        html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+
+        /* Navegación */
+        .lp-nav {
+            position: sticky; top: 0; z-index: 1030;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: saturate(180%) blur(10px);
+            border-bottom: 1px solid var(--fs-border);
+        }
+        .lp-nav .container { height: 68px; display: flex; align-items: center; gap: 1.5rem; }
+        .lp-brand { display: flex; align-items: center; text-decoration: none; }
+        .lp-brand img { width: 168px; height: auto; display: block; }
+        .lp-links { display: flex; gap: 1.5rem; margin-left: 1.5rem; }
+        .lp-links a { color: var(--fs-text); text-decoration: none; font-size: 0.925rem; font-weight: 500; }
+        .lp-links a:hover { color: var(--fs-green-ink); }
+        .lp-nav-actions { margin-left: auto; display: flex; gap: 0.5rem; }
+        .btn-ghost { color: var(--fs-forest); border: 1px solid var(--fs-border-strong); background: var(--fs-surface); }
+        .btn-ghost:hover { color: var(--fs-forest); border-color: var(--fs-forest); background: var(--fs-surface); }
+
+        /* Portada */
+        .lp-hero {
+            position: relative;
+            background: var(--fs-bg);
+            color: var(--fs-text);
+            padding: 4.5rem 0 9rem;
+            overflow: hidden;
+        }
+        .lp-eyebrow {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--fs-forest);
+            background: var(--fs-green-soft);
+            border: 1px solid var(--fs-green-border);
+            padding: 0.35rem 0.8rem;
+            border-radius: 999px;
+        }
+        .lp-hero h1 {
+            color: var(--fs-forest);
+            font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -0.025em;
+            margin: 1.25rem 0 1.1rem;
+        }
+        .lp-hero h1 .accent { color: var(--fs-green-ink); }
+        .lp-hero .lead { color: var(--fs-muted); font-size: 1.15rem; max-width: 34rem; }
+        .lp-hero-points { list-style: none; padding: 0; margin: 2rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; font-size: 0.9rem; color: var(--fs-muted); }
+        .lp-hero-points i { color: var(--fs-green-ink); margin-right: 0.35rem; }
+
+        /* Tarjeta de acceso */
+        .lp-login {
+            background: #fff;
+            color: var(--fs-text);
+            border-radius: 16px;
+            border: 1px solid var(--fs-border);
+            box-shadow: var(--fs-shadow-lg);
+            padding: 2rem;
+        }
+        .lp-login h2 { font-size: 1.25rem; font-weight: 700; color: var(--fs-ink); margin: 0; }
+        .lp-login .form-control { padding: 0.7rem 0.9rem; border-color: var(--fs-border-strong); }
+        .lp-login .form-control:focus, .lp-demo-form .form-control:focus { border-color: var(--fs-green-ink); box-shadow: var(--fs-focus-ring); }
+        .lp-login .form-label { font-weight: 500; font-size: 0.9rem; }
+        .lp-login .btn-primary { padding: 0.7rem; font-weight: 600; }
+        .lp-pass { position: relative; }
+        .lp-pass .form-control { padding-right: 2.75rem; }
+        .lp-pass button {
+            position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+            border: 0; background: transparent; color: var(--fs-muted);
+            width: 36px; height: 36px; border-radius: 6px;
+        }
+        .lp-pass button:hover { color: var(--fs-ink); background: var(--fs-subtle); }
+        .lp-field-error { color: var(--fs-danger); font-size: 0.83rem; margin-top: 0.35rem; }
+        .lp-field-error ul { list-style: none; padding: 0; margin: 0; }
+
+        /* Vista del producto */
+        .lp-preview { margin-top: -6.5rem; position: relative; z-index: 2; }
+        .lp-browser {
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--fs-surface);
+            box-shadow: var(--fs-shadow-lg), 0 0 0 1px var(--fs-border);
+        }
+        .lp-browser-bar { display: flex; gap: 6px; padding: 10px 14px; background: var(--fs-subtle); border-bottom: 1px solid var(--fs-border); }
+        .lp-browser-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--fs-border-strong); }
+        .lp-browser img { display: block; width: 100%; height: auto; }
+
+        /* Secciones */
+        .lp-section { padding: 6rem 0; }
+        .lp-section-alt { background: var(--fs-bg); }
+        .lp-kicker { color: var(--fs-green-ink); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .lp-title { font-size: clamp(1.75rem, 3vw, 2.4rem); font-weight: 800; color: var(--fs-ink); letter-spacing: -0.02em; line-height: 1.15; margin: 0.5rem 0 1rem; }
+        .lp-sub { color: var(--fs-muted); font-size: 1.075rem; max-width: 40rem; }
+
+        .lp-feature {
+            height: 100%;
+            padding: 1.75rem;
+            border: 1px solid var(--fs-border);
+            border-radius: 14px;
+            background: #fff;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .lp-feature:hover { box-shadow: var(--fs-shadow-lg); transform: translateY(-2px); }
+        .lp-feature .kpi-icon { width: 44px; height: 44px; font-size: 1.3rem; margin-bottom: 1.1rem; }
+        .lp-feature h3 { font-size: 1.1rem; font-weight: 700; color: var(--fs-ink); margin-bottom: 0.5rem; }
+        .lp-feature p { color: var(--fs-muted); margin: 0; font-size: 0.95rem; line-height: 1.6; }
+        .lp-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.9rem; }
+        .lp-tags span { font-size: 0.75rem; font-weight: 500; color: var(--fs-text); background: var(--fs-bg); border-radius: 999px; padding: 0.2rem 0.6rem; }
+
+        .lp-checks { list-style: none; padding: 0; margin: 1.5rem 0 0; }
+        .lp-checks li { display: flex; gap: 0.85rem; padding: 0.75rem 0; }
+        .lp-checks .kpi-icon { width: 36px; height: 36px; font-size: 1rem; flex-shrink: 0; }
+        .lp-checks strong { display: block; color: var(--fs-ink); }
+        .lp-checks span { color: var(--fs-muted); font-size: 0.95rem; }
+
+        .lp-shot { border-radius: 14px; overflow: hidden; box-shadow: var(--fs-shadow-lg); border: 1px solid var(--fs-border); }
+        .lp-shot img { display: block; width: 100%; height: auto; }
+
+        .lp-video { border-radius: 14px; overflow: hidden; box-shadow: var(--fs-shadow-lg); background: var(--fs-forest); }
+
+        /* Planes */
+        .lp-plan {
+            height: 100%;
+            border: 1px solid var(--fs-border);
+            border-radius: 16px;
+            padding: 2rem;
+            background: #fff;
+            display: flex; flex-direction: column;
+        }
+        .lp-plan.is-featured { border: 2px solid var(--fs-green); box-shadow: var(--fs-shadow-lg); position: relative; }
+        .lp-plan-badge {
+            position: absolute; top: -0.8rem; left: 2rem;
+            background: var(--fs-green); color: var(--fs-on-green);
+            font-size: 0.75rem; font-weight: 700;
+            padding: 0.25rem 0.75rem; border-radius: 999px;
+        }
+        .lp-plan h3 { font-size: 1.1rem; font-weight: 700; color: var(--fs-ink); }
+        .lp-price { font-size: 2.5rem; font-weight: 800; color: var(--fs-ink); letter-spacing: -0.02em; }
+        .lp-price small { font-size: 0.95rem; font-weight: 500; color: var(--fs-muted); letter-spacing: 0; }
+        .lp-plan ul { list-style: none; padding: 0; margin: 1.5rem 0 2rem; flex: 1; }
+        .lp-plan li { padding: 0.4rem 0; display: flex; gap: 0.6rem; }
+        .lp-plan li i { color: var(--fs-green-ink); }
+
+        /* Demostración */
+        .lp-demo {
+            background: var(--fs-forest);
+            color: var(--fs-sidebar-text);
+            border-radius: 20px;
+            padding: 3rem;
+        }
+        .lp-demo .lp-title { color: #fff; }
+        .lp-demo .lp-sub { color: var(--fs-sidebar-text); }
+        .lp-contact { display: flex; align-items: center; gap: 0.75rem; color: #fff; text-decoration: none; padding: 0.5rem 0; }
+        .lp-contact:hover { color: #fff; }
+        .lp-contact i { width: 38px; height: 38px; border-radius: 10px; background: rgba(108, 205, 149, 0.16); color: var(--fs-green); display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .lp-demo-form { background: #fff; color: var(--fs-text); border-radius: 14px; padding: 1.75rem; }
+        .lp-demo-form .form-control { padding: 0.65rem 0.85rem; border-color: var(--fs-border-strong); }
+
+        /* Pie */
+        .lp-footer { border-top: 1px solid var(--fs-border); padding: 2.5rem 0; color: var(--fs-muted); font-size: 0.9rem; }
+        .lp-footer a { color: var(--fs-muted); text-decoration: none; }
+        .lp-footer a:hover { color: var(--fs-green-ink); }
+
+        .lp-whatsapp {
+            position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 1040;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: #25d366; color: #fff;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .lp-whatsapp:hover { color: #fff; transform: scale(1.06); }
+
+        @media (max-width: 991.98px) {
+            .lp-links { display: none; }
+            .lp-hero { padding: 3rem 0 8rem; }
+            .lp-section { padding: 4rem 0; }
+            .lp-demo { padding: 2rem 1.25rem; }
+        }
+        @media (max-width: 575.98px) {
+            .lp-nav-actions .btn-ghost { display: none; }
+            .lp-login { padding: 1.5rem; }
+            .lp-preview { margin-top: -5.5rem; }
+        }
+    </style>
+</head>
+<body class="landing">
+
+<!-- ===================== Navegación ===================== -->
+<nav class="lp-nav" aria-label="Principal">
+    <div class="container">
+        <a class="lp-brand" href="#inicio" aria-label="Fresh Start Manager · Inicio">
+            <img src="{% static 'brand/logo-horizontal.png' %}" width="168" height="37" alt="Fresh Start Manager">
+        </a>
+        <div class="lp-links">
+            <a href="#funciones">Funciones</a>
+            <a href="#equipo">Para tu equipo</a>
+            <a href="#planes">Planes</a>
+            <a href="#demo">Contacto</a>
+        </div>
+        <div class="lp-nav-actions">
+            <a href="#demo" class="btn btn-sm btn-ghost">Solicitar demo</a>
+            <a href="#acceso" class="btn btn-sm btn-primary js-ir-acceso"><i class="bi bi-box-arrow-in-right me-1"></i>Acceso clientes</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ===================== Portada + acceso ===================== -->
+<header class="lp-hero" id="inicio">
+    <div class="container">
+        <div class="row g-4 g-lg-5 align-items-center">
+            <div class="col-lg-7">
+                <span class="lp-eyebrow"><i class="bi bi-shield-check"></i>Software para clínicas de rehabilitación en adicciones</span>
+                <h1>Todo el expediente de tus internos, <span class="accent">en un solo lugar.</span></h1>
+                <p class="lead">
+                    Fresh Start Manager reúne ingresos, evaluaciones clínicas, notas de evolución, recetas y cuotas voluntarias
+                    en una plataforma web pensada para centros de tratamiento residencial.
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <a href="#demo" class="btn btn-primary btn-lg px-4">Solicitar demostración</a>
+                    <a href="#video" class="btn btn-lg btn-ghost px-4"><i class="bi bi-play-circle me-2"></i>Ver cómo funciona</a>
+                </div>
+                <ul class="lp-hero-points">
+                    <li><i class="bi bi-check-circle-fill"></i>Sin instalar nada</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Computadora, tablet o celular</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Cada sede con su información</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="lp-login" id="acceso">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="kpi-icon"><i class="bi bi-shield-lock"></i></span>
+                        <div>
+                            <h2>Acceso para clínicas</h2>
+                            <p class="text-muted small mb-0">Ingresa con el ID y la contraseña de tu clínica.</p>
+                        </div>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}{% if 'demo' not in message.tags %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} small py-2">{{ message }}</div>
+                        {% endif %}{% endfor %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'login_clinica' %}" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_clinica_id" class="form-label">ID de clínica</label>
+                            <input type="text" name="clinica_id" id="id_clinica_id" maxlength="30"
+                                   class="form-control {% if form.clinica_id.errors %}is-invalid{% endif %}"
+                                   value="{{ form.clinica_id.value|default:'' }}"
+                                   placeholder="Ej. CLINICA001" autocomplete="username" autocapitalize="characters" required>
+                            {% if form.clinica_id.errors %}<div class="lp-field-error">{{ form.clinica_id.errors }}</div>{% endif %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label">Contraseña</label>
+                            <div class="lp-pass">
+                                <input type="password" name="password" id="id_password"
+                                       class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                       autocomplete="current-password" required>
+                                <button type="button" id="verPassword" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}<div class="lp-field-error">{{ form.password.errors }}</div>{% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        ¿Aún no usas Fresh Start Manager? <a href="#demo">Solicita una demostración</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ===================== Vista del producto ===================== -->
+<div class="container lp-preview">
+    <div class="lp-browser">
+        <div class="lp-browser-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <img src="{% static 'images/landing/producto-inicio.jpg' %}" width="1600" height="1000"
+             alt="Panel de inicio de Fresh Start Manager con internos activos, camas disponibles, ocupación e ingresos del mes">
+    </div>
+</div>
+
+<!-- ===================== Funciones ===================== -->
+<section class="lp-section" id="funciones">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 44rem;">
+            <div class="lp-kicker">Funciones</div>
+            <h2 class="lp-title">Todo lo que tu clínica necesita, sin papeles</h2>
+            <p class="lp-sub mx-auto">Desde el ingreso hasta el egreso: cada área de tu equipo trabaja sobre el mismo expediente.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-folder2-open"></i></span>
+                    <h3>Expediente clínico digital</h3>
+                    <p>Datos del interno, responsable, dependientes, historial médico y sustancias de consumo, siempre a la mano y con el paciente a la vista en cada pantalla.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-clipboard2-pulse"></i></span>
+                    <h3>Evaluaciones con puntuación automática</h3>
+                    <p>Aplica los instrumentos de tamizaje y obtén el puntaje al momento, sin sumar a mano.</p>
+                    <div class="lp-tags"><span>ASSIST</span><span>AUDIT</span><span>Ansiedad</span><span>Depresión</span><span>Psicosis</span><span>Satisfacción de vida</span></div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-chat-heart"></i></span>
+                    <h3>Consejería y psicología</h3>
+                    <p>Plan de consejería, notas de evolución individuales, familiares y grupales, hoja de atención psicológica y tareas digitalizadas.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-heart-pulse"></i></span>
+                    <h3>Área médica</h3>
+                    <p>Diagnóstico inicial, historia clínica y emisión de recetas con signos vitales e índice de masa corporal calculado.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-cash-coin"></i></span>
+                    <h3>Cuotas y recibos</h3>
+                    <p>Registra cuotas voluntarias, genera el plan de pagos de cada interno, imprime recibos en PDF y consulta lo recibido y lo pendiente.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="lp-feature">
+                    <span class="kpi-icon"><i class="bi bi-file-earmark-check"></i></span>
+                    <h3>Documentos listos para imprimir</h3>
+                    <p>Contrato, carta de consentimiento, solicitud y aviso de internación generados con los datos del interno.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Para tu equipo ===================== -->
+<section class="lp-section lp-section-alt" id="equipo">
+    <div class="container">
+        <div class="row g-4 g-lg-5 align-items-center">
+            <div class="col-lg-5">
+                <div class="lp-kicker">Para tu equipo</div>
+                <h2 class="lp-title">Diseñado para el trabajo diario de una clínica</h2>
+                <p class="lp-sub">Consejeros, psicólogos, médicos y personal de oficina trabajan sobre la misma información, cada quien desde su área.</p>
+                <ul class="lp-checks">
+                    <li>
+                        <span class="kpi-icon"><i class="bi bi-speedometer2"></i></span>
+                        <div><strong>Panel de la clínica</strong><span>Ocupación, camas disponibles, ingresos del mes y los ingresos más recientes de un vistazo.</span></div>
+                    </li>
+                    <li>
+                        <span class="kpi-icon"><i class="bi bi-person-badge"></i></span>
+                        <div><strong>Un usuario por persona</strong><span>Cada integrante entra con su nombre y ve las secciones que le corresponden según sus permisos.</span></div>
+                    </li>
+                    <li>
+                        <span class="kpi-icon"><i class="bi bi-clock-history"></i></span>
+                        <div><strong>Cierre de sesión automático</strong><span>Si el equipo se queda sin uso por 15 minutos, la sesión se cierra sola.</span></div>
+                    </li>
+                    <li>
+                        <span class="kpi-icon"><i class="bi bi-buildings"></i></span>
+                        <div><strong>Varias sedes</strong><span>Si tu organización tiene más de una clínica, cada una maneja su información por separado.</span></div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-7">
+                <div class="lp-shot">
+                    <img src="{% static 'images/landing/producto-expediente.jpg' %}" width="1600" height="1000" loading="lazy"
+                         alt="Expediente de un interno en Fresh Start Manager con el menú de evaluaciones abierto">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Video ===================== -->
+<section class="lp-section" id="video">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 44rem;">
+            <div class="lp-kicker">Demostración</div>
+            <h2 class="lp-title">Mira Fresh Start Manager en acción</h2>
+            <p class="lp-sub mx-auto">Un recorrido por el día a día de una clínica usando Fresh Start Manager.</p>
+        </div>
+        <div class="mx-auto" style="max-width: 900px;">
+            <div class="lp-video ratio ratio-16x9">
+                <iframe src="https://www.youtube-nocookie.com/embed/J3Somj7aFvE?rel=0&modestbranding=1"
+                        title="Demostración de Fresh Start Manager" loading="lazy"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Planes ===================== -->
+<section class="lp-section lp-section-alt" id="planes">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 44rem;">
+            <div class="lp-kicker">Planes</div>
+            <h2 class="lp-title">Un plan para cada etapa de tu clínica</h2>
+            <p class="lp-sub mx-auto">Sin costos ocultos. Empieza fácil y crece cuando lo necesites.</p>
+        </div>
+        <div class="row g-4 justify-content-center" style="max-width: 880px; margin: 0 auto;">
+            <div class="col-md-6">
+                <div class="lp-plan">
+                    <h3>Básico</h3>
+                    <div class="lp-price">$1,200 <small>MXN / mes</small></div>
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill"></i>Hasta 30 internos</li>
+                        <li><i class="bi bi-check-circle-fill"></i>2 usuarios</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Expedientes digitales</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Control básico</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Soporte limitado</li>
+                    </ul>
+                    <a href="#demo" class="btn btn-soft w-100 py-2" data-plan="Básico">Empezar</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="lp-plan is-featured">
+                    <span class="lp-plan-badge">Más popular</span>
+                    <h3>Profesional</h3>
+                    <div class="lp-price">$2,500 <small>MXN / mes</small></div>
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill"></i>Internos ilimitados</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Usuarios ilimitados</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Evaluaciones automatizadas</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Reportes y métricas</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Recibos en PDF</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Soporte prioritario</li>
+                    </ul>
+                    <a href="#demo" class="btn btn-primary w-100 py-2" data-plan="Profesional">Elegir plan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Solicitar demostración ===================== -->
+<section class="lp-section" id="demo">
+    <div class="container">
+        <div class="lp-demo">
+            <div class="row g-4 g-lg-5 align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="lp-title">Agenda una demostración</h2>
+                    <p class="lp-sub">Déjanos tus datos y te contactamos para mostrarte Fresh Start Manager y configurar tu cuenta. También puedes escribirnos directamente.</p>
+                    <div class="mt-4">
+                        <a class="lp-contact" href="https://wa.me/526642631741?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Fresh%20Start%20Manager%20para%20mi%20cl%C3%ADnica." target="_blank" rel="noopener">
+                            <i class="bi bi-whatsapp"></i><span>WhatsApp</span>
+                        </a>
+                        <a class="lp-contact" href="mailto:info@freshstart.mx"><i class="bi bi-envelope"></i><span>info@freshstart.mx</span></a>
+                        <a class="lp-contact" href="tel:+526649796859"><i class="bi bi-telephone"></i><span>664 979 6859</span></a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="lp-demo-form">
+                        {% if messages %}
+                            {% for message in messages %}{% if 'demo' in message.tags %}
+                            <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% else %}info{% endif %} small" role="status">{{ message }}</div>
+                            {% endif %}{% endfor %}
+                        {% endif %}
+                        <form method="post" action="{% url 'solicitar_demo' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ demo_form.nombre.id_for_label }}">Nombre completo</label>
+                                {{ demo_form.nombre }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ demo_form.email.id_for_label }}">Correo electrónico</label>
+                                {{ demo_form.email }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ demo_form.clinica.id_for_label }}">Nombre de la clínica</label>
+                                {{ demo_form.clinica }}
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" for="{{ demo_form.telefono.id_for_label }}">Teléfono o WhatsApp <span class="text-muted fw-normal">(opcional)</span></label>
+                                {{ demo_form.telefono }}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2">Solicitar demostración</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== Pie ===================== -->
+<footer class="lp-footer">
+    <div class="container d-flex flex-wrap gap-3 justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <img src="{% static 'brand/isotipo.png' %}" alt="" style="height: 26px; width: auto;">
+            <span><strong class="text-body">Fresh Start Manager</strong> · Desarrollado por Soluciones Digitales · Tijuana, B.C.</span>
+        </div>
+        <div class="d-flex flex-wrap gap-3">
+            <a href="#funciones">Funciones</a>
+            <a href="#planes">Planes</a>
+            <a href="#acceso" class="js-ir-acceso">Acceso clientes</a>
+            <span>&copy; {% now "Y" %} Soluciones Digitales</span>
+        </div>
+    </div>
+</footer>
+
+<a class="lp-whatsapp" href="https://wa.me/526642631741?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20Fresh%20Start%20Manager%20para%20mi%20cl%C3%ADnica."
+   target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" title="Escríbenos por WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const clinica = document.getElementById('id_clinica_id');
+        const password = document.getElementById('id_password');
+
+        // El ID de clínica siempre en mayúsculas
+        clinica.addEventListener('input', function () {
+            const pos = this.selectionStart;
+            this.value = this.value.toUpperCase();
+            this.setSelectionRange(pos, pos);
+        });
+
+        // Mostrar / ocultar contraseña
+        const ver = document.getElementById('verPassword');
+        ver.addEventListener('click', function () {
+            const oculto = password.type === 'password';
+            password.type = oculto ? 'text' : 'password';
+            this.innerHTML = oculto ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+            this.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+
+        // "Acceso clientes" lleva al formulario y pone el cursor en el ID de clínica
+        document.querySelectorAll('.js-ir-acceso').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('acceso').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function () { clinica.focus({ preventScroll: true }); }, 400);
+            });
+        });
+
+        // Si hubo un error al entrar, enfocar el campo correspondiente
+        const conError = document.querySelector('.lp-login .is-invalid');
+        if (conError) conError.focus();
+        else if (!window.location.hash && window.matchMedia('(min-width: 992px)').matches) clinica.focus({ preventScroll: true });
+
+        // Al elegir un plan, llevar al formulario de demostración listo para escribir
+        document.querySelectorAll('[data-plan]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                const nombre = document.getElementById('{{ demo_form.nombre.id_for_label }}');
+                setTimeout(function () { if (nombre) nombre.focus({ preventScroll: true }); }, 500);
+            });
+        });
+    });
+</script>
+</body>
+</html>
